@@ -22,7 +22,8 @@ collections:
               { label: "Blok Teks", value: "text_block" },
               { label: "Visi & Misi", value: "visi_misi_block" },
               { label: "Fasilitas", value: "fasilitas_block" },
-              { label: "Kutipan", value: "quote_block" }
+              { label: "Kutipan", value: "quote_block" },
+              { label: "Maps", value: "maps_block" }
             ] },
           { label: "Judul Block", name: "title", widget: "string", required: false },
           { label: "Konten Teks", name: "content", widget: "text", required: false },

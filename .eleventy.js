@@ -7,6 +7,9 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addGlobalData("eleventyComputed", {
     permalink: (data) => {
       if (data.page.inputPath.includes("index.md")) {
+        if (data.page.inputPath.includes("berita/")) {
+          return "/berita/";
+        }
         return "/";
       }
       return data.page.filePathStem.replace(/^\/_/, "/") + "/";

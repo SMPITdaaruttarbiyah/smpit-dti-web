@@ -23,6 +23,7 @@ module.exports = {
   ],
   social: {
     instagram: "https://instagram.com/smpitdti",
-    facebook: "https://facebook.com/smpitdti"
+    facebook: "https://facebook.com/smpitdti",
+    tiktok: "https://tiktok.com/@dtifoundation"
   }
 };

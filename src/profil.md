@@ -11,7 +11,9 @@ content_blocks:
     content: Kami menawarkan program Tahfidz Al-Qur'an, pendidikan islam terpadu, dan berbagai kegiatan ekstrakurikuler yang mendukung pengembangan siswa secara holistik.
   - type: quote_block
     title: Motivasi Belajar
-    keyword: learning
+    keyword: ilmu
     auto_refresh: true
     refresh_interval: 45
+  - type: maps_block
+    title: Kunjungi Kami
 ---

@@ -10,7 +10,9 @@ content_blocks:
   - type: fasilitas_block
   - type: quote_block
     title: Kutipan Inspiratif
-    keyword: education
+    keyword: ilmu
     auto_refresh: true
     refresh_interval: 30
+  - type: maps_block
+    title: Lokasi Kami
 ---
