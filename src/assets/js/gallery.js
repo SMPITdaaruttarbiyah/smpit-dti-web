@@ -26,6 +26,13 @@ class SMPITGallery {
       return;
     }
 
+    // Check if gallery element exists
+    const galleryElement = document.querySelector('.gallerySwiper');
+    if (!galleryElement) {
+      console.warn('Gallery element not found');
+      return;
+    }
+
     // Initialize Swiper with advanced effects
     this.swiper = new Swiper('.gallerySwiper', {
       // Effect configuration
@@ -104,6 +111,10 @@ class SMPITGallery {
   // ===================================
   
   onSwiperInit() {
+    if (!this.swiper || !this.swiper.slides) {
+      console.warn('Swiper or slides not available during init');
+      return;
+    }
     // Add initial animations
     const activeSlide = this.swiper.slides[this.swiper.activeIndex];
     if (activeSlide) {
@@ -112,6 +123,10 @@ class SMPITGallery {
   }
 
   onSlideChange() {
+    if (!this.swiper || !this.swiper.slides) {
+      console.warn('Swiper or slides not available');
+      return;
+    }
     const activeSlide = this.swiper.slides[this.swiper.activeIndex];
     if (activeSlide) {
       this.animateSlideContent(activeSlide);
@@ -474,10 +489,13 @@ class SMPITGallery {
 // ===================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Wait for Swiper to load
+  // Wait for Swiper to load and DOM to be ready
   const initGallery = () => {
     if (typeof Swiper !== 'undefined') {
-      window.smpitGallery = new SMPITGallery();
+      // Add a small delay to ensure DOM is fully ready
+      setTimeout(() => {
+        window.smpitGallery = new SMPITGallery();
+      }, 100);
     } else {
       setTimeout(initGallery, 100);
     }
