@@ -1,0 +1,228 @@
+/* ===================================
+   Enhanced Quotes Section Styles
+   =================================== */
+
+.quotes-container {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+}
+
+.quote-box {
+    background: var(--abu-abu-sejuk);
+    border-left: 5px solid var(--biru-daarut);
+    padding: 3rem;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-smooth);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.quote-text,
+.quote-author {
+    transition: opacity 0.3s ease;
+}
+
+.quote-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.quote-btn {
+    background: var(--hijau-pertumbuhan);
+    color: var(--putih-murni);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quote-btn:hover {
+    background: var(--biru-daarut);
+    transform: scale(1.1);
+}
+
+.quote-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.quote-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-color);
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.quote-dot.active {
+    width: 24px;
+    border-radius: 4px;
+    background: var(--hijau-pertumbuhan);
+}
+
+.quote-dot:hover {
+    background: var(--biru-daarut);
+}
+
+/* Loading Screen Styles */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--putih-gading);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.loader {
+    text-align: center;
+}
+
+.loader-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--hijau-pertumbuhan);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 2rem;
+    color: var(--putih-murni);
+    margin: 0 auto 1rem;
+    animation: pulse 1.5s infinite;
+}
+
+.loader-text {
+    color: var(--biru-daarut);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* Back to Top Button */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--hijau-pertumbuhan);
+    color: var(--putih-murni);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition-smooth);
+    z-index: 999;
+    box-shadow: var(--shadow-lg);
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.back-to-top:hover {
+    background: var(--biru-daarut);
+    transform: translateY(-5px);
+}
+
+/* Footer Badges */
+.footer-badges {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.footer-badges .badge {
+    height: 40px;
+    width: auto;
+    border-radius: 4px;
+}
+
+/* Enhanced Map Container */
+.map-container {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    height: 450px;
+    position: relative;
+    border: 2px solid var(--border-color);
+}
+
+/* Hero Scroll Indicator */
+.hero-scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: bounce 2s infinite;
+}
+
+.mouse {
+    width: 30px;
+    height: 50px;
+    border: 2px solid var(--putih-murni);
+    border-radius: 15px;
+    position: relative;
+}
+
+.wheel {
+    width: 4px;
+    height: 10px;
+    background: var(--putih-murni);
+    border-radius: 2px;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: scroll 1.5s infinite;
+}
+
+@keyframes scroll {
+    0% {
+        opacity: 1;
+        top: 10px;
+    }
+    100% {
+        opacity: 0;
+        top: 25px;
+    }
+}
