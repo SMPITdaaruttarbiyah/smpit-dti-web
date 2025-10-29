@@ -7,7 +7,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addGlobalData("eleventyComputed", {
     permalink: (data) => {
       if (data.page.inputPath.includes("index.md")) {
-        return data.page.filePathStem.replace(/^\/_/, "/") + "/";
+        return "/";
       }
       return data.page.filePathStem.replace(/^\/_/, "/") + "/";
     }
@@ -35,6 +35,7 @@ module.exports = function(eleventyConfig) {
     templateFormats: ["md", "njk", "html"],
     markdownTemplateEngine: "njk",
     htmlTemplateEngine: "njk",
-    dataTemplateEngine: "njk"
+    dataTemplateEngine: "njk",
+    pathPrefix: "/smpit-dti-web/"
   };
 };
