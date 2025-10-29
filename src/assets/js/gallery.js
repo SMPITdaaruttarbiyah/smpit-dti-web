@@ -148,36 +148,72 @@ class SMPITGallery {
     const description = slide.querySelector('.gallery-overlay p');
     
     if (overlay) {
-      // Reset animation
-      gsap.set(overlay, { y: 100, opacity: 0 });
-      
-      // Animate in
-      gsap.to(overlay, {
-        duration: 0.8,
-        y: 0,
-        opacity: 1,
-        ease: "power3.out",
-        delay: 0.2,
-      });
-      
-      if (title) {
-        gsap.from(title, {
-          duration: 0.6,
-          y: 20,
-          opacity: 0,
-          ease: "power2.out",
-          delay: 0.4,
+      // Check if GSAP is available
+      if (typeof gsap !== 'undefined') {
+        // Reset animation
+        gsap.set(overlay, { y: 100, opacity: 0 });
+        
+        // Animate in
+        gsap.to(overlay, {
+          duration: 0.8,
+          y: 0,
+          opacity: 1,
+          ease: "power3.out",
+          delay: 0.2,
         });
-      }
-      
-      if (description) {
-        gsap.from(description, {
-          duration: 0.6,
-          y: 20,
-          opacity: 0,
-          ease: "power2.out",
-          delay: 0.6,
-        });
+        
+        if (title) {
+          gsap.from(title, {
+            duration: 0.6,
+            y: 20,
+            opacity: 0,
+            ease: "power2.out",
+            delay: 0.4,
+          });
+        }
+        
+        if (description) {
+          gsap.from(description, {
+            duration: 0.6,
+            y: 20,
+            opacity: 0,
+            ease: "power2.out",
+            delay: 0.6,
+          });
+        }
+      } else {
+        // Fallback CSS animation
+        overlay.style.transform = 'translateY(100%)';
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'all 0.8s ease';
+        
+        if (title) {
+          title.style.transform = 'translateY(20px)';
+          title.style.opacity = '0';
+          title.style.transition = 'all 0.6s ease 0.4s';
+        }
+        
+        if (description) {
+          description.style.transform = 'translateY(20px)';
+          description.style.opacity = '0';
+          description.style.transition = 'all 0.6s ease 0.6s';
+        }
+        
+        // Trigger animations
+        setTimeout(() => {
+          overlay.style.transform = 'translateY(0)';
+          overlay.style.opacity = '1';
+          
+          if (title) {
+            title.style.transform = 'translateY(0)';
+            title.style.opacity = '1';
+          }
+          
+          if (description) {
+            description.style.transform = 'translateY(0)';
+            description.style.opacity = '1';
+          }
+        }, 200);
       }
     }
   }

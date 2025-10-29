@@ -40,7 +40,7 @@ class IslamicQuotes {
       
       if (this.quotes.length > 0) {
         // Filter quotes yang mengandung kata "ilmu"
-        this.filterIlmuQuotes();
+        await this.filterIlmuQuotes();
         
         if (this.quotes.length > 0) {
           // Tampilkan quote pertama
@@ -77,7 +77,7 @@ class IslamicQuotes {
     }
   }
 
-  filterIlmuQuotes() {
+  async filterIlmuQuotes() {
     // Filter quotes yang mengandung kata "ilmu" atau variasinya
     const ilmuKeywords = ['ilmu', 'ilm', 'علم', 'belajar', 'mengajar', 'pelajaran', 'pendidikan'];
     
