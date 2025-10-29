@@ -463,8 +463,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===================================
-   Enhanced Navigation Interactions
-   ===================================
+// Enhanced Navigation Interactions
+// ===================================
 
 class EnhancedNavigation {
   constructor() {

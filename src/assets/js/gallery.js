@@ -487,8 +487,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===================================
-   Handle Window Resize
-   ===================================
+// Handle Window Resize
+// ===================================
 
 window.addEventListener('resize', () => {
   if (window.smpitGallery) {
@@ -497,8 +497,8 @@ window.addEventListener('resize', () => {
 });
 
 // ===================================
-   Keyboard Navigation for Gallery
-   ===================================
+// Keyboard Navigation for Gallery
+// ===================================
 
 document.addEventListener('keydown', (e) => {
   if (!window.smpitGallery || !window.smpitGallery.swiper) return;
@@ -526,8 +526,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ===================================
-   Touch Gestures for Mobile
-   ===================================
+// Touch Gestures for Mobile
+// ===================================
 
 let touchStartX = 0;
 let touchEndX = 0;
