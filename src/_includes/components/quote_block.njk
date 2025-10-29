@@ -30,7 +30,7 @@
         keyword: '{{ block.keyword or "inspiration" }}',
         maxLength: {{ block.max_length or 200 }},
         refreshInterval: {{ block.refresh_interval or 30000 }}, // 30 seconds default
-        autoRefresh: {{ block.auto_refresh | default(true) | lower }}
+        autoRefresh: {{ block.auto_refresh | default(true) | string | lower }}
     };
     
     let refreshTimer;
