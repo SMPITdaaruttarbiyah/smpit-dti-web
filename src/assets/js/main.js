@@ -351,7 +351,7 @@ window.addEventListener('error', (e) => {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('/smpit-dti-web/sw.js')
       .then(registration => {
         console.log('SW registered: ', registration);
       })
