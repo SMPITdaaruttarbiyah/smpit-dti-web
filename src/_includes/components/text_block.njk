@@ -1,0 +1,12 @@
+<section class="content-block">
+    <div class="container">
+        <div class="text-content">
+            {% if block.title %}
+                <h2>{{ block.title }}</h2>
+            {% endif %}
+            {% if block.content %}
+                <p>{{ block.content }}</p>
+            {% endif %}
+        </div>
+    </div>
+</section>

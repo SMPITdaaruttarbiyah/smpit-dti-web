@@ -1,141 +1,241 @@
-# 🚀 Welcome to Z.ai Code Scaffold
+# SMPIT DTI Website
 
-A modern, production-ready web application scaffold powered by cutting-edge technologies, designed to accelerate your development with [Z.ai](https://chat.z.ai)'s AI-powered coding assistance.
-
-## ✨ Technology Stack
-
-This scaffold provides a robust foundation built with:
-
-### 🎯 Core Framework
-- **⚡ Next.js 15** - The React framework for production with App Router
-- **📘 TypeScript 5** - Type-safe JavaScript for better developer experience
-- **🎨 Tailwind CSS 4** - Utility-first CSS framework for rapid UI development
-
-### 🧩 UI Components & Styling
-- **🧩 shadcn/ui** - High-quality, accessible components built on Radix UI
-- **🎯 Lucide React** - Beautiful & consistent icon library
-- **🌈 Framer Motion** - Production-ready motion library for React
-- **🎨 Next Themes** - Perfect dark mode in 2 lines of code
-
-### 📋 Forms & Validation
-- **🎣 React Hook Form** - Performant forms with easy validation
-- **✅ Zod** - TypeScript-first schema validation
-
-### 🔄 State Management & Data Fetching
-- **🐻 Zustand** - Simple, scalable state management
-- **🔄 TanStack Query** - Powerful data synchronization for React
-- **🌐 Axios** - Promise-based HTTP client
-
-### 🗄️ Database & Backend
-- **🗄️ Prisma** - Next-generation Node.js and TypeScript ORM
-- **🔐 NextAuth.js** - Complete open-source authentication solution
-
-### 🎨 Advanced UI Features
-- **📊 TanStack Table** - Headless UI for building tables and datagrids
-- **🖱️ DND Kit** - Modern drag and drop toolkit for React
-- **📊 Recharts** - Redefined chart library built with React and D3
-- **🖼️ Sharp** - High performance image processing
-
-### 🌍 Internationalization & Utilities
-- **🌍 Next Intl** - Internationalization library for Next.js
-- **📅 Date-fns** - Modern JavaScript date utility library
-- **🪝 ReactUse** - Collection of essential React hooks for modern development
-
-## 🎯 Why This Scaffold?
-
-- **🏎️ Fast Development** - Pre-configured tooling and best practices
-- **🎨 Beautiful UI** - Complete shadcn/ui component library with advanced interactions
-- **🔒 Type Safety** - Full TypeScript configuration with Zod validation
-- **📱 Responsive** - Mobile-first design principles with smooth animations
-- **🗄️ Database Ready** - Prisma ORM configured for rapid backend development
-- **🔐 Auth Included** - NextAuth.js for secure authentication flows
-- **📊 Data Visualization** - Charts, tables, and drag-and-drop functionality
-- **🌍 i18n Ready** - Multi-language support with Next Intl
-- **🚀 Production Ready** - Optimized build and deployment settings
-- **🤖 AI-Friendly** - Structured codebase perfect for AI assistance
-
-## 🚀 Quick Start
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see your application running.
-
-## 🤖 Powered by Z.ai
-
-This scaffold is optimized for use with [Z.ai](https://chat.z.ai) - your AI assistant for:
-
-- **💻 Code Generation** - Generate components, pages, and features instantly
-- **🎨 UI Development** - Create beautiful interfaces with AI assistance  
-- **🔧 Bug Fixing** - Identify and resolve issues with intelligent suggestions
-- **📝 Documentation** - Auto-generate comprehensive documentation
-- **🚀 Optimization** - Performance improvements and best practices
-
-Ready to build something amazing? Start chatting with Z.ai at [chat.z.ai](https://chat.z.ai) and experience the future of AI-powered development!
-
-## 📁 Project Structure
-
-```
-src/
-├── app/                 # Next.js App Router pages
-├── components/          # Reusable React components
-│   └── ui/             # shadcn/ui components
-├── hooks/              # Custom React hooks
-└── lib/                # Utility functions and configurations
-```
-
-## 🎨 Available Features & Components
-
-This scaffold includes a comprehensive set of modern web development tools:
-
-### 🧩 UI Components (shadcn/ui)
-- **Layout**: Card, Separator, Aspect Ratio, Resizable Panels
-- **Forms**: Input, Textarea, Select, Checkbox, Radio Group, Switch
-- **Feedback**: Alert, Toast (Sonner), Progress, Skeleton
-- **Navigation**: Breadcrumb, Menubar, Navigation Menu, Pagination
-- **Overlay**: Dialog, Sheet, Popover, Tooltip, Hover Card
-- **Data Display**: Badge, Avatar, Calendar
-
-### 📊 Advanced Data Features
-- **Tables**: Powerful data tables with sorting, filtering, pagination (TanStack Table)
-- **Charts**: Beautiful visualizations with Recharts
-- **Forms**: Type-safe forms with React Hook Form + Zod validation
-
-### 🎨 Interactive Features
-- **Animations**: Smooth micro-interactions with Framer Motion
-- **Drag & Drop**: Modern drag-and-drop functionality with DND Kit
-- **Theme Switching**: Built-in dark/light mode support
-
-### 🔐 Backend Integration
-- **Authentication**: Ready-to-use auth flows with NextAuth.js
-- **Database**: Type-safe database operations with Prisma
-- **API Client**: HTTP requests with Axios + TanStack Query
-- **State Management**: Simple and scalable with Zustand
-
-### 🌍 Production Features
-- **Internationalization**: Multi-language support with Next Intl
-- **Image Optimization**: Automatic image processing with Sharp
-- **Type Safety**: End-to-end TypeScript with Zod validation
-- **Essential Hooks**: 100+ useful React hooks with ReactUse for common patterns
-
-## 🤝 Get Started with Z.ai
-
-1. **Clone this scaffold** to jumpstart your project
-2. **Visit [chat.z.ai](https://chat.z.ai)** to access your AI coding assistant
-3. **Start building** with intelligent code generation and assistance
-4. **Deploy with confidence** using the production-ready setup
+Website resmi SMPIT Daarut Tarbiyah Indonesia yang dibangun dengan Eleventy dan Decap CMS dengan sistem Page Builder modular.
 
 ---
 
-Built with ❤️ for the developer community. Supercharged by [Z.ai](https://chat.z.ai) 🚀
+## 🚀 Untuk Developer
+
+### Teknologi yang Digunakan
+- **Static Site Generator**: Eleventy 11ty
+- **CMS**: Decap CMS (sebelumnya Netlify CMS)
+- **Deployment**: GitHub Pages
+- **Styling**: CSS Inline (dalam template)
+- **Template Engine**: Nunjucks
+
+### Instalasi
+
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/smpitdti/smpitdti-website.git
+   cd smpitdti-website
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Jalankan Development Server**
+   ```bash
+   npm run serve
+   ```
+   Website akan berjalan di `http://localhost:8080`
+
+4. **Build untuk Production**
+   ```bash
+   npm run build
+   ```
+   Hasil build akan ada di folder `_site`
+
+### Struktur Proyek
+
+```
+smpitdti-website/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml          # GitHub Actions untuk auto-deploy
+├── src/
+│   ├── _data/
+│   │   └── school.js           # Data sekolah (visi, misi, fasilitas)
+│   ├── _includes/
+│   │   ├── layout.njk          # Template utama dengan CSS inline
+│   │   └── components/         # Komponen Page Builder
+│   │       ├── text_block.njk
+│   │       ├── visi_misi_block.njk
+│   │       ├── fasilitas_block.njk
+│   │       └── quote_block.njk
+│   ├── admin/
+│   │   ├── config.yml          # Konfigurasi Decap CMS
+│   │   └── index.html          # Halaman admin
+│   ├── assets/
+│   │   └── images/             # Upload gambar via CMS
+│   ├── berita/                 # Folder berita (dibuat via CMS)
+│   ├── profil.md               # Halaman profil (opsional)
+│   └── index.md                # Halaman utama (opsional)
+├── .eleventy.js                # Konfigurasi Eleventy
+├── .gitignore
+├── package.json
+└── README.md
+```
+
+### Cara Kerja Page Builder
+
+Sistem Page Builder menggunakan 4 komponen modular:
+
+1. **text_block**: Blok teks biasa (manual input)
+2. **visi_misi_block**: Otomatis dari `school.js`
+3. **fasilitas_block**: Otomatis dari `school.js`
+4. **quote_block**: API quotes dengan auto-refresh
+
+Setiap halaman bisa memiliki kombinasi blok-blok ini sesuai kebutuhan.
+
+### Environment Variables
+
+Tidak ada environment variables yang diperlukan. Semua konfigurasi sudah embedded dalam file.
+
+### Deployment
+
+Website menggunakan GitHub Pages dengan GitHub Actions:
+
+1. Push ke branch `main` → Auto build & deploy
+2. Pull request → Build test saja
+3. Hasil deploy di `https://smpitdti.github.io/smpitdti-website`
+
+---
+
+## 👥 Untuk Staf Sekolah (Non-Teknis)
+
+### Cara Login CMS
+
+1. Buka `https://smpitdti.github.io/smpitdti-website/admin`
+2. Klik tombol "Login"
+3. Pilih "Login with GitHub"
+4. Authorize aplikasi (hanya sekali)
+5. Setelah login, Anda akan melihat dashboard admin
+
+**Catatan**: Pastikan Anda sudah ditambahkan sebagai collaborator di repository GitHub.
+
+### Cara Membuat Berita
+
+1. **Login ke CMS** (lihat cara di atas)
+2. Klik menu **"Berita"** di sidebar kiri
+3. Klik tombol **"New Berita"**
+4. **Isi form berita**:
+   - **Judul**: Judul berita (contoh: "Wisuda Tahfidz Angkatan ke-5")
+   - **Tanggal**: Pilih tanggal berita
+   - **Gambar**: Upload gambar (klik "Choose image")
+   - **Ringkasan**: Singkat berita (2-3 kalimat)
+   - **Konten**: Isi lengkap berita (bisa pakai format markdown)
+   - **Tags**: Tambahkan tags (contoh: wisuda, tahfidz, prestasi)
+   - **Author**: Nama penulis (default: Admin SMPIT DTI)
+5. Klik **"Save"** untuk menyimpan draft
+6. Klik **"Publish"** untuk publikasi ke website
+
+### Cara Menggunakan Page Builder
+
+Page Builder memungkinkan Anda membuat halaman dengan drag & drop blok konten.
+
+#### 1. Blok Teks (Manual)
+- **Fungsi**: Menambahkan teks biasa
+- **Cara pakai**:
+  1. Pilih tipe "Blok Teks"
+  2. Isi "Judul Block" (opsional)
+  3. Isi "Konten Teks"
+  4. Simpan
+
+#### 2. Blok Visi & Misi (Otomatis)
+- **Fungsi**: Menampilkan visi & misi sekolah
+- **Cara pakai**:
+  1. Pilih tipe "Visi & Misi"
+  2. Data otomatis dari file `school.js`
+  3. Tidak perlu input manual
+  4. Untuk edit data, hubungi developer
+
+#### 3. Blok Fasilitas (Otomatis)
+- **Fungsi**: Menampilkan fasilitas sekolah
+- **Cara pakai**:
+  1. Pilih tipe "Fasilitas"
+  2. Data otomatis dari file `school.js`
+  3. Tidak perlu input manual
+  4. Untuk edit data, hubungi developer
+
+#### 4. Blok Kutipan (API)
+- **Fungsi**: Menampilkan kutipan inspiratif dari API
+- **Cara pakai**:
+  1. Pilih tipe "Kutipan"
+  2. **Judul Block**: Judul section (opsional)
+  3. **Keyword Kutipan**: Filter kutipan (contoh: education, inspiration, wisdom)
+  4. **Max Length**: Maksimal karakter (default: 200)
+  5. **Auto Refresh**: Aktifkan auto refresh (default: true)
+  6. **Refresh Interval**: Interval refresh dalam detik (default: 30)
+  7. Simpan
+
+**Fitur Blok Kutipan**:
+- Auto refresh setiap 30 detik (bisa diatur)
+- Manual refresh dengan tombol
+- Loading state dan error handling
+- Fallback quote jika API error
+
+### Workflow Publikasi
+
+1. **Draft**: Simpan sebagai draft (belum terlihat di website)
+2. **Review**: Ajukan untuk review (perlu approval)
+3. **Publish**: Publikasi ke website (langsung terlihat)
+
+### Tips & Best Practices
+
+#### Untuk Berita
+- Gunakan judul yang jelas dan menarik
+- Upload gambar dengan ukuran optimal (max 1MB)
+- Tulis ringkasan yang informatif
+- Gunakan tags yang relevan
+- Cek preview sebelum publish
+
+#### Untuk Page Builder
+- Kombinasikan berbagai tipe blok untuk halaman yang menarik
+- Gunakan blok teks untuk konten kustom
+- Manfaatkan blok otomatis (visi/misi, fasilitas)
+- Eksperimen dengan keyword kutipan yang berbeda
+
+#### Umum
+- Selalu preview sebelum publish
+- Simpan draft secara berkala
+- Gunakan bahasa yang sopan dan profesional
+- Perhatikan ejaan dan tata bahasa
+
+### Troubleshooting
+
+#### Tidak Bisa Login
+- Pastikan Anda sudah collaborator di repository
+- Coba logout dan login kembali
+- Clear browser cache
+- Hubungi developer jika masih gagal
+
+#### Gambar Tidak Muncul
+- Pastikan ukuran gambar tidak terlalu besar
+- Format yang didukung: JPG, PNG, GIF
+- Coba upload ulang gambar
+
+#### Konten Tidak Update
+- Tunggu beberapa saat (ada delay deployment)
+- Refresh browser dengan Ctrl+F5
+- Cek apakah sudah di-publish (bukan draft)
+
+---
+
+## 📞 Bantuan
+
+### Untuk Developer
+- **Issue**: GitHub repository
+- **Documentation**: README ini
+- **Tech Stack**: Eleventy, Decap CMS, GitHub Pages
+
+### Untuk Staf Sekolah
+- **CMS Access**: Hubungi admin IT
+- **Content Issues**: Hubungi bagian humas
+- **Technical Issues**: Hubungi developer
+
+---
+
+## 📄 Lisensi
+
+MIT License - SMPIT Daarut Tarbiyah Indonesia
+
+---
+
+## 🙏 Credit
+
+Website ini dikembangkan dengan ❤️ untuk SMPIT Daarut Tarbiyah Indonesia
+
+**Build with**: Eleventy + Decap CMS + GitHub Pages

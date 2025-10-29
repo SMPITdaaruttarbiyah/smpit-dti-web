@@ -1,0 +1,75 @@
+backend:
+  name: git-gateway
+  branch: main
+  repo: smpitdti/smpitdti-website
+
+media_folder: "src/assets/images"
+public_folder: "/assets/images"
+
+publish_mode: editorial_workflow
+
+collections:
+  - name: "pages"
+    label: "Halaman"
+    folder: "src"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Judul", name: "title", widget: "string" }
+      - { label: "Layout", name: "layout", widget: "hidden", default: "layout.njk" }
+      - { label: "Konten Blocks", name: "content_blocks", widget: "list", fields: [
+          { label: "Tipe Block", name: "type", widget: "select", options: [
+              { label: "Blok Teks", value: "text_block" },
+              { label: "Visi & Misi", value: "visi_misi_block" },
+              { label: "Fasilitas", value: "fasilitas_block" },
+              { label: "Kutipan", value: "quote_block" }
+            ] },
+          { label: "Judul Block", name: "title", widget: "string", required: false },
+          { label: "Konten Teks", name: "content", widget: "text", required: false },
+          { label: "Keyword Kutipan", name: "keyword", widget: "string", required: false, hint: "Keyword untuk filter kutipan (contoh: inspiration, education, wisdom)" },
+          { label: "Max Length Kutipan", name: "max_length", widget: "number", required: false, default: 200, hint: "Maksimal karakter kutipan" },
+          { label: "Auto Refresh", name: "auto_refresh", widget: "boolean", required: false, default: true, hint: "Auto refresh kutipan" },
+          { label: "Refresh Interval (detik)", name: "refresh_interval", widget: "number", required: false, default: 30, hint: "Interval auto refresh dalam detik" }
+        ] }
+      - { label: "Meta Deskripsi", name: "description", widget: "text", required: false }
+
+  - name: "berita"
+    label: "Berita"
+    folder: "src/berita"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Judul", name: "title", widget: "string" }
+      - { label: "Tanggal", name: "date", widget: "datetime" }
+      - { label: "Gambar", name: "image", widget: "image", required: false }
+      - { label: "Ringkasan", name: "excerpt", widget: "text", required: false }
+      - { label: "Konten", name: "body", widget: "markdown" }
+      - { label: "Tags", name: "tags", widget: "list", required: false }
+      - { label: "Author", name: "author", widget: "string", default: "Admin SMPIT DTI" }
+
+  - name: "settings"
+    label: "Pengaturan"
+    files:
+      - label: "Info Sekolah"
+        name: "school"
+        file: "src/_data/school.js"
+        fields:
+          - { label: "Nama Sekolah", name: "name", widget: "string" }
+          - { label: "Alamat", name: "address", widget: "text" }
+          - { label: "Visi", name: "visi", widget: "text" }
+          - { label: "Misi", name: "misi", widget: "list", field: { label: "Item Misi", widget: "text" } }
+          - { label: "Program", name: "program", widget: "list", fields: [
+              { label: "Nama Program", name: "name", widget: "string" },
+              { label: "Icon", name: "icon", widget: "string", hint: "Emoji icon" }
+            ] }
+          - { label: "Fasilitas", name: "fasilitas", widget: "list", fields: [
+              { label: "Nama Fasilitas", name: "name", widget: "string" },
+              { label: "Icon", name: "icon", widget: "string", hint: "Emoji icon" },
+              { label: "Deskripsi", name: "desc", widget: "text" }
+            ] }
+          - label: "Sosial Media"
+            name: "social"
+            widget: "object"
+            fields:
+              - { label: "Instagram", name: "instagram", widget: "string" }
+              - { label: "Facebook", name: "facebook", widget: "string" }
