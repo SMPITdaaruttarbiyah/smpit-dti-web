@@ -119,4 +119,4 @@ Website di-deploy menggunakan GitHub Pages dengan GitHub Actions:
 
 ---
 
-© 2024 SMPIT Daarut Tarbiyah. All rights reserved.
+© 2024 SMPIT Daarut Tarbiyah. All rights reserved.Force rebuild
