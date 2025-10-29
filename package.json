@@ -1,27 +1,37 @@
 {
-  "name": "smpitdti-website",
+  "name": "smpit-dti-website",
   "version": "1.0.0",
-  "description": "Website SMPIT Daarut Tarbiyah Indonesia dengan Eleventy dan Decap CMS",
-  "main": ".eleventy.js",
+  "description": "Website SMPIT Daarut Tarbiyah - High-Tech & High-Touch Islamic Education",
+  "main": "index.js",
   "scripts": {
-    "build": "eleventy",
-    "serve": "eleventy --serve",
     "start": "eleventy --serve",
-    "clean": "rm -rf _site"
+    "build": "eleventy",
+    "clean": "rimraf _site",
+    "dev": "eleventy --serve --watch",
+    "debug": "DEBUG=* eleventy"
   },
   "keywords": [
     "eleventy",
-    "decap-cms",
-    "static-site",
-    "school-website"
+    "static-site-generator",
+    "jamstack",
+    "education",
+    "islamic"
   ],
-  "author": "SMPIT Daarut Tarbiyah Indonesia",
+  "author": "SMPIT Daarut Tarbiyah",
   "license": "MIT",
   "devDependencies": {
     "@11ty/eleventy": "^2.0.1",
-    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0"
+    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
+    "markdown-it": "^13.0.2",
+    "markdown-it-anchor": "^8.6.7",
+    "html-minifier": "^4.0.0",
+    "rimraf": "^5.0.5"
   },
   "dependencies": {
-    "decap-cms-app": "^3.1.10"
+    "swiper": "^11.0.5",
+    "gsap": "^3.12.4",
+    "scrollmagic": "^2.0.8",
+    "intersection-observer": "^0.12.2",
+    "lucide": "^0.312.0"
   }
 }
