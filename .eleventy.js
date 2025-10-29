@@ -53,7 +53,8 @@ module.exports = function(eleventyConfig) {
     });
   });
   
-  // Transform for HTML minification
+  // Transform for HTML minification (disabled for debugging)
+  /*
   eleventyConfig.addTransform("htmlmin", function(content, outputPath) {
     if(outputPath && outputPath.endsWith(".html")) {
       let minified = htmlmin.minify(content, {
@@ -67,6 +68,7 @@ module.exports = function(eleventyConfig) {
     }
     return content;
   });
+  */
   
   // Directory structure
   return {
