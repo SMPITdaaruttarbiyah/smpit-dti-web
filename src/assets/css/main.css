@@ -504,3 +504,254 @@ body {
     background-position: -200% 0;
   }
 }
+
+
+/* Container Logo */
+.logo-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 20px 8px 8px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efek shimmer saat hover */
+.logo-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+.logo-wrapper:hover::before {
+    left: 100%;
+}
+
+.logo-wrapper:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo Circle Container */
+.logo-circle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Logo Image */
+.logo-img {
+    height: 60px;
+    width: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: white;
+    padding: 8px;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        0 0 0 4px rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 2;
+}
+
+.logo-wrapper:hover .logo-img {
+    transform: rotate(5deg) scale(1.05);
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.15),
+        0 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Ring animasi di sekitar logo */
+.logo-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: rgba(26, 95, 58, 0.5); /* Hijau Islamic */
+    border-right-color: rgba(255, 215, 0, 0.5); /* Emas */
+    opacity: 0;
+    transition: all 0.4s ease;
+    z-index: 1;
+}
+
+.logo-wrapper:hover .logo-ring {
+    opacity: 1;
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Text Logo */
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    line-height: 1;
+}
+
+.logo-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.logo-wrapper:hover .logo-title {
+    letter-spacing: 1px;
+    color: #ffd700; /* Emas saat hover */
+}
+
+.logo-subtitle {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.logo-wrapper:hover .logo-subtitle {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .logo-wrapper {
+        padding: 8px 16px 8px 8px;
+        gap: 14px;
+    }
+    
+    .logo-img {
+        height: 55px;
+        width: 55px;
+        padding: 7px;
+    }
+    
+    .logo-ring {
+        width: 65px;
+        height: 65px;
+    }
+    
+    .logo-title {
+        font-size: 18px;
+    }
+    
+    .logo-subtitle {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .logo-wrapper {
+        padding: 6px 12px 6px 6px;
+        gap: 12px;
+    }
+    
+    .logo-img {
+        height: 48px;
+        width: 48px;
+        padding: 6px;
+    }
+    
+    .logo-ring {
+        width: 58px;
+        height: 58px;
+    }
+    
+    .logo-title {
+        font-size: 16px;
+    }
+    
+    .logo-subtitle {
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Hanya tampilkan logo bulat, sembunyikan teks */
+    .logo-wrapper {
+        padding: 6px;
+        gap: 0;
+        border-radius: 50%;
+    }
+    
+    .logo-text {
+        display: none;
+    }
+    
+    .logo-img {
+        height: 45px;
+        width: 45px;
+    }
+    
+    .logo-ring {
+        width: 55px;
+        height: 55px;
+    }
+}
+
+/* Accessibility: Fokus untuk keyboard navigation */
+.logo-wrapper:focus {
+    outline: 2px solid #ffd700;
+    outline-offset: 4px;
+}
+
+.logo-wrapper:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .logo-wrapper {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .logo-wrapper:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.25);
+    }
+}
+
+/* Reduce motion untuk accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .logo-wrapper,
+    .logo-img,
+    .logo-ring,
+    .logo-title,
+    .logo-subtitle,
+    .logo-wrapper::before {
+        transition: none;
+        animation: none;
+    }
+}
