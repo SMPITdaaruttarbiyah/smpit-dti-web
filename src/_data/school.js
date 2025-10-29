@@ -1,6 +1,6 @@
 module.exports = {
-  name: "SMPIT Daarut Tarbiyah Indonesia",
-  address: "Jl. Lapangan Bekasi Tengah No. 3, Bekasi",
+  name: "SMPIT DAARUT TARBIYAH INDONESIA",
+  address: "Jl. Lapangan Bekasi Tengah No. 3, kel. Margahayu, kec. Bekasi Timur, Bekasi",
   visi: "Membangun peradaban islam Rahmatan Lil' Aalamiin",
   misi: [
     "Menyelenggarakan lembaga pendidikan pondok pesantren Tahfidz Al-Qur'an",
@@ -9,17 +9,32 @@ module.exports = {
     "Menyelenggarakan kegiatan peduli sosial dan kemanusiaan"
   ],
   program: [
-    { name: "Tahfidz Al-Qur'an", icon: "📖" },
-    { name: "Wisuda Tahfidz", icon: "🎓" },
-    { name: "Ilmu Keislaman", icon: "📚" },
-    { name: "Kewirausahaan", icon: "💼" },
-    { name: "Bahasa Arab & Inggris", icon: "🌍" }
+    "Program Tahfidz Al-Qur'an",
+    "Program wisuda Tahfidz Al-Qur'an",
+    "Program belajar ilmu - ilmu keislaman",
+    "Program Kewirausahaan",
+    "Program Muhadroh",
+    "Program Extrakulikuler",
+    "Program Bahasa Arab",
+    "Program Bahasa Inggris",
+    "Program Pengabdian",
+    "Program Praktek Khodimul Ummah",
+    "Program DLF (DTI Leadership Factory)"
   ],
   fasilitas: [
-    { name: "Masjid", icon: "🕌", desc: "Tempat yang menjiwai setiap aktivitas" },
-    { name: "Ruang Kelas", icon: "🏫", desc: "KBM kondusif" },
-    { name: "Perpustakaan", icon: "📚", desc: "Literasi & wawasan" },
-    { name: "Lab Komputer", icon: "💻", desc: "Teknologi modern" }
+    "Masjid merupakan tempat yang menjiwai setiap aktivitas murid/santri",
+    "Ruang kelas untuk melaksanakan kegiatan belajar mengajar",
+    "Perpustakaan untuk menambah literasi & wawasan para murid/santri",
+    "Ruang komputer untuk mempelajari hal - hal baru yang tidak bisa dijumpai pada buku",
+    "Lapangan untuk membantu melaksanakan serangkaian upacara & kegiatan luar kelas lainnya"
+  ],
+  ekstrakulikuler: [
+    "Ekskul PMR",
+    "Ekskul Pramuka",
+    "Ekskul Pelajar pustakawan",
+    "Ekskul Hadroh",
+    "Ekskul Public Speaking",
+    "Ekskul Futsal"
   ],
   social: {
     instagram: "https://instagram.com/smpitdti",

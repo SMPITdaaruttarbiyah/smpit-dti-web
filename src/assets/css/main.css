@@ -79,6 +79,7 @@ body {
   font-weight: 700;
   font-size: 1.25rem;
   transition: var(--transition-base);
+  gap: 12px;
 }
 
 .logo-img {
@@ -86,6 +87,27 @@ body {
   width: auto;
   object-fit: contain;
   transition: var(--transition-base);
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.logo-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--putih-murni);
+}
+
+.logo-subtitle {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--hijau-pertumbuhan);
+  opacity: 0.9;
+  line-height: 1.2;
 }
 
 .logo:hover {
@@ -394,6 +416,18 @@ body {
   
   .menu-toggle {
     display: flex;
+  }
+  
+  .logo {
+    gap: 8px;
+  }
+  
+  .logo-title {
+    font-size: 0.9rem;
+  }
+  
+  .logo-subtitle {
+    font-size: 0.65rem;
   }
   
   .hero {
