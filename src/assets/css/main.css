@@ -74,7 +74,6 @@ body {
 .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
   text-decoration: none;
   color: var(--putih-murni);
   font-weight: 700;
@@ -82,8 +81,37 @@ body {
   transition: var(--transition-base);
 }
 
+.logo-img {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  transition: var(--transition-base);
+}
+
 .logo:hover {
   transform: translateY(-2px);
+}
+
+.logo:hover .logo-img {
+  transform: scale(1.05);
+}
+
+.school-info {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.info-item {
+  color: var(--putih-murni);
+  line-height: 1.6;
+}
+
+.info-item strong {
+  color: var(--hijau-pertumbuhan);
+  font-weight: 600;
 }
 
 .logo-icon {
