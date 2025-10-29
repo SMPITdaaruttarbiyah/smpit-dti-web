@@ -1,240 +1,232 @@
-// ===================================
-// Islamic Quotes System with API
-// ===================================
+/**
+ * SMPIT Daarut Tarbiyah - Islamic Quotes System
+ * Mengambil quotes tentang ilmu dari Islamic Quotes API
+ */
 
-class IslamicQuotesManager {
-    constructor() {
-        this.quotes = [];
-        this.currentIndex = 0;
-        this.quoteText = document.getElementById('quote-text');
-        this.quoteAuthor = document.getElementById('quote-author');
-        this.prevBtn = document.getElementById('prev-quote');
-        this.nextBtn = document.getElementById('next-quote');
-        this.dotsContainer = document.getElementById('quote-dots');
-        
-        // Fallback quotes jika API gagal
-        this.fallbackQuotes = [
-            {
-                content: "Carilah ilmu dari buaian hingga liang lahat.",
-                author: "Nabi Muhammad SAW"
-            },
-            {
-                content: "Sesungguhnya sesudah kesulitan itu ada kemudahan.",
-                author: "QS. Al-Insyirah: 6"
-            },
-            {
-                content: "Barangsiapa yang menempuh jalan untuk mencari ilmu, maka Allah akan mudahkan baginya jalan menuju surga.",
-                author: "HR. Muslim"
-            },
-            {
-                content: "Ilmu itu lebih baik daripada harta. Ilmu menjaga engkau dan engkau menjaga harta.",
-                author: "Ali bin Abi Thalib"
-            },
-            {
-                content: "Didiklah anak-anakmu sesuai dengan zamannya, karena mereka hidup bukan di zamanmu.",
-                author: "Ali bin Abi Thalib"
-            }
-        ];
-        
-        this.init();
+class IslamicQuotes {
+  constructor() {
+    this.quotes = [];
+    this.currentQuoteIndex = 0;
+    this.quoteElement = null;
+    this.isLoading = false;
+    this.init();
+  }
+
+  async init() {
+    // Tunggu DOM siap
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.setupQuotes());
+    } else {
+      this.setupQuotes();
     }
+  }
+
+  async setupQuotes() {
+    // Cari elemen quote di halaman
+    this.quoteElement = document.querySelector('.quote-text');
+    const quoteAuthor = document.querySelector('.quote-author');
     
-    async init() {
-        await this.fetchQuotes();
-        this.setupEventListeners();
-        this.createDots();
-        this.displayQuote();
-        this.startAutoRotate();
+    if (!this.quoteElement) {
+      console.warn('Quote element not found');
+      return;
     }
-    
-    async fetchQuotes() {
-        try {
-            // Fetch quotes from multiple sources
-            const responses = await Promise.allSettled([
-                this.fetchFromQuotable(),
-                this.fetchFromQuotesAPI()
-            ]);
-            
-            // Combine successful responses
-            responses.forEach(response => {
-                if (response.status === 'fulfilled' && response.value) {
-                    this.quotes = [...this.quotes, ...response.value];
-                }
-            });
-            
-            // If no quotes fetched, use fallback
-            if (this.quotes.length === 0) {
-                this.quotes = this.fallbackQuotes;
-            }
-            
-        } catch (error) {
-            console.error('Error fetching quotes:', error);
-            this.quotes = this.fallbackQuotes;
+
+    // Tampilkan loading state
+    this.showLoadingState();
+
+    try {
+      // Ambil quotes dari API
+      await this.fetchQuotes();
+      
+      if (this.quotes.length > 0) {
+        // Filter quotes yang mengandung kata "ilmu"
+        this.filterIlmuQuotes();
+        
+        if (this.quotes.length > 0) {
+          // Tampilkan quote pertama
+          this.displayQuote();
+          
+          // Setup rotasi quotes otomatis
+          this.startQuoteRotation();
+          
+          // Setup navigasi manual
+          this.setupManualNavigation();
+        } else {
+          this.showNoQuotesMessage();
         }
+      } else {
+        this.showErrorMessage();
+      }
+    } catch (error) {
+      console.error('Error loading quotes:', error);
+      this.showErrorMessage();
     }
-    
-    async fetchFromQuotable() {
-        try {
-            const tags = ['education', 'wisdom', 'inspirational'];
-            const tag = tags[Math.floor(Math.random() * tags.length)];
-            const response = await fetch(`https://api.quotable.io/quotes?tags=${tag}&limit=5`);
-            
-            if (!response.ok) throw new Error('Quotable API failed');
-            
-            const data = await response.json();
-            return data.results.map(quote => ({
-                content: quote.content,
-                author: quote.author
-            }));
-        } catch (error) {
-            console.error('Quotable API error:', error);
-            return null;
-        }
+  }
+
+  async fetchQuotes() {
+    try {
+      const response = await fetch('https://islamic-quotes-api.vercel.app/api/quotes');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      this.quotes = data;
+    } catch (error) {
+      console.error('Error fetching quotes:', error);
+      throw error;
     }
+  }
+
+  filterIlmuQuotes() {
+    // Filter quotes yang mengandung kata "ilmu" atau variasinya
+    const ilmuKeywords = ['ilmu', 'ilm', 'علم', 'belajar', 'mengajar', 'pelajaran', 'pendidikan'];
     
-    async fetchFromQuotesAPI() {
-        try {
-            const categories = ['education', 'success', 'inspirational'];
-            const category = categories[Math.floor(Math.random() * categories.length)];
-            const response = await fetch(`https://quotes.rest/qod?category=${category}`, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!response.ok) throw new Error('Quotes API failed');
-            
-            const data = await response.json();
-            if (data.contents && data.contents.quotes) {
-                return data.contents.quotes.map(quote => ({
-                    content: quote.quote,
-                    author: quote.author
-                }));
-            }
-            return null;
-        } catch (error) {
-            console.error('Quotes API error:', error);
-            return null;
-        }
-    }
-    
-    setupEventListeners() {
-        if (this.prevBtn) {
-            this.prevBtn.addEventListener('click', () => this.previousQuote());
-        }
+    this.quotes = this.quotes.filter(quote => {
+      const text = (quote.text || '').toLowerCase();
+      const arabic = (quote.arabic || '').toLowerCase();
+      const explanation = (quote.explanation || '').toLowerCase();
+      
+      return ilmuKeywords.some(keyword => 
+        text.includes(keyword) || 
+        arabic.includes(keyword) || 
+        explanation.includes(keyword)
+      );
+    });
+
+    // Jika tidak ada quotes tentang ilmu, gunakan quotes tentang pendidikan umum
+    if (this.quotes.length === 0) {
+      const educationKeywords = ['ajaran', 'didik', 'ajar', 'bimbing', 'pandu', 'petunjuk'];
+      this.quotes = this.quotes.filter(quote => {
+        const text = (quote.text || '').toLowerCase();
+        const explanation = (quote.explanation || '').toLowerCase();
         
-        if (this.nextBtn) {
-            this.nextBtn.addEventListener('click', () => this.nextQuote());
-        }
-        
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') this.previousQuote();
-            if (e.key === 'ArrowRight') this.nextQuote();
-        });
-        
-        // Touch swipe for mobile
-        let touchStartX = 0;
-        let touchEndX = 0;
-        
-        const quoteBox = document.querySelector('.quote-box');
-        if (quoteBox) {
-            quoteBox.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-            });
-            
-            quoteBox.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                this.handleSwipe();
-            });
-        }
-        
-        this.handleSwipe = () => {
-            if (touchEndX < touchStartX - 50) this.nextQuote();
-            if (touchEndX > touchStartX + 50) this.previousQuote();
-        };
+        return educationKeywords.some(keyword => 
+          text.includes(keyword) || 
+          explanation.includes(keyword)
+        );
+      });
     }
+
+    // Jika masih kosong, gunakan 10 quotes pertama sebagai fallback
+    if (this.quotes.length === 0) {
+      const allQuotes = await this.fetchQuotes();
+      this.quotes = allQuotes.slice(0, 10);
+    }
+  }
+
+  showLoadingState() {
+    if (this.quoteElement) {
+      this.quoteElement.innerHTML = `
+        <div class="quote-loading">
+          <div class="loading-spinner"></div>
+          <p>Memuat quotes inspiratif...</p>
+        </div>
+      `;
+    }
+  }
+
+  showErrorMessage() {
+    if (this.quoteElement) {
+      this.quoteElement.innerHTML = `
+        <div class="quote-error">
+          <p>Maaf, terjadi kesalahan saat memuat quotes.</p>
+          <p>Mohon refresh halaman untuk mencoba lagi.</p>
+        </div>
+      `;
+    }
+  }
+
+  showNoQuotesMessage() {
+    if (this.quoteElement) {
+      this.quoteElement.innerHTML = `
+        <div class="quote-error">
+          <p>Tidak ada quotes tersedia saat ini.</p>
+        </div>
+      `;
+    }
+  }
+
+  displayQuote() {
+    if (!this.quoteElement || this.quotes.length === 0) return;
+
+    const quote = this.quotes[this.currentQuoteIndex];
+    const quoteAuthor = document.querySelector('.quote-author');
     
-    createDots() {
-        if (!this.dotsContainer) return;
-        
-        this.dotsContainer.innerHTML = '';
-        this.quotes.forEach((_, index) => {
-            const dot = document.createElement('span');
-            dot.className = 'quote-dot';
-            if (index === 0) dot.classList.add('active');
-            dot.addEventListener('click', () => this.goToQuote(index));
-            this.dotsContainer.appendChild(dot);
-        });
-    }
+    // Animasi fade out
+    this.quoteElement.style.opacity = '0';
     
-    displayQuote() {
-        if (this.quotes.length === 0) return;
-        
-        const quote = this.quotes[this.currentIndex];
-        
-        // Fade out
-        if (this.quoteText) {
-            this.quoteText.style.opacity = '0';
-            this.quoteAuthor.style.opacity = '0';
-        }
-        
-        setTimeout(() => {
-            if (this.quoteText) {
-                this.quoteText.textContent = quote.content;
-                this.quoteAuthor.textContent = `- ${quote.author}`;
-                
-                // Fade in
-                this.quoteText.style.opacity = '1';
-                this.quoteAuthor.style.opacity = '1';
-            }
-            
-            this.updateDots();
-        }, 300);
+    setTimeout(() => {
+      // Tampilkan quote baru
+      this.quoteElement.innerHTML = `
+        <div class="quote-content">
+          <p class="quote-text-arabic" dir="rtl">${quote.arabic || ''}</p>
+          <p class="quote-text-indonesia">${quote.text || ''}</p>
+          ${quote.source ? `<p class="quote-source">${quote.source}</p>` : ''}
+        </div>
+      `;
+      
+      if (quoteAuthor) {
+        quoteAuthor.textContent = quote.category || 'Islamic Quotes';
+      }
+      
+      // Animasi fade in
+      this.quoteElement.style.opacity = '1';
+    }, 300);
+  }
+
+  startQuoteRotation() {
+    // Rotasi quote setiap 10 detik
+    setInterval(() => {
+      this.nextQuote();
+    }, 10000);
+  }
+
+  setupManualNavigation() {
+    // Tambahkan tombol navigasi jika belum ada
+    const quoteContainer = document.querySelector('.quote-container');
+    if (quoteContainer && !quoteContainer.querySelector('.quote-navigation')) {
+      const navigation = document.createElement('div');
+      navigation.className = 'quote-navigation';
+      navigation.innerHTML = `
+        <button class="quote-nav-btn quote-prev" aria-label="Quote sebelumnya">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <button class="quote-nav-btn quote-next" aria-label="Quote berikutnya">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+      `;
+      
+      quoteContainer.appendChild(navigation);
+      
+      // Event listeners
+      navigation.querySelector('.quote-prev').addEventListener('click', () => this.previousQuote());
+      navigation.querySelector('.quote-next').addEventListener('click', () => this.nextQuote());
     }
-    
-    updateDots() {
-        const dots = document.querySelectorAll('.quote-dot');
-        dots.forEach((dot, index) => {
-            if (index === this.currentIndex) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
-        });
-    }
-    
-    nextQuote() {
-        this.currentIndex = (this.currentIndex + 1) % this.quotes.length;
-        this.displayQuote();
-        this.resetAutoRotate();
-    }
-    
-    previousQuote() {
-        this.currentIndex = (this.currentIndex - 1 + this.quotes.length) % this.quotes.length;
-        this.displayQuote();
-        this.resetAutoRotate();
-    }
-    
-    goToQuote(index) {
-        this.currentIndex = index;
-        this.displayQuote();
-        this.resetAutoRotate();
-    }
-    
-    startAutoRotate() {
-        this.autoRotateInterval = setInterval(() => {
-            this.nextQuote();
-        }, 7000); // Change quote every 7 seconds
-    }
-    
-    resetAutoRotate() {
-        clearInterval(this.autoRotateInterval);
-        this.startAutoRotate();
-    }
+  }
+
+  nextQuote() {
+    if (this.quotes.length === 0) return;
+    this.currentQuoteIndex = (this.currentQuoteIndex + 1) % this.quotes.length;
+    this.displayQuote();
+  }
+
+  previousQuote() {
+    if (this.quotes.length === 0) return;
+    this.currentQuoteIndex = (this.currentQuoteIndex - 1 + this.quotes.length) % this.quotes.length;
+    this.displayQuote();
+  }
 }
 
-// Initialize quotes when DOM is ready
+// Inisialisasi sistem quotes
 document.addEventListener('DOMContentLoaded', () => {
-    new IslamicQuotesManager();
+  window.islamicQuotes = new IslamicQuotes();
 });
+
+// Export untuk penggunaan di modul lain
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = IslamicQuotes;
+}
