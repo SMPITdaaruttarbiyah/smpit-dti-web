@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - SMPIT DAARUT TARBIYAH INDONESIA</title>
   <style>
+    /* Style tetap sama */
     * {
       margin: 0;
       padding: 0;
@@ -245,6 +246,24 @@
       background: #545b62;
     }
     
+    .btn-warning {
+      background: #ffc107;
+      color: #212529;
+    }
+    
+    .btn-warning:hover {
+      background: #e0a800;
+    }
+    
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #218838;
+    }
+    
     .news-list {
       background: white;
       border: 1px solid #e1e5e9;
@@ -357,28 +376,167 @@
       display: block;
     }
     
-    /* GitHub Status */
-    .github-status {
+    /* GitHub Setup Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      margin-bottom: 1.5rem;
+    }
+    
+    .modal-header h2 {
+      color: #0A3D73;
+      margin-bottom: 0.5rem;
+    }
+    
+    .modal-header p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .setup-steps {
       background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .setup-steps ol {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+    
+    .setup-steps li {
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    .github-status {
       padding: 1rem;
       border-radius: 8px;
       margin-bottom: 1rem;
       border-left: 4px solid #0A3D73;
     }
     
-    .github-status.success {
-      border-left-color: #1E9E44;
+    .github-status.connected {
       background: #e8f5e8;
+      border-left-color: #1E9E44;
     }
     
     .github-status.error {
-      border-left-color: #dc3545;
       background: #fee;
+      border-left-color: #dc3545;
     }
     
     .github-status.pending {
-      border-left-color: #ffc107;
       background: #fff3cd;
+      border-left-color: #ffc107;
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-top-color: #0A3D73;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Sync Status Badge */
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .sync-badge.synced {
+      background: #e8f5e8;
+      color: #1E9E44;
+    }
+    
+    .sync-badge.syncing {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .sync-badge.error {
+      background: #fee;
+      color: #dc3545;
+    }
+    
+    /* Edit Mode Indicator */
+    .edit-mode-indicator {
+      background: #ffc107;
+      color: #000;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .edit-mode-indicator.active {
+      display: flex;
+    }
+    
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #e9ecef;
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0A3D73, #1E9E44);
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: progress-pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes progress-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
     
     @media (max-width: 768px) {
@@ -404,6 +562,11 @@
       
       .btn-group {
         flex-direction: column;
+      }
+      
+      .modal-content {
+        width: 95%;
+        padding: 1.5rem;
       }
     }
   </style>
@@ -456,17 +619,80 @@
         <h1>Admin Panel - SMPIT DAARUT TARBIYAH</h1>
         <p>Selamat datang, <span id="userDisplay">Admin</span>!</p>
       </div>
-      <button class="logout-btn" id="logoutBtn">Logout</button>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div class="sync-badge" id="syncBadge">
+          <span id="syncStatus">⚡ Auto-Sync Active</span>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+      </div>
     </div>
     
     <div class="admin-content">
+      <!-- GitHub Setup Section -->
+      <div class="admin-section" id="githubSetupSection">
+        <h2>🔧 GitHub Configuration</h2>
+        
+        <div class="github-status" id="githubConnectionStatus">
+          <h4>📡 Status Koneksi GitHub</h4>
+          <p id="connectionStatusText">Checking connection...</p>
+          <div class="progress-bar" id="setupProgress" style="display: none;">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+          <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+            <h3 style="color: #0A3D73; margin-bottom: 1rem;">🚀 Quick Setup</h3>
+            <div class="form-group">
+              <label for="githubToken">GitHub Personal Access Token</label>
+              <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx">
+              <small style="color: #666; display: block; margin-top: 0.5rem;">
+                Token akan terenkripsi dan disimpan lokal
+              </small>
+            </div>
+            <button class="btn btn-primary" onclick="setupGitHub()">Connect GitHub</button>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+            <h3 style="color: #0A3D73; margin-bottom: 1rem;">📚 Repository Info</h3>
+            <div class="form-group">
+              <label>Repository</label>
+              <input type="text" id="repoName" value="username/smpit-dti-web" placeholder="username/repo-name">
+            </div>
+            <div class="form-group">
+              <label>Branch</label>
+              <input type="text" id="branchName" value="main" placeholder="main">
+            </div>
+            <button class="btn btn-success" onclick="testConnection()">Test Connection</button>
+          </div>
+        </div>
+        
+        <div style="background: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+          <h4 style="color: #1E9E44; margin-bottom: 0.5rem;">🔐 Cara mendapatkan GitHub Token:</h4>
+          <ol style="margin: 0; padding-left: 1.5rem; font-size: 0.9rem;">
+            <li>Buka <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a></li>
+            <li>Klik "Generate new token (classic)"</li>
+            <li>Beri nama token (misal: "SMPIT DTI Admin")</li>
+            <li>Pilih scope: <strong>repo</strong> (full control)</li>
+            <li>Klik "Generate token" dan copy</li>
+          </ol>
+        </div>
+      </div>
+      
       <!-- News Management Section -->
       <div class="admin-section">
         <h2>📝 Manajemen Berita</h2>
         
         <div class="news-form">
-          <h3>Tambah Berita Baru</h3>
+          <div class="edit-mode-indicator" id="editModeIndicator">
+            <span>🖊️ Mode Edit: Mengubah berita yang ada</span>
+            <button class="btn btn-secondary btn-small" onclick="cancelEdit()">Batal Edit</button>
+          </div>
+          
+          <h3 id="formTitle">Tambah Berita Baru</h3>
           <form id="newsForm">
+            <input type="hidden" id="editingId" value="">
+            
             <div class="form-row single">
               <div class="form-group">
                 <label for="newsTitle">Judul Berita</label>
@@ -511,8 +737,11 @@
             </div>
             
             <div class="btn-group">
-              <button type="submit" class="btn btn-primary">Simpan Berita</button>
-              <button type="reset" class="btn btn-secondary" onclick="resetImageUpload()">Reset Form</button>
+              <button type="submit" class="btn btn-primary" id="submitBtn">
+                <span id="submitBtnText">Simpan & Publish</span>
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset Form</button>
+              <button type="button" class="btn btn-warning" id="cancelEditBtn" style="display: none;" onclick="cancelEdit()">Batal Edit</button>
             </div>
           </form>
         </div>
@@ -525,69 +754,9 @@
         </div>
       </div>
       
-      <!-- GitHub Status -->
-      <div class="admin-section">
-        <h2>🔄 GitHub Sync Status</h2>
-        <div class="github-status" id="githubStatus">
-          <h4>📊 Status Sinkronisasi</h4>
-          <p id="githubStatusText">Menunggu sinkronisasi...</p>
-          <small id="githubLastSync">Terakhir sync: Belum pernah</small>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-          <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
-            <h3 style="color: #0A3D73; margin-bottom: 1rem;">🔄 Sync Data</h3>
-            <p style="color: #666; margin-bottom: 1rem;">Siapkan data untuk sinkronisasi</p>
-            <button class="btn btn-primary" id="syncBtn" onclick="syncGitHub()">Sync Now</button>
-          </div>
-          
-          <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
-            <h3 style="color: #0A3D73; margin-bottom: 1rem;">📊 View Site</h3>
-            <p style="color: #666; margin-bottom: 1rem;">Lihat website utama</p>
-            <button class="btn btn-primary" onclick="window.open('/smpit-dti-web/', '_blank')">Buka Website</button>
-          </div>
-          
-          <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
-            <h3 style="color: #0A3D73; margin-bottom: 1rem;">🧹 Clear Cache</h3>
-            <p style="color: #666; margin-bottom: 1rem;">Bersihkan cache browser</p>
-            <button class="btn btn-secondary" onclick="clearCache()">Clear Cache</button>
-          </div>
-        </div>
-        
-        <!-- Sync Instructions -->
-        <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid #1E9E44;">
-          <h4 style="color: #1E9E44; margin-bottom: 1rem;">🚀 Sistem Sinkronisasi Hybrid</h4>
-          <p style="margin: 0 0 1rem 0; color: #333;"><strong>2 Cara mudah update berita:</strong></p>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; border-left: 3px solid #007bff;">
-              <h5 style="color: #007bff; margin: 0 0 0.5rem 0;">🤖 Cara 1: Otomatis</h5>
-              <ol style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem;">
-                <li>Klik "Sync Now"</li>
-                <li>File JSON auto-download</li>
-                <li>Website update otomatis</li>
-              </ol>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; border-left: 3px solid #28a745;">
-              <h5 style="color: #28a745; margin: 0 0 0.5rem 0;">👤 Cara 2: Manual</h5>
-              <ol style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem;">
-                <li>Download file JSON</li>
-                <li>Upload ke GitHub</li>
-                <li>Website update 1-3 menit</li>
-              </ol>
-            </div>
-          </div>
-          
-          <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
-            <strong>💡 Tips:</strong> File JSON selalu di-download sebagai backup. Gunakan cara yang paling mudah untuk Anda!
-          </div>
-        </div>
-      </div>
-      
       <!-- Statistics Section -->
       <div class="admin-section">
-        <h2>📈 Statistik</h2>
+        <h2>📈 Statistik & Status</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
           <div style="background: #e8f5e8; padding: 1rem; border-radius: 8px; text-align: center;">
             <h3 style="color: #1E9E44; font-size: 2rem; margin: 0;" id="totalNews">0</h3>
@@ -597,13 +766,200 @@
             <h3 style="color: #f57c00; font-size: 2rem; margin: 0;" id="totalCategories">0</h3>
             <p style="color: #666; margin: 0.5rem 0 0 0;">Kategori</p>
           </div>
+          <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; text-align: center;">
+            <h3 style="color: #1976d2; font-size: 2rem; margin: 0;" id="lastSyncTime">-</h3>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Last Sync</p>
+          </div>
+          <div style="background: #f3e5f5; padding: 1rem; border-radius: 8px; text-align: center;">
+            <h3 style="color: #7b1fa2; font-size: 2rem; margin: 0;" id="syncCount">0</h3>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Total Sync</p>
+          </div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+          <h3 style="color: #0A3D73; margin-bottom: 1rem;">🔄 Manual Actions</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <button class="btn btn-primary" onclick="manualSync()">
+              🔄 Force Sync Now
+            </button>
+            <button class="btn btn-success" onclick="downloadBackup()">
+              💾 Download Backup
+            </button>
+            <button class="btn btn-warning" onclick="window.open(getRepoUrl(), '_blank')">
+              🌐 Open GitHub Repo
+            </button>
+            <button class="btn btn-secondary" onclick="clearCache()">
+              🧹 Clear Cache
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
   
+  <!-- GitHub Setup Modal -->
+  <div class="modal" id="setupModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🚀 GitHub Auto-Sync Setup</h2>
+        <p>Konfigurasikan GitHub untuk auto-publish berita</p>
+      </div>
+      
+      <div class="setup-steps">
+        <h4>Setup Steps:</h4>
+        <ol>
+          <li>Generate GitHub Personal Access Token</li>
+          <li>Enter token dan repository info</li>
+          <li>Test connection</li>
+          <li>Start auto-publishing!</li>
+        </ol>
+      </div>
+      
+      <div id="modalSetupForm">
+        <!-- Form content will be here -->
+      </div>
+      
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="saveGitHubConfig()">Save Configuration</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  
   <script>
-    // Login functionality
+    // ===== KONFIGURASI GITHUB =====
+    const GITHUB_CONFIG = {
+      owner: '', // Will be set from repo name
+      repo: '',  // Will be set from repo name
+      branch: 'main',
+      path: 'data/news.json',
+      token: null,
+      apiBase: 'https://api.github.com'
+    };
+    
+    // ===== GLOBAL VARIABLES =====
+    let isEditMode = false;
+    let editingNewsId = null;
+    let autoSyncEnabled = true;
+    let syncInProgress = false;
+    
+    // ===== GITHUB API CLASS =====
+    class GitHubAPI {
+      constructor(config) {
+        this.config = config;
+      }
+      
+      // Encode/Decode Base64
+      encodeBase64(str) {
+        return btoa(unescape(encodeURIComponent(str)));
+      }
+      
+      decodeBase64(str) {
+        return decodeURIComponent(escape(atob(str)));
+      }
+      
+      // Get file from GitHub
+      async getFile(path) {
+        try {
+          const response = await fetch(
+            `${this.config.apiBase}/repos/${this.config.owner}/${this.config.repo}/contents/${path}`,
+            {
+              headers: {
+                'Authorization': `token ${this.config.token}`,
+                'Accept': 'application/vnd.github.v3+json'
+              }
+            }
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            return {
+              content: this.decodeBase64(data.content),
+              sha: data.sha
+            };
+          } else if (response.status === 404) {
+            return null; // File doesn't exist
+          } else {
+            throw new Error(`GitHub API Error: ${response.status}`);
+          }
+        } catch (error) {
+          console.error('Error getting file:', error);
+          throw error;
+        }
+      }
+      
+      // Create or update file on GitHub
+      async createOrUpdateFile(path, content, message) {
+        try {
+          // Get current file (if exists) to get SHA
+          const currentFile = await this.getFile(path);
+          
+          const body = {
+            message: message,
+            content: this.encodeBase64(content),
+            branch: this.config.branch
+          };
+          
+          if (currentFile && currentFile.sha) {
+            body.sha = currentFile.sha;
+          }
+          
+          const response = await fetch(
+            `${this.config.apiBase}/repos/${this.config.owner}/${this.config.repo}/contents/${path}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Authorization': `token ${this.config.token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(body)
+            }
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            return data;
+          } else {
+            const error = await response.json();
+            throw new Error(error.message || `GitHub API Error: ${response.status}`);
+          }
+        } catch (error) {
+          console.error('Error creating/updating file:', error);
+          throw error;
+        }
+      }
+      
+      // Test connection
+      async testConnection() {
+        try {
+          const response = await fetch(
+            `${this.config.apiBase}/repos/${this.config.owner}/${this.config.repo}`,
+            {
+              headers: {
+                'Authorization': `token ${this.config.token}`,
+                'Accept': 'application/vnd.github.v3+json'
+              }
+            }
+          );
+          
+          return response.ok;
+        } catch (error) {
+          console.error('Connection test failed:', error);
+          return false;
+        }
+      }
+    }
+    
+    // ===== INITIALIZATION =====
+    let githubAPI = null;
+    
+    // Check if already logged in
+    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+      showAdminPanel();
+    }
+    
+    // ===== LOGIN FUNCTIONALITY =====
     const loginForm = document.getElementById('loginForm');
     const loginContainer = document.getElementById('loginContainer');
     const adminPanel = document.getElementById('adminPanel');
@@ -611,23 +967,12 @@
     const successMessage = document.getElementById('successMessage');
     const logoutBtn = document.getElementById('logoutBtn');
     
-    // News management
-    const newsForm = document.getElementById('newsForm');
-    const newsItems = document.getElementById('newsItems');
-    
-    // Check if already logged in
-    if (sessionStorage.getItem('isLoggedIn') === 'true') {
-      showAdminPanel();
-    }
-    
-    // Login form submission
     loginForm.addEventListener('submit', function(e) {
       e.preventDefault();
       
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       
-      // Simple authentication
       if (username === 'admin' && password === 'smpitdti2024') {
         errorMessage.style.display = 'none';
         successMessage.style.display = 'block';
@@ -640,18 +985,14 @@
       } else {
         errorMessage.style.display = 'block';
         successMessage.style.display = 'none';
-        
-        // Clear password field
         document.getElementById('password').value = '';
         
-        // Hide error after 3 seconds
         setTimeout(() => {
           errorMessage.style.display = 'none';
         }, 3000);
       }
     });
     
-    // Logout functionality
     logoutBtn.addEventListener('click', function() {
       sessionStorage.removeItem('isLoggedIn');
       sessionStorage.removeItem('username');
@@ -665,36 +1006,192 @@
       loginContainer.style.display = 'none';
       adminPanel.style.display = 'block';
       
+      // Initialize
+      loadGitHubConfig();
       loadNews();
       updateStatistics();
-      updateGitHubStatus();
+      checkGitHubConnection();
     }
     
     function showLoginForm() {
       loginContainer.style.display = 'flex';
       adminPanel.style.display = 'none';
-      
-      // Clear form
       loginForm.reset();
       errorMessage.style.display = 'none';
       successMessage.style.display = 'none';
     }
     
-    // Image upload handler (simplified for static)
+    // ===== GITHUB CONFIGURATION =====
+    function loadGitHubConfig() {
+      const savedConfig = localStorage.getItem('githubConfig');
+      if (savedConfig) {
+        try {
+          const config = JSON.parse(savedConfig);
+          GITHUB_CONFIG.token = atob(config.token); // Decrypt token
+          GITHUB_CONFIG.owner = config.owner;
+          GITHUB_CONFIG.repo = config.repo;
+          GITHUB_CONFIG.branch = config.branch || 'main';
+          
+          document.getElementById('githubToken').value = '•'.repeat(20);
+          document.getElementById('repoName').value = `${config.owner}/${config.repo}`;
+          document.getElementById('branchName').value = config.branch;
+          
+          githubAPI = new GitHubAPI(GITHUB_CONFIG);
+          updateSyncBadge('synced');
+        } catch (error) {
+          console.error('Error loading GitHub config:', error);
+        }
+      }
+    }
+    
+    async function setupGitHub() {
+      const token = document.getElementById('githubToken').value;
+      const repoName = document.getElementById('repoName').value;
+      const branch = document.getElementById('branchName').value || 'main';
+      
+      if (!token || token === '•'.repeat(20)) {
+        showNotification('⚠️ Masukkan GitHub Token yang valid!', 'error');
+        return;
+      }
+      
+      if (!repoName || !repoName.includes('/')) {
+        showNotification('⚠️ Format repo: username/repo-name', 'error');
+        return;
+      }
+      
+      const [owner, repo] = repoName.split('/');
+      
+      // Update config
+      GITHUB_CONFIG.token = token;
+      GITHUB_CONFIG.owner = owner;
+      GITHUB_CONFIG.repo = repo;
+      GITHUB_CONFIG.branch = branch;
+      
+      // Create API instance
+      githubAPI = new GitHubAPI(GITHUB_CONFIG);
+      
+      // Test connection
+      showNotification('🔄 Testing GitHub connection...', 'info');
+      const isConnected = await githubAPI.testConnection();
+      
+      if (isConnected) {
+        // Save config (encrypted)
+        const configToSave = {
+          token: btoa(token), // Simple encryption
+          owner: owner,
+          repo: repo,
+          branch: branch
+        };
+        localStorage.setItem('githubConfig', JSON.stringify(configToSave));
+        
+        showNotification('✅ GitHub berhasil terhubung!', 'success');
+        updateGitHubStatus('connected');
+        updateSyncBadge('synced');
+        
+        // Hide setup section
+        document.getElementById('githubSetupSection').style.display = 'none';
+      } else {
+        showNotification('❌ Gagal terhubung ke GitHub. Periksa token dan repo!', 'error');
+        updateGitHubStatus('error');
+      }
+    }
+    
+    async function testConnection() {
+      if (!githubAPI) {
+        showNotification('⚠️ Setup GitHub terlebih dahulu!', 'error');
+        return;
+      }
+      
+      showNotification('🔄 Testing connection...', 'info');
+      const isConnected = await githubAPI.testConnection();
+      
+      if (isConnected) {
+        showNotification('✅ Connection successful!', 'success');
+        updateGitHubStatus('connected');
+      } else {
+        showNotification('❌ Connection failed!', 'error');
+        updateGitHubStatus('error');
+      }
+    }
+    
+    async function checkGitHubConnection() {
+      const statusEl = document.getElementById('githubConnectionStatus');
+      const statusText = document.getElementById('connectionStatusText');
+      
+      if (!githubAPI) {
+        statusText.textContent = '⚠️ GitHub belum dikonfigurasi. Setup diperlukan.';
+        statusEl.className = 'github-status pending';
+        return;
+      }
+      
+      statusText.innerHTML = '<span class="spinner"></span>Checking connection...';
+      
+      const isConnected = await githubAPI.testConnection();
+      if (isConnected) {
+        statusText.textContent = '✅ GitHub terhubung dan siap auto-sync!';
+        statusEl.className = 'github-status connected';
+        document.getElementById('githubSetupSection').style.display = 'none';
+      } else {
+        statusText.textContent = '❌ GitHub tidak terhubung. Periksa konfigurasi.';
+        statusEl.className = 'github-status error';
+      }
+    }
+    
+    function updateGitHubStatus(status) {
+      const statusEl = document.getElementById('githubConnectionStatus');
+      const statusText = document.getElementById('connectionStatusText');
+      
+      switch(status) {
+        case 'connected':
+          statusEl.className = 'github-status connected';
+          statusText.textContent = '✅ GitHub terhubung dan siap auto-sync!';
+          break;
+        case 'error':
+          statusEl.className = 'github-status error';
+          statusText.textContent = '❌ GitHub tidak terhubung. Periksa konfigurasi.';
+          break;
+        case 'pending':
+          statusEl.className = 'github-status pending';
+          statusText.textContent = '⚠️ GitHub belum dikonfigurasi.';
+          break;
+      }
+    }
+    
+    function updateSyncBadge(status) {
+      const badge = document.getElementById('syncBadge');
+      const statusText = document.getElementById('syncStatus');
+      
+      switch(status) {
+        case 'synced':
+          badge.className = 'sync-badge synced';
+          statusText.textContent = '✅ Auto-Sync Active';
+          break;
+        case 'syncing':
+          badge.className = 'sync-badge syncing';
+          statusText.innerHTML = '<span class="spinner"></span>Syncing...';
+          break;
+        case 'error':
+          badge.className = 'sync-badge error';
+          statusText.textContent = '❌ Sync Error';
+          break;
+      }
+    }
+    
+    // ===== NEWS MANAGEMENT =====
+    const newsForm = document.getElementById('newsForm');
+    
+    // Image upload handler
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          // Store base64 image
           document.getElementById('newsImage').value = e.target.result;
           
-          // Show preview
           const preview = document.getElementById('imagePreview');
           preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
           preview.style.display = 'block';
           
-          // Update label
           const label = document.getElementById('fileUploadLabel');
           label.textContent = `✅ ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
           label.classList.add('has-file');
@@ -703,7 +1200,12 @@
       }
     }
     
-    // Reset image upload
+    function resetForm() {
+      newsForm.reset();
+      resetImageUpload();
+      cancelEdit();
+    }
+    
     function resetImageUpload() {
       document.getElementById('newsImage').value = '';
       document.getElementById('imagePreview').style.display = 'none';
@@ -715,9 +1217,32 @@
       label.classList.remove('has-file');
     }
     
-    // News form submission
-    newsForm.addEventListener('submit', function(e) {
+    function cancelEdit() {
+      isEditMode = false;
+      editingNewsId = null;
+      
+      document.getElementById('editingId').value = '';
+      document.getElementById('formTitle').textContent = 'Tambah Berita Baru';
+      document.getElementById('submitBtnText').textContent = 'Simpan & Publish';
+      document.getElementById('editModeIndicator').classList.remove('active');
+      document.getElementById('cancelEditBtn').style.display = 'none';
+      
+      newsForm.reset();
+      resetImageUpload();
+    }
+    
+    // News form submission with AUTO-SYNC
+    newsForm.addEventListener('submit', async function(e) {
       e.preventDefault();
+      
+      if (syncInProgress) {
+        showNotification('⏳ Sync sedang berlangsung, harap tunggu...', 'info');
+        return;
+      }
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Menyimpan...';
       
       const formData = {
         title: document.getElementById('newsTitle').value,
@@ -726,43 +1251,153 @@
         content: document.getElementById('newsContent').value,
         image: document.getElementById('newsImage').value,
         tags: document.getElementById('newsTags').value,
-        id: Date.now().toString()
+        id: isEditMode ? editingNewsId : Date.now().toString(),
+        createdAt: isEditMode ? undefined : new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
       
-      // Save to localStorage
+      // Get existing news
       let news = JSON.parse(localStorage.getItem('smpitNews') || '[]');
-      news.unshift(formData);
+      
+      if (isEditMode) {
+        const index = news.findIndex(item => item.id === editingNewsId);
+        if (index !== -1) {
+          news[index] = { ...news[index], ...formData };
+        }
+      } else {
+        news.unshift(formData);
+      }
+      
+      // Save to localStorage
       localStorage.setItem('smpitNews', JSON.stringify(news));
       
+      // AUTO-SYNC TO GITHUB
+      if (githubAPI && autoSyncEnabled) {
+        try {
+          updateSyncBadge('syncing');
+          submitBtn.innerHTML = '<span class="spinner"></span>Publishing to GitHub...';
+          
+          await syncToGitHub(news);
+          
+          showNotification('🎉 Berita berhasil dipublish ke website!', 'success');
+          updateSyncBadge('synced');
+        } catch (error) {
+          console.error('Auto-sync error:', error);
+          showNotification('⚠️ Berita tersimpan lokal, sync GitHub gagal', 'warning');
+          updateSyncBadge('error');
+        }
+      } else {
+        showNotification('✅ Berita tersimpan (offline mode)', 'success');
+      }
+      
       // Reset form
+      cancelEdit();
       newsForm.reset();
       resetImageUpload();
       
-      // Reload news list
+      // Reload
       loadNews();
       updateStatistics();
       
-      // Show success message
-      showNotification('Berita berhasil disimpan!', 'success');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span id="submitBtnText">Simpan & Publish</span>';
     });
     
-    // Load news from localStorage
-    function loadNews() {
-      const news = JSON.parse(localStorage.getItem('smpitNews') || '[]');
-      const newsItems = document.getElementById('newsItems');
+    // Sync to GitHub
+    async function syncToGitHub(newsData) {
+      if (!githubAPI) {
+        throw new Error('GitHub not configured');
+      }
       
-      if (news.length === 0) {
-        newsItems.innerHTML = '<p style="padding: 2rem; text-align: center; color: #666;">Belum ada berita</p>';
+      syncInProgress = true;
+      
+      try {
+        const dataToSync = {
+          lastUpdated: new Date().toISOString(),
+          version: '2.0.0',
+          news: newsData,
+          metadata: {
+            totalNews: newsData.length,
+            categories: [...new Set(newsData.map(item => item.category))],
+            lastSync: new Date().toISOString(),
+            syncBy: sessionStorage.getItem('username') || 'admin'
+          }
+        };
+        
+        const jsonContent = JSON.stringify(dataToSync, null, 2);
+        
+        // Upload to GitHub
+        const result = await githubAPI.createOrUpdateFile(
+          GITHUB_CONFIG.path,
+          jsonContent,
+          `Update news data - ${new Date().toLocaleString('id-ID')}`
+        );
+        
+        if (result) {
+          // Update sync stats
+          const syncCount = parseInt(localStorage.getItem('syncCount') || '0');
+          localStorage.setItem('syncCount', (syncCount + 1).toString());
+          localStorage.setItem('lastSyncTime', new Date().toISOString());
+          
+          updateStatistics();
+          return true;
+        }
+      } finally {
+        syncInProgress = false;
+      }
+      
+      return false;
+    }
+    
+    // Manual sync
+    async function manualSync() {
+      if (syncInProgress) {
+        showNotification('⏳ Sync sedang berlangsung...', 'info');
         return;
       }
       
-      newsItems.innerHTML = news.map(item => `
+      const news = JSON.parse(localStorage.getItem('smpitNews') || '[]');
+      
+      if (news.length === 0) {
+        showNotification('⚠️ Tidak ada berita untuk di-sync', 'warning');
+        return;
+      }
+      
+      updateSyncBadge('syncing');
+      showNotification('🔄 Syncing to GitHub...', 'info');
+      
+      try {
+        await syncToGitHub(news);
+        showNotification('✅ Sync berhasil! Website akan update dalam 1-2 menit', 'success');
+        updateSyncBadge('synced');
+      } catch (error) {
+        console.error('Manual sync error:', error);
+        showNotification('❌ Sync gagal: ' + error.message, 'error');
+        updateSyncBadge('error');
+        
+        // Fallback: download backup
+        downloadBackup();
+      }
+    }
+    
+    // Load news
+    function loadNews() {
+      const news = JSON.parse(localStorage.getItem('smpitNews') || '[]');
+      const newsItemsContainer = document.getElementById('newsItems');
+      
+      if (news.length === 0) {
+        newsItemsContainer.innerHTML = '<p style="padding: 2rem; text-align: center; color: #666;">Belum ada berita</p>';
+        return;
+      }
+      
+      newsItemsContainer.innerHTML = news.map(item => `
         <div class="news-item">
           <div>
             <h4>${item.title}</h4>
             <p>${item.content.substring(0, 100)}...</p>
             <div class="meta">
               ${item.category} • ${new Date(item.date).toLocaleDateString('id-ID')}
+              ${item.updatedAt ? ` • Updated: ${new Date(item.updatedAt).toLocaleTimeString('id-ID')}` : ''}
             </div>
           </div>
           <div class="news-actions">
@@ -774,42 +1409,64 @@
     }
     
     // Delete news
-    function deleteNews(id) {
+    async function deleteNews(id) {
       if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
         let news = JSON.parse(localStorage.getItem('smpitNews') || '[]');
         news = news.filter(item => item.id !== id);
         localStorage.setItem('smpitNews', JSON.stringify(news));
         
+        // Auto-sync after delete
+        if (githubAPI && autoSyncEnabled) {
+          try {
+            updateSyncBadge('syncing');
+            await syncToGitHub(news);
+            showNotification('✅ Berita dihapus dan website diupdate!', 'success');
+            updateSyncBadge('synced');
+          } catch (error) {
+            showNotification('⚠️ Berita dihapus lokal, sync gagal', 'warning');
+            updateSyncBadge('error');
+          }
+        } else {
+          showNotification('✅ Berita berhasil dihapus!', 'success');
+        }
+        
         loadNews();
         updateStatistics();
-        showNotification('Berita berhasil dihapus!', 'success');
       }
     }
     
-    // Edit news (simplified)
+    // Edit news
     function editNews(id) {
       const news = JSON.parse(localStorage.getItem('smpitNews') || '[]');
       const item = news.find(n => n.id === id);
       
       if (item) {
+        isEditMode = true;
+        editingNewsId = id;
+        
+        document.getElementById('editingId').value = id;
         document.getElementById('newsTitle').value = item.title;
         document.getElementById('newsCategory').value = item.category;
         document.getElementById('newsDate').value = item.date;
         document.getElementById('newsContent').value = item.content;
-        document.getElementById('newsImage').value = item.image;
-        document.getElementById('newsTags').value = item.tags;
+        document.getElementById('newsTags').value = item.tags || '';
         
-        // Show image if exists
         if (item.image) {
+          document.getElementById('newsImage').value = item.image;
           const preview = document.getElementById('imagePreview');
           preview.innerHTML = `<img src="${item.image}" alt="Preview">`;
           preview.style.display = 'block';
+          
+          const label = document.getElementById('fileUploadLabel');
+          label.textContent = '✅ Gambar tersimpan (klik untuk ganti)';
+          label.classList.add('has-file');
         }
         
-        // Delete the old item
-        deleteNews(id);
+        document.getElementById('formTitle').textContent = 'Edit Berita';
+        document.getElementById('submitBtnText').textContent = 'Update & Publish';
+        document.getElementById('editModeIndicator').classList.add('active');
+        document.getElementById('cancelEditBtn').style.display = 'inline-block';
         
-        // Scroll to form
         document.getElementById('newsForm').scrollIntoView({ behavior: 'smooth' });
       }
     }
@@ -817,179 +1474,75 @@
     // Update statistics
     function updateStatistics() {
       const news = JSON.parse(localStorage.getItem('smpitNews') || '[]');
-      document.getElementById('totalNews').textContent = news.length;
-      
       const categories = [...new Set(news.map(item => item.category))];
-      document.getElementById('totalCategories').textContent = categories.length;
-    }
-    
-    // Update GitHub status
-    function updateGitHubStatus() {
-      const statusElement = document.getElementById('githubStatus');
-      const statusText = document.getElementById('githubStatusText');
-      const lastSyncElement = document.getElementById('githubLastSync');
+      const syncCount = localStorage.getItem('syncCount') || '0';
+      const lastSync = localStorage.getItem('lastSyncTime');
       
-      // Simulate GitHub sync status
-      const lastSync = localStorage.getItem('lastGitHubSync');
+      document.getElementById('totalNews').textContent = news.length;
+      document.getElementById('totalCategories').textContent = categories.length;
+      document.getElementById('syncCount').textContent = syncCount;
+      
       if (lastSync) {
         const syncDate = new Date(lastSync);
-        lastSyncElement.textContent = `Terakhir sync: ${syncDate.toLocaleString('id-ID')}`;
-        statusText.textContent = '✅ Data siap untuk disinkronkan';
-        statusElement.className = 'github-status success';
-      } else {
-        lastSyncElement.textContent = 'Terakhir sync: Belum pernah';
-        statusText.textContent = 'Menunggu sinkronisasi...';
-        statusElement.className = 'github-status pending';
-      }
-    }
-    
-    // Sync to GitHub (Hybrid approach - automatic + manual backup)
-    async function syncGitHub() {
-      const news = JSON.parse(localStorage.getItem('smpitNews') || '[]');
-      
-      // Update status to syncing
-      const statusElement = document.getElementById('githubStatus');
-      const statusText = document.getElementById('githubStatusText');
-      statusText.textContent = '🔄 Sedang menyinkronkan data...';
-      statusElement.className = 'github-status pending';
-      
-      try {
-        // Prepare data for sync
-        const newsData = {
-          lastUpdated: new Date().toISOString(),
-          syncType: 'automatic',
-          version: '1.0.0',
-          news: news,
-          statistics: {
-            totalNews: news.length,
-            categories: [...new Set(news.map(item => item.category))],
-            lastSync: new Date().toISOString()
-          }
-        };
+        const now = new Date();
+        const diff = Math.floor((now - syncDate) / 60000); // minutes
         
-        // Step 1: Save to localStorage for backup
-        localStorage.setItem('smpitNewsData', JSON.stringify(newsData));
-        
-        // Step 2: Create downloadable file as backup
-        const dataStr = JSON.stringify(newsData, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `news-data-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        // Step 3: Try automatic sync (simulated for now)
-        const apiResponse = await saveNewsData(newsData);
-        
-        if (apiResponse.success) {
-          // Update status
-          localStorage.setItem('lastGitHubSync', new Date().toISOString());
-          updateGitHubStatus();
-          
-          showNotification('✅ Data berhasil disinkronkan! File backup telah di-download.', 'success');
-          
-          // Show next steps
-          setTimeout(() => {
-            showNotification('📋 Website akan update otomatis atau upload file JSON ke GitHub.', 'info');
-          }, 2000);
-          
-          // Start checking for deployment
-          checkDeploymentStatus();
+        if (diff < 1) {
+          document.getElementById('lastSyncTime').textContent = 'Just now';
+        } else if (diff < 60) {
+          document.getElementById('lastSyncTime').textContent = `${diff}m ago`;
+        } else if (diff < 1440) {
+          document.getElementById('lastSyncTime').textContent = `${Math.floor(diff/60)}h ago`;
         } else {
-          throw new Error(apiResponse.error || 'Gagal menyimpan data');
+          document.getElementById('lastSyncTime').textContent = syncDate.toLocaleDateString('id-ID');
         }
-        
-      } catch (error) {
-        console.error('Sync error:', error);
-        statusText.textContent = '❌ Gagal sinkronisasi. Silakan coba lagi.';
-        statusElement.className = 'github-status error';
-        showNotification('❌ Gagal sinkronisasi. Silakan coba lagi.', 'error');
+      } else {
+        document.getElementById('lastSyncTime').textContent = 'Never';
       }
     }
     
-    // Save news data to API (simulated)
-    async function saveNewsData(newsData) {
-      try {
-        // Simulate API call - in production, this would be a real API
-        console.log('💾 Saving news data...', newsData.statistics.totalNews, 'items');
-        
-        // For demo purposes, we'll simulate success
-        // In production, you would make a real API call here
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        return { success: true, message: 'Data saved successfully' };
-        
-        // Real API call would look like:
-        // const response = await fetch('/api/news', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(newsData)
-        // });
-        // return await response.json();
-        
-      } catch (error) {
-        console.error('API Error:', error);
-        return { success: false, error: error.message };
-      }
-    }
-    
-    // Check deployment status
-    async function checkDeploymentStatus() {
-      const statusElement = document.getElementById('githubStatus');
-      const statusText = document.getElementById('githubStatusText');
-      
-      let attempts = 0;
-      const maxAttempts = 5; // Reduced from 10 to prevent too many requests
-      
-      const checkStatus = async () => {
-        attempts++;
-        
-        try {
-          // Check if website is updated
-          const response = await fetch('/smpit-dti-web/assets/data/news.json?t=' + Date.now());
-          if (response.ok) {
-            const data = await response.json();
-            const localNews = JSON.parse(localStorage.getItem('smpitNews') || '[]');
-            
-            if (data.news && data.news.length >= localNews.length) {
-              statusText.textContent = '✅ Website berhasil diperbarui!';
-              statusElement.className = 'github-status success';
-              showNotification('🎉 Website berhasil diperbarui!', 'success');
-              return;
-            }
-          }
-          
-          if (attempts < maxAttempts) {
-            statusText.textContent = `🔄 Menunggu deployment... (${attempts}/${maxAttempts})`;
-            setTimeout(checkStatus, 30000); // Increased to 30 seconds to reduce server load
-          } else {
-            statusText.textContent = '⏱️ Deployment selesai. Silakan periksa website.';
-            statusElement.className = 'github-status success';
-            showNotification('✅ Sinkronisasi selesai. Website akan segera terupdate.', 'success');
-          }
-          
-        } catch (error) {
-          console.log('Check status error:', error);
-          if (attempts < maxAttempts) {
-            setTimeout(checkStatus, 30000);
-          } else {
-            statusText.textContent = '✅ Sinkronisasi selesai. Website akan segera terupdate.';
-            statusElement.className = 'github-status success';
-          }
+    // Download backup
+    function downloadBackup() {
+      const news = JSON.parse(localStorage.getItem('smpitNews') || '[]');
+      const dataToBackup = {
+        lastUpdated: new Date().toISOString(),
+        version: '2.0.0',
+        news: news,
+        metadata: {
+          totalNews: news.length,
+          categories: [...new Set(news.map(item => item.category))],
+          backupDate: new Date().toISOString()
         }
       };
       
-      setTimeout(checkStatus, 60000); // Start checking after 1 minute instead of 30 seconds
+      const dataStr = JSON.stringify(dataToBackup, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `news-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      showNotification('✅ Backup berhasil di-download!', 'success');
+    }
+    
+    // Get repo URL
+    function getRepoUrl() {
+      if (GITHUB_CONFIG.owner && GITHUB_CONFIG.repo) {
+        return `https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`;
+      }
+      return 'https://github.com';
     }
     
     // Clear cache
     function clearCache() {
-      if (confirm('Apakah Anda yakin ingin membersihkan cache?')) {
-        localStorage.clear();
-        sessionStorage.clear();
-        location.reload();
+      if (confirm('⚠️ Ini akan menghapus semua data lokal termasuk berita dan konfigurasi. Lanjutkan?')) {
+        if (confirm('⚠️ PERINGATAN TERAKHIR: Semua data akan HILANG PERMANEN! Yakin?')) {
+          localStorage.clear();
+          sessionStorage.clear();
+          location.reload();
+        }
       }
     }
     
@@ -1000,14 +1553,20 @@
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#007bff'};
-        color: white;
+        background: ${
+          type === 'success' ? '#28a745' : 
+          type === 'error' ? '#dc3545' : 
+          type === 'warning' ? '#ffc107' :
+          '#007bff'
+        };
+        color: ${type === 'warning' ? '#000' : 'white'};
         padding: 1rem 1.5rem;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 9999;
-        max-width: 300px;
+        z-index: 99999;
+        max-width: 350px;
         animation: slideIn 0.3s ease;
+        font-weight: 500;
       `;
       notification.textContent = message;
       
@@ -1016,9 +1575,11 @@
       setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => {
-          document.body.removeChild(notification);
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
         }, 300);
-      }, 3000);
+      }, 4000);
     }
     
     // Add CSS animations
@@ -1035,8 +1596,11 @@
     `;
     document.head.appendChild(style);
     
+    // Auto-refresh statistics
+    setInterval(updateStatistics, 30000); // Update every 30 seconds
+    
     // Initialize
-    console.log('🚀 SMPIT DTI Admin Panel loaded successfully!');
+    console.log('🚀 SMPIT DTI Admin Panel with GitHub Auto-Sync loaded!');
   </script>
 </body>
 </html>
