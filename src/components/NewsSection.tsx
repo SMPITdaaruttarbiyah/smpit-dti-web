@@ -16,14 +16,14 @@ interface NewsItem {
 }
 
 interface NewsData {
-  lastUpdated: string
-  syncType: string
   version: string
+  lastUpdated: string
+  website: string
+  totalNews: number
   news: NewsItem[]
-  statistics: {
-    totalNews: number
-    categories: string[]
-    lastSync: string
+  metadata: {
+    updatedAt: string
+    updatedBy: string
   }
 }
 
@@ -136,9 +136,9 @@ export default function NewsSection() {
           <p className="text-gray-600 max-w-2xl mx-auto">
             Dapatkan informasi terbaru tentang kegiatan dan prestasi SMPIT DAARUT TARBIYAH INDONESIA
           </p>
-          {newsData.statistics.lastSync && (
+          {newsData.lastUpdated && (
             <p className="text-sm text-gray-500 mt-2">
-              Terakhir diperbarui: {formatDate(newsData.statistics.lastSync)}
+              Terakhir diperbarui: {formatDate(newsData.lastUpdated)}
             </p>
           )}
         </div>
@@ -194,7 +194,7 @@ export default function NewsSection() {
                 <span className="font-semibold">Statistik Berita</span>
               </div>
               <p className="text-gray-600">
-                Total {newsData.statistics.totalNews} berita dari {newsData.statistics.categories.length} kategori
+                Total {newsData.totalNews} berita tersedia
               </p>
             </div>
           </div>
