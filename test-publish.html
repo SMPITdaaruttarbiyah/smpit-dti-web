@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Publish - SMPIT DTI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background: #0A3D73;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #082b52;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .logs {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Publish Berita</h1>
+        <p>Halaman ini untuk testing sistem publish berita ke GitHub.</p>
+        
+        <form id="testForm">
+            <div class="form-group">
+                <label for="title">Judul Berita</label>
+                <input type="text" id="title" value="Test Berita - [WAKTU SEKARANG]" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Kategori</label>
+                <select id="category">
+                    <option value="Test">Test</option>
+                    <option value="Pengumuman">Pengumuman</option>
+                    <option value="Kegiatan">Kegiatan</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="content">Konten Berita</label>
+                <textarea id="content" required>Ini adalah berita test untuk memastikan sistem publish berfungsi dengan baik. Dibuat pada: [WAKTU SEKARANG]</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password Master</label>
+                <input type="password" id="password" placeholder="Masukkan password master Anda" required>
+            </div>
+            
+            <button type="submit" id="publishBtn">🚀 Test Publish</button>
+            <button type="button" onclick="clearLogs()" style="margin-left: 10px; background: #6c757d;">🗑️ Clear Logs</button>
+        </form>
+        
+        <div id="result" class="result"></div>
+        <div id="logs" class="logs"></div>
+    </div>
+
+    <script>
+        // Copy encryption functions from admin panel
+        const Base64 = {
+            encode(str) {
+                const utf8Bytes = new TextEncoder().encode(str);
+                let binaryString = '';
+                utf8Bytes.forEach(byte => {
+                    binaryString += String.fromCharCode(byte);
+                });
+                return btoa(binaryString);
+            },
+            
+            decode(base64) {
+                const binaryString = atob(base64);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                return new TextDecoder().decode(bytes);
+            }
+        };
+
+        const CryptoManager = {
+            encrypt(text, password) {
+                const key = this.deriveKey(password);
+                const salt = this.generateSalt();
+                let encrypted = salt + '|';
+                
+                for (let i = 0; i < text.length; i++) {
+                    const charCode = text.charCodeAt(i);
+                    const keyCode = key.charCodeAt(i % key.length);
+                    const saltCode = salt.charCodeAt(i % salt.length);
+                    encrypted += String.fromCharCode((charCode ^ keyCode ^ saltCode) % 65536);
+                }
+                
+                return Base64.encode(encrypted);
+            },
+            
+            decrypt(encrypted, password) {
+                try {
+                    const key = this.deriveKey(password);
+                    const decoded = Base64.decode(encrypted);
+                    const [salt, ...rest] = decoded.split('|');
+                    const cipher = rest.join('|');
+                    let decrypted = '';
+                    
+                    for (let i = 0; i < cipher.length; i++) {
+                        const charCode = cipher.charCodeAt(i);
+                        const keyCode = key.charCodeAt(i % key.length);
+                        const saltCode = salt.charCodeAt(i % salt.length);
+                        decrypted += String.fromCharCode(charCode ^ keyCode ^ saltCode);
+                    }
+                    
+                    return decrypted;
+                } catch (error) {
+                    console.error('Decrypt error:', error);
+                    return null;
+                }
+            },
+            
+            deriveKey(password) {
+                let key = '';
+                for (let i = 0; i < password.length; i++) {
+                    key += String.fromCharCode((password.charCodeAt(i) * 13 + 7) % 65536);
+                }
+                return key + 'SMPIT-DTI-2024';
+            },
+            
+            generateSalt() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let salt = '';
+                for (let i = 0; i < 16; i++) {
+                    salt += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return salt;
+            },
+            
+            hash(text) {
+                let hash = 0;
+                for (let i = 0; i < text.length; i++) {
+                    const char = text.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return Math.abs(hash).toString(16);
+            }
+        };
+
+        const StorageManager = {
+            KEYS: {
+                CONFIG: 'smpit_config_v2',
+                PASSWORD_HASH: 'smpit_pwd_hash'
+            },
+            
+            loadConfig(password) {
+                try {
+                    log('🔍 Loading config with password...');
+                    const encrypted = localStorage.getItem(this.KEYS.CONFIG);
+                    if (!encrypted) {
+                        log('❌ No config found in localStorage');
+                        return null;
+                    }
+                    
+                    log('🔓 Decrypting config...');
+                    const decrypted = CryptoManager.decrypt(encrypted, password);
+                    if (!decrypted) {
+                        log('❌ Decryption failed - wrong password');
+                        return null;
+                    }
+                    
+                    const config = JSON.parse(decrypted);
+                    log('✅ Config loaded successfully:', { 
+                        hasToken: !!config.token, 
+                        username: config.username, 
+                        repo: config.repo 
+                    });
+                    return config;
+                } catch (error) {
+                    log('❌ Config load error: ' + error.message);
+                    return null;
+                }
+            },
+            
+            verifyPassword(password) {
+                const savedHash = localStorage.getItem(this.KEYS.PASSWORD_HASH);
+                if (!savedHash) {
+                    log('❌ No password hash found');
+                    return false;
+                }
+                
+                const hash = CryptoManager.hash(password);
+                const isValid = hash === savedHash;
+                log('🔐 Password verification:', isValid ? 'VALID' : 'INVALID');
+                return isValid;
+            }
+        };
+
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.textContent = message;
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            document.getElementById('result').style.display = 'none';
+        }
+
+        async function testPublish() {
+            const title = document.getElementById('title').value;
+            const category = document.getElementById('category').value;
+            const content = document.getElementById('content').value;
+            const password = document.getElementById('password').value;
+            const publishBtn = document.getElementById('publishBtn');
+
+            if (!title || !content || !password) {
+                showResult('Semua field harus diisi!', 'error');
+                return;
+            }
+
+            // Replace placeholders
+            const now = new Date().toLocaleString('id-ID');
+            const finalTitle = title.replace('[WAKTU SEKARANG]', now);
+            const finalContent = content.replace('[WAKTU SEKARANG]', now);
+
+            publishBtn.disabled = true;
+            publishBtn.textContent = '🔄 Testing...';
+            showResult('Sedang melakukan test publish...', 'loading');
+
+            try {
+                log('🚀 Starting test publish...');
+                
+                // Verify password
+                if (!StorageManager.verifyPassword(password)) {
+                    throw new Error('Password master salah!');
+                }
+                
+                // Load config
+                const config = StorageManager.loadConfig(password);
+                if (!config) {
+                    throw new Error('Gagal memuat konfigurasi. Mungkin password salah.');
+                }
+                
+                log('✅ Config loaded successfully');
+                log(`📁 Repository: ${config.username}/${config.repo}`);
+                
+                // Create test news data
+                const newsData = [{
+                    id: Date.now().toString(),
+                    title: finalTitle,
+                    category: category,
+                    date: new Date().toISOString().split('T')[0],
+                    content: finalContent,
+                    image: '',
+                    published: true,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                }];
+                
+                log('📦 Test news data created');
+                
+                // Test GitHub API
+                const testResult = await testGitHubAPI(config, newsData);
+                
+                if (testResult.success) {
+                    showResult(`✅ Test berhasil! Berita test berhasil dipublish. Commit URL: ${testResult.commitUrl}`, 'success');
+                    log('🎉 Test publish completed successfully!');
+                } else {
+                    throw new Error(testResult.error);
+                }
+                
+            } catch (error) {
+                showResult(`❌ Test gagal: ${error.message}`, 'error');
+                log(`❌ Test failed: ${error.message}`);
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.textContent = '🚀 Test Publish';
+            }
+        }
+
+        async function testGitHubAPI(config, newsData) {
+            try {
+                log('🔄 Testing GitHub API connection...');
+                
+                // Test repository access
+                const repoResponse = await fetch(
+                    `https://api.github.com/repos/${config.username}/${config.repo}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${config.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+                
+                if (!repoResponse.ok) {
+                    throw new Error(`Repository access failed: ${repoResponse.status}`);
+                }
+                
+                log('✅ Repository access successful');
+                
+                // Test file update
+                const dataToSave = {
+                    version: '2.0.0',
+                    lastUpdated: new Date().toISOString(),
+                    website: 'SMPIT DAARUT TARBIYAH INDONESIA',
+                    totalNews: newsData.length,
+                    news: newsData,
+                    metadata: {
+                        updatedAt: new Date().toISOString(),
+                        updatedBy: 'Test Panel'
+                    }
+                };
+                
+                const jsonString = JSON.stringify(dataToSave, null, 2);
+                const content = btoa(unescape(encodeURIComponent(jsonString)));
+                
+                const updateResponse = await fetch(
+                    `https://api.github.com/repos/${config.username}/${config.repo}/contents/assets/data/news.json`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${config.token}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Test publish: ${newsData[0].title}`,
+                            content: content,
+                            branch: config.branch || 'main'
+                        })
+                    }
+                );
+                
+                if (!updateResponse.ok) {
+                    const error = await updateResponse.json();
+                    throw new Error(`GitHub API error: ${error.message || updateResponse.status}`);
+                }
+                
+                const result = await updateResponse.json();
+                log('✅ GitHub API update successful');
+                log(`🔗 Commit: ${result.commit.html_url}`);
+                
+                return {
+                    success: true,
+                    commitUrl: result.commit.html_url
+                };
+                
+            } catch (error) {
+                log(`❌ GitHub API error: ${error.message}`);
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        // Form submission
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            testPublish();
+        });
+
+        // Initialize
+        log('🧪 Test Publish Page Loaded');
+        log('📝 Fill in the form and click "Test Publish" to verify the system works');
+    </script>
+</body>
+</html>
