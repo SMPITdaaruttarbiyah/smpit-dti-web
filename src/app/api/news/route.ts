@@ -5,7 +5,7 @@ const GITHUB_CONFIG = {
   owner: 'SMPITdaaruttarbiyah',
   repo: 'smpit-dti-web',
   branch: 'main',
-  filePath: 'data/news.json'
+  filePath: 'assets/data/news.json'
 };
 
 // Cache duration in milliseconds (5 minutes)
