@@ -438,7 +438,7 @@ class NewsAPI {
     try {
       const newsData = localStorage.getItem(this.storageKey) || '[]';
       const imageData = localStorage.getItem(this.imageStorageKey) || '{}';
-      const syncData = localStorage.getItem(this.syncStatusKey) || '{}';
+      const syncData = localStorage.getItem(this.syncStatusKey) || '{}');
       
       return {
         news: {
