@@ -544,7 +544,7 @@
           <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
             <h3 style="color: #0A3D73; margin-bottom: 1rem;">📊 View Site</h3>
             <p style="color: #666; margin-bottom: 1rem;">Lihat website utama</p>
-            <button class="btn btn-primary" onclick="window.open('/smpit-dti-web/', '_blank')">Buka Website</button>
+            <button class="btn btn-primary" onclick="window.open('/', '_blank')">Buka Website</button>
           </div>
           
           <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
@@ -912,25 +912,28 @@
         }
       }
       
-      // Save news data to API (simulated)
+      // Save news data to API
       async function saveNewsData(newsData) {
         try {
-          // Simulate API call - in production, this would be a real API
           console.log('💾 Saving news data...', newsData.statistics.totalNews, 'items');
           
-          // For demo purposes, we'll simulate success
-          // In production, you would make a real API call here
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Call the API to save news data
+          const response = await fetch('/api/news', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newsData)
+          });
           
-          return { success: true, message: 'Data saved successfully' };
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
           
-          // Real API call would look like:
-          // const response = await fetch('/api/news', {
-          //   method: 'POST',
-          //   headers: { 'Content-Type': 'application/json' },
-          //   body: JSON.stringify(newsData)
-          // });
-          // return await response.json();
+          const result = await response.json();
+          console.log('✅ News data saved successfully:', result);
+          
+          return { success: true, message: 'Data saved successfully', data: result };
           
         } catch (error) {
           console.error('API Error:', error);
@@ -951,7 +954,7 @@
           
           try {
             // Check if website is updated
-            const response = await fetch('/smpit-dti-web/assets/data/news.json?t=' + Date.now());
+            const response = await fetch('/api/news?t=' + Date.now());
             if (response.ok) {
               const data = await response.json();
               const localNews = JSON.parse(localStorage.getItem('smpitNews') || '[]');

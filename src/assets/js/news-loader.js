@@ -33,11 +33,11 @@ class NewsLoader {
             this.showLoadingState();
 
             // Ambil data berita dari API
-            const response = await fetch('/api/news?status=published&limit=6');
-            const result = await response.json();
+            const response = await fetch('/api/news');
+            const data = await response.json();
 
-            if (result.success && result.data) {
-                this.newsData = result.data;
+            if (data && data.news) {
+                this.newsData = data.news;
                 this.renderNews();
             } else {
                 this.showErrorState();
@@ -85,10 +85,11 @@ class NewsLoader {
             });
 
             const categoryColors = {
-                'prestasi': '#10b981',
-                'kegiatan': '#3b82f6',
-                'akademik': '#8b5cf6',
-                'pengumuman': '#f59e0b'
+                'Pengumuman': '#f59e0b',
+                'Kegiatan': '#3b82f6',
+                'Prestasi': '#10b981',
+                'Akademik': '#8b5cf6',
+                'Umum': '#6b7280'
             };
 
             const categoryColor = categoryColors[news.category] || '#6b7280';
@@ -109,10 +110,10 @@ class NewsLoader {
                         <h3>${news.title}</h3>
                         <p>${news.content.substring(0, 120)}...</p>
                         <div class="news-meta">
-                            <span class="news-author">Oleh ${news.author}</span>
+                            <span class="news-author">Admin</span>
                             <span class="news-status">Published</span>
                         </div>
-                        <button class="news-link" onclick="newsLoader.showNewsDetail(${news.id})">
+                        <button class="news-link" onclick="newsLoader.showNewsDetail('${news.id}')">
                             Baca Selengkapnya →
                         </button>
                     </div>
@@ -150,7 +151,7 @@ class NewsLoader {
                             month: 'long',
                             year: 'numeric'
                         })}</span>
-                        <span class="news-author">Oleh ${news.author}</span>
+                        <span class="news-author">Admin</span>
                     </div>
                 </div>
                 <div class="news-modal-body">
@@ -158,6 +159,13 @@ class NewsLoader {
                     <div class="news-content-full">
                         ${news.content.split('\n').map(paragraph => `<p>${paragraph}</p>`).join('')}
                     </div>
+                    ${news.tags ? `
+                        <div class="news-tags" style="margin-top: 20px;">
+                            <strong>Tags:</strong> ${news.tags.split(',').map(tag => 
+                                `<span class="tag" style="background: #e5e7eb; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">${tag.trim()}</span>`
+                            ).join('')}
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="news-modal-footer">
                     <button class="btn" onclick="this.closest('.news-modal').remove()">Tutup</button>
@@ -303,10 +311,11 @@ class NewsLoader {
 
     getCategoryColor(category) {
         const categoryColors = {
-            'prestasi': '#10b981',
-            'kegiatan': '#3b82f6',
-            'akademik': '#8b5cf6',
-            'pengumuman': '#f59e0b'
+            'Pengumuman': '#f59e0b',
+            'Kegiatan': '#3b82f6',
+            'Prestasi': '#10b981',
+            'Akademik': '#8b5cf6',
+            'Umum': '#6b7280'
         };
         return categoryColors[category] || '#6b7280';
     }

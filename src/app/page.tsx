@@ -21,8 +21,10 @@ import {
   Computer,
   MapPin,
   Phone,
-  Mail
+  Mail,
+  Newspaper
 } from 'lucide-react'
+import NewsSection from '@/components/NewsSection'
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('home')
@@ -52,6 +54,7 @@ export default function Home() {
             </div>
             <nav className="hidden md:flex space-x-6">
               <button onClick={() => setActiveSection('home')} className="text-emerald-700 hover:text-emerald-900 font-medium">Beranda</button>
+              <button onClick={() => setActiveSection('berita')} className="text-emerald-700 hover:text-emerald-900 font-medium">Berita</button>
               <button onClick={() => setActiveSection('visi')} className="text-emerald-700 hover:text-emerald-900 font-medium">Visi & Misi</button>
               <button onClick={() => setActiveSection('program')} className="text-emerald-700 hover:text-emerald-900 font-medium">Program</button>
               <button onClick={() => setActiveSection('fasilitas')} className="text-emerald-700 hover:text-emerald-900 font-medium">Fasilitas</button>
@@ -131,6 +134,9 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* News Section */}
+      {activeSection === 'berita' && <NewsSection />}
 
       {/* Visi & Misi Section */}
       {activeSection === 'visi' && (

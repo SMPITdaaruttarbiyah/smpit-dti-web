@@ -1,0 +1,30 @@
+{
+  "lastUpdated": "2025-10-30T14:03:39.482Z",
+  "syncType": "automatic",
+  "version": "1.0.0",
+  "news": [
+    {
+      "id": "1",
+      "title": "Selamat Datang Siswa Baru Tahun Ajaran 2024/2025",
+      "category": "Pengumuman",
+      "date": "2024-01-15",
+      "content": "SMPIT DAARUT TARBIYAH INDONESIA mengucapkan selamat datang kepada seluruh siswa baru tahun ajaran 2024/2025. Semoga menjadi generasi Islam yang unggul dan berkarakter.",
+      "image": "",
+      "tags": "siswa baru,2024/2025,welcome"
+    },
+    {
+      "id": "2", 
+      "title": "Peresmian Lab Komputer Baru",
+      "category": "Kegiatan",
+      "date": "2024-01-10",
+      "content": "Alhamdulillah, SMPIT DTI telah meresmikan laboratorium komputer baru untuk mendukung kegiatan belajar mengajar dan pengembangan teknologi informasi siswa.",
+      "image": "",
+      "tags": "lab komputer,fasilitas,teknologi"
+    }
+  ],
+  "statistics": {
+    "totalNews": 2,
+    "categories": ["Pengumuman", "Kegiatan"],
+    "lastSync": "2025-10-30T14:03:39.482Z"
+  }
+}
