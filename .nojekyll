@@ -1,0 +1,2 @@
+# This file tells GitHub Pages to not use Jekyll processing
+# This allows our Next.js app to work properly on GitHub Pages
