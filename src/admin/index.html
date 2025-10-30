@@ -1346,6 +1346,13 @@
     function publishNews() {
       console.log('📝 Publish button clicked');
       
+      // Check if config exists
+      if (!StorageManager.hasConfig()) {
+        console.error('❌ No config found! Need to setup first.');
+        showToast('❌ Anda belum melakukan setup! Silakan refresh halaman dan lakukan setup terlebih dahulu.', 'error');
+        return;
+      }
+      
       const title = document.getElementById('newsTitle').value.trim();
       const content = document.getElementById('newsContent').value.trim();
       
@@ -1355,9 +1362,11 @@
       }
       
       console.log('✅ Form validation passed');
+      console.log('✅ Config exists, proceeding with publish...');
       
       publishCallback = async function(password) {
         console.log('🔐 Executing publish callback with password:', password ? '***' : 'null');
+        console.log('🔐 publishCallback exists:', typeof publishCallback === 'function');
         
         const publishBtn = document.getElementById('publishBtn');
         publishBtn.disabled = true;
@@ -1368,10 +1377,16 @@
           const config = StorageManager.loadConfig(password);
           
           if (!config) {
-            throw new Error('Gagal memuat konfigurasi. Password mungkin salah.');
+            console.error('❌ No config found!');
+            throw new Error('Gagal memuat konfigurasi. Password mungkin salah atau Anda belum melakukan setup.');
           }
           
-          console.log('✅ Config loaded:', { owner: config.username, repo: config.repo });
+          console.log('✅ Config loaded:', { 
+            owner: config.username, 
+            repo: config.repo,
+            hasToken: !!config.token,
+            tokenPrefix: config.token ? config.token.substring(0, 10) + '...' : 'none'
+          });
           
           console.log('🔄 Initializing GitHub API...');
           await GitHubAPI.initialize(
@@ -1491,10 +1506,14 @@
         console.log('✅ Password valid');
         errorEl.classList.remove('show');
         
+        // Execute callback FIRST, then close modal
         if (publishCallback) {
           console.log('🚀 Executing publish callback');
-          publishCallback(password);
-          publishCallback = null; // Reset after execution
+          const callback = publishCallback;
+          publishCallback = null; // Reset immediately
+          callback(password);
+        } else {
+          console.log('⚠️ No publish callback found');
         }
         
         closePasswordModal();
