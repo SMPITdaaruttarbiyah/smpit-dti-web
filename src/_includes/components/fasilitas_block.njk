@@ -1,0 +1,14 @@
+<section class="content-block">
+    <div class="container">
+        <h2 class="block-title">Fasilitas</h2>
+        <div class="grid-4">
+            {% for fasilitas in school.fasilitas %}
+                <div class="card">
+                    <div class="card-icon">{{ fasilitas.icon }}</div>
+                    <h3 class="card-title">{{ fasilitas.name }}</h3>
+                    <p class="card-description">{{ fasilitas.desc }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

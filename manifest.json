@@ -1,0 +1,117 @@
+{
+  "name": "smpit-dti-website",
+  "short_name": "SMPIT DT",
+  "description": "SMPIT Daarut Tarbiyah - High-Tech & High-Touch Islamic Education",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A3D73",
+  "theme_color": "#1E9E44",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "id-ID",
+  "categories": ["education", "islamic", "school"],
+  "icons": [
+    {
+      "src": "/assets/images/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/images/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/images/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/images/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/images/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/images/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/assets/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Profil Sekolah",
+      "short_name": "Profil",
+      "description": "Lihat profil sekolah",
+      "url": "/#profile",
+      "icons": [
+        {
+          "src": "/assets/images/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Fasilitas",
+      "short_name": "Fasilitas",
+      "description": "Lihat fasilitas sekolah",
+      "url": "/#facilities",
+      "icons": [
+        {
+          "src": "/assets/images/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Kontak",
+      "short_name": "Kontak",
+      "description": "Hubungi kami",
+      "url": "/#contact",
+      "icons": [
+        {
+          "src": "/assets/images/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/images/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Desktop view of SMPIT Daarut Tarbiyah website"
+    },
+    {
+      "src": "/assets/images/screenshot-mobile.png",
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile view of SMPIT Daarut Tarbiyah website"
+    }
+  ]
+}

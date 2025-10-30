@@ -1,0 +1,86 @@
+name: Auto Sync News Data
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/admin/index.html'
+  workflow_dispatch:
+    inputs:
+      sync_type:
+        description: 'Type of sync'
+        required: true
+        default: 'manual'
+        type: choice
+        options:
+        - manual
+        - scheduled
+
+# Set permissions for the workflow
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  sync-news:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build site
+      run: npm run build
+      
+    - name: Extract news data
+      id: extract-news
+      run: |
+        echo "Extracting news data from admin panel..."
+        
+        # Ensure assets/data directory exists
+        mkdir -p assets/data
+        
+        # Set environment variable
+        export SYNC_TYPE="${{ github.event.inputs.sync_type || 'automatic' }}"
+        
+        # Run the extraction script
+        node extract-news.js
+        
+        # Verify file was created
+        if [ -f "assets/data/news.json" ]; then
+          echo "✅ news.json created successfully"
+          echo "📄 File size: $(wc -c < assets/data/news.json) bytes"
+          echo "📊 News items: $(grep -o '"id":' assets/data/news.json | wc -l)"
+        else
+          echo "❌ news.json was not created"
+          exit 1
+        fi
+        
+    - name: Update GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./_site
+        
+    - name: Create summary
+      run: |
+        echo "## 📊 Sync Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Sync Type**: ${{ github.event.inputs.sync_type || 'automatic' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp**: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+        echo "- **Files Updated**: news.json" >> $GITHUB_STEP_SUMMARY

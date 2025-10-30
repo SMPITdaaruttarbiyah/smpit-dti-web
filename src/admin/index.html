@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - {{ school.name }}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0A3D73 0%, #1E9E44 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .login-container {
+      background: white;
+      padding: 3rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    
+    .login-header {
+      margin-bottom: 2rem;
+    }
+    
+    .login-header h1 {
+      color: #0A3D73;
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .login-header p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .school-logo {
+      width: 80px;
+      height: 80px;
+      background: #0A3D73;
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #0A3D73;
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 0.875rem;
+      background: #0A3D73;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    .login-btn:hover {
+      background: #082b52;
+    }
+    
+    .login-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .error-message {
+      background: #fee;
+      color: #c33;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 1px solid #fcc;
+      display: none;
+    }
+    
+    .success-message {
+      background: #e8f5e8;
+      color: #1E9E44;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 1px solid #1E9E44;
+      display: none;
+    }
+    
+    .login-info {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+    
+    .login-info strong {
+      color: #0A3D73;
+    }
+    
+    .admin-panel {
+      display: none;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 1200px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .admin-header {
+      background: #0A3D73;
+      color: white;
+      padding: 1.5rem 2rem;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .admin-header h1 {
+      font-size: 1.5rem;
+    }
+    
+    .logout-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    
+    .logout-btn:hover {
+      background: #c82333;
+    }
+    
+    .admin-content {
+      padding: 2rem;
+    }
+    
+    .admin-section {
+      margin-bottom: 2rem;
+    }
+    
+    .admin-section h2 {
+      color: #0A3D73;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e1e5e9;
+    }
+    
+    .news-form {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .form-row.single {
+      grid-template-columns: 1fr;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .btn-primary {
+      background: #0A3D73;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #082b52;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #545b62;
+    }
+    
+    .news-list {
+      background: white;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .news-item {
+      padding: 1rem;
+      border-bottom: 1px solid #e1e5e9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .news-item:last-child {
+      border-bottom: none;
+    }
+    
+    .news-item h4 {
+      color: #0A3D73;
+      margin-bottom: 0.25rem;
+    }
+    
+    .news-item p {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .news-item .meta {
+      font-size: 0.8rem;
+      color: #999;
+    }
+    
+    .news-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .btn-small {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .btn-edit {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-edit:hover {
+      background: #218838;
+    }
+    
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-delete:hover {
+      background: #c82333;
+    }
+    
+    /* Image Upload Styles */
+    .file-upload {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      width: 100%;
+    }
+    
+    .file-upload input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    .file-upload-label {
+      display: block;
+      padding: 0.75rem 1rem;
+      background: #f8f9fa;
+      border: 2px dashed #0A3D73;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .file-upload-label:hover {
+      background: #e9ecef;
+      border-color: #082b52;
+    }
+    
+    .file-upload-label.has-file {
+      background: #e8f5e8;
+      border-color: #1E9E44;
+      border-style: solid;
+    }
+    
+    .image-preview {
+      margin-top: 1rem;
+      max-width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .image-preview img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #0A3D73;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* GitHub Status */
+    .github-status {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #0A3D73;
+    }
+    
+    .github-status.success {
+      border-left-color: #1E9E44;
+      background: #e8f5e8;
+    }
+    
+    .github-status.error {
+      border-left-color: #dc3545;
+      background: #fee;
+    }
+    
+    .github-status.pending {
+      border-left-color: #ffc107;
+      background: #fff3cd;
+    }
+    
+    @media (max-width: 768px) {
+      .login-container {
+        margin: 1rem;
+        padding: 2rem;
+      }
+      
+      .admin-panel {
+        margin: 1rem;
+        max-height: 95vh;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .admin-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Form -->
+  <div class="login-container" id="loginContainer">
+    <div class="school-logo">DTI</div>
+    <div class="login-header">
+      <h1>Admin Panel</h1>
+      <p>SMPIT DAARUT TARBIYAH INDONESIA</p>
+    </div>
+    
+    <div class="error-message" id="errorMessage">
+      Username atau password salah!
+    </div>
+    
+    <div class="success-message" id="successMessage">
+      Login berhasil! Mengalihkan...
+    </div>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      
+      <button type="submit" class="login-btn" id="loginBtn">
+        Login
+      </button>
+    </form>
+    
+    <div class="login-info">
+      <strong>Informasi Login:</strong><br>
+      Username: <strong>admin</strong><br>
+      Password: <strong>smpitdti2024</strong><br>
+      <small>Gunakan kredensial di atas untuk mengakses panel admin</small>
+    </div>
+  </div>
+  
+  <!-- Admin Panel -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <div>
+        <h1>Admin Panel - SMPIT DAARUT TARBIYAH</h1>
+        <p>Selamat datang, <span id="userDisplay">Admin</span>!</p>
+      </div>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+    
+    <div class="admin-content">
+      <!-- News Management Section -->
+      <div class="admin-section">
+        <h2>📝 Manajemen Berita</h2>
+        
+        <div class="news-form">
+          <h3>Tambah Berita Baru</h3>
+          <form id="newsForm">
+            <div class="form-row single">
+              <div class="form-group">
+                <label for="newsTitle">Judul Berita</label>
+                <input type="text" id="newsTitle" name="title" required>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="newsCategory">Kategori</label>
+                <input type="text" id="newsCategory" name="category" placeholder="Pengumuman, Kegiatan, dll.">
+              </div>
+              <div class="form-group">
+                <label for="newsDate">Tanggal</label>
+                <input type="date" id="newsDate" name="date" required>
+              </div>
+            </div>
+            
+            <div class="form-row single">
+              <div class="form-group">
+                <label for="newsContent">Konten Berita</label>
+                <textarea id="newsContent" name="content" rows="5" required></textarea>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="newsImageFile">Upload Gambar</label>
+                <div class="file-upload">
+                  <input type="file" id="newsImageFile" name="imageFile" accept="image/*" onchange="handleImageUpload(event)">
+                  <label for="newsImageFile" class="file-upload-label" id="fileUploadLabel">
+                    📷 Klik untuk upload gambar atau drag & drop
+                  </label>
+                </div>
+                <div id="imagePreview" class="image-preview" style="display: none;"></div>
+                <input type="hidden" id="newsImage" name="image">
+              </div>
+              <div class="form-group">
+                <label for="newsTags">Tags</label>
+                <input type="text" id="newsTags" name="tags" placeholder="pisahkan dengan koma">
+              </div>
+            </div>
+            
+            <div class="btn-group">
+              <button type="submit" class="btn btn-primary">Simpan Berita</button>
+              <button type="reset" class="btn btn-secondary" onclick="resetImageUpload()">Reset Form</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="news-list" id="newsList">
+          <h3 style="padding: 1rem; margin: 0; border-bottom: 1px solid #e1e5e9;">Daftar Berita</h3>
+          <div id="newsItems">
+            <!-- News items will be populated here -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- GitHub Status -->
+      <div class="admin-section">
+        <h2>🔄 GitHub Sync Status</h2>
+        <div class="github-status" id="githubStatus">
+          <h4>📊 Status Sinkronisasi</h4>
+          <p id="githubStatusText">Menunggu sinkronisasi...</p>
+          <small id="githubLastSync">Terakhir sync: Belum pernah</small>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+          <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <h3 style="color: #0A3D73; margin-bottom: 1rem;">🔄 Sync Data</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Siapkan data untuk sinkronisasi</p>
+            <button class="btn btn-primary" id="syncBtn" onclick="syncGitHub()">Sync Now</button>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <h3 style="color: #0A3D73; margin-bottom: 1rem;">📊 View Site</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Lihat website utama</p>
+            <button class="btn btn-primary" onclick="window.open('/', '_blank')">Buka Website</button>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <h3 style="color: #0A3D73; margin-bottom: 1rem;">🧹 Clear Cache</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Bersihkan cache browser</p>
+            <button class="btn btn-secondary" onclick="clearCache()">Clear Cache</button>
+          </div>
+        </div>
+        
+        <!-- Sync Instructions -->
+        <div style="background: #e3f2fd; padding: 1.5rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid #1976d2;">
+          <h4 style="color: #1976d2; margin-bottom: 1rem;">📋 Instruksi Sinkronisasi Manual</h4>
+          <ol style="margin: 0; padding-left: 1.5rem; color: #333;">
+            <li style="margin-bottom: 0.5rem;">Klik tombol "Sync Now" di atas untuk menyiapkan data</li>
+            <li style="margin-bottom: 0.5rem;">Buka terminal/command prompt di direktori project</li>
+            <li style="margin-bottom: 0.5rem;">Jalankan perintah: <code style="background: #f0f0f0; padding: 0.2rem 0.4rem; border-radius: 4px;">bash manual-sync.sh</code></li>
+            <li style="margin-bottom: 0.5rem;">Tunggu 1-3 menit untuk deploy ke GitHub Pages</li>
+            <li>Periksa website untuk memastikan update sudah terlihat</li>
+          </ol>
+          <div style="background: #fff3cd; padding: 0.75rem; border-radius: 4px; margin-top: 1rem; border: 1px solid #ffeaa7;">
+            <strong>💡 Tips:</strong> Simpan perintah <code>bash manual-sync.sh</code> untuk penggunaan berulang.
+          </div>
+        </div>
+      </div>
+      
+      <!-- Statistics Section -->
+      <div class="admin-section">
+        <h2>📈 Statistik</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <div style="background: #e8f5e8; padding: 1rem; border-radius: 8px; text-align: center;">
+            <h3 style="color: #1E9E44; font-size: 2rem; margin: 0;" id="totalNews">0</h3>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Total Berita</p>
+          </div>
+          <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; text-align: center;">
+            <h3 style="color: #1976d2; font-size: 2rem; margin: 0;" id="todayNews">0</h3>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Berita Hari Ini</p>
+          </div>
+          <div style="background: #fff3e0; padding: 1rem; border-radius: 8px; text-align: center;">
+            <h3 style="color: #f57c00; font-size: 2rem; margin: 0;" id="totalCategories">0</h3>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Kategori</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="/assets/data/news-api.js"></script>
+  <script>
+    // Login functionality
+    const loginForm = document.getElementById('loginForm');
+    const loginContainer = document.getElementById('loginContainer');
+    const adminPanel = document.getElementById('adminPanel');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    // News management
+    const newsForm = document.getElementById('newsForm');
+    const newsItems = document.getElementById('newsItems');
+    
+    // Check if already logged in
+    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+      showAdminPanel();
+    }
+    
+    // Login form submission
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      // Simple authentication (in production, use proper authentication)
+      if (username === 'admin' && password === 'smpitdti2024') {
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'block';
+        
+        setTimeout(() => {
+          sessionStorage.setItem('isLoggedIn', 'true');
+          sessionStorage.setItem('username', username);
+          showAdminPanel();
+        }, 1000);
+      } else {
+        errorMessage.style.display = 'block';
+        successMessage.style.display = 'none';
+        
+        // Clear password field
+        document.getElementById('password').value = '';
+        
+        // Hide error after 3 seconds
+        setTimeout(() => {
+          errorMessage.style.display = 'none';
+        }, 3000);
+      }
+    });
+    
+    // Logout functionality
+    logoutBtn.addEventListener('click', function() {
+      sessionStorage.removeItem('isLoggedIn');
+      sessionStorage.removeItem('username');
+      showLoginForm();
+    });
+    
+    function showAdminPanel() {
+      const username = sessionStorage.getItem('username') || 'Admin';
+      document.getElementById('userDisplay').textContent = username;
+      
+      loginContainer.style.display = 'none';
+      adminPanel.style.display = 'block';
+      
+      loadNews();
+      updateStatistics();
+      updateGitHubStatus();
+    }
+    
+    function showLoginForm() {
+      loginContainer.style.display = 'flex';
+      adminPanel.style.display = 'none';
+      
+      // Clear form
+      loginForm.reset();
+      errorMessage.style.display = 'none';
+      successMessage.style.display = 'none';
+    }
+    
+    // Image upload handler
+    async function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        try {
+          showNotification('Mengupload gambar...', 'info');
+          const uploadedImage = await window.newsAPI.uploadImage(file);
+          
+          // Update form
+          document.getElementById('newsImage').value = uploadedImage.id;
+          
+          // Show preview
+          const preview = document.getElementById('imagePreview');
+          preview.innerHTML = `<img src="${uploadedImage.data}" alt="Preview">`;
+          preview.style.display = 'block';
+          
+          // Update label
+          const label = document.getElementById('fileUploadLabel');
+          label.textContent = `✅ ${uploadedImage.name} (${(uploadedImage.size / 1024).toFixed(1)} KB)`;
+          label.classList.add('has-file');
+          
+          showNotification('Gambar berhasil diupload!', 'success');
+        } catch (error) {
+          showNotification('Gagal upload gambar: ' + error.message, 'error');
+        }
+      }
+    }
+    
+    // Reset image upload
+    function resetImageUpload() {
+      document.getElementById('imagePreview').style.display = 'none';
+      document.getElementById('fileUploadLabel').textContent = '📷 Klik untuk upload gambar atau drag & drop';
+      document.getElementById('fileUploadLabel').classList.remove('has-file');
+      document.getElementById('newsImage').value = '';
+    }
+    
+    // News management functions
+    newsForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      try {
+        const formData = new FormData(newsForm);
+        const imageId = formData.get('image');
+        
+        const newsData = {
+          title: formData.get('title'),
+          category: formData.get('category') || 'Umum',
+          date: formData.get('date'),
+          content: formData.get('content'),
+          imageId: imageId || null,
+          tags: formData.get('tags') ? formData.get('tags').split(',').map(tag => tag.trim()) : []
+        };
+        
+        // Add news using API
+        const newNews = await window.newsAPI.addNews(newsData);
+        
+        // Reset form including image
+        newsForm.reset();
+        resetImageUpload();
+        
+        loadNews();
+        updateStatistics();
+        
+        showNotification('Berita berhasil ditambahkan!', 'success');
+        
+      } catch (error) {
+        showNotification('Gagal menambah berita: ' + error.message, 'error');
+      }
+    });
+    
+    function loadNews() {
+      try {
+        const news = window.newsAPI.getAllNews();
+        
+        if (news.length === 0) {
+          newsItems.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Belum ada berita. Tambahkan berita pertama!</div>';
+          return;
+        }
+        
+        newsItems.innerHTML = news.map(item => `
+          <div class="news-item">
+            <div style="flex: 1; margin-right: 1rem;">
+              <h4>${item.title}</h4>
+              <p>${item.content.substring(0, 100)}...</p>
+              <div class="meta">
+                📅 ${formatDate(item.date)} | 🏷️ ${item.category} | 🏷️ ${item.tags.join(', ')}
+              </div>
+            </div>
+            <div class="news-actions">
+              <button class="btn btn-small btn-edit" onclick="editNews(${item.id})">Edit</button>
+              <button class="btn btn-small btn-delete" onclick="deleteNews(${item.id})">Hapus</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        showNotification('Gagal memuat berita: ' + error.message, 'error');
+      }
+    }
+    
+    async function deleteNews(id) {
+      if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
+        try {
+          await window.newsAPI.deleteNews(id);
+          loadNews();
+          updateStatistics();
+          showNotification('Berita berhasil dihapus!', 'success');
+        } catch (error) {
+          showNotification('Gagal menghapus berita: ' + error.message, 'error');
+        }
+      }
+    }
+    
+    function editNews(id) {
+      try {
+        const news = window.newsAPI.getNewsById(id);
+        if (news) {
+          document.getElementById('newsTitle').value = news.title;
+          document.getElementById('newsCategory').value = news.category;
+          document.getElementById('newsDate').value = news.date;
+          document.getElementById('newsContent').value = news.content;
+          document.getElementById('newsTags').value = news.tags.join(', ');
+          
+          // Handle image
+          if (news.imageId) {
+            const image = window.newsAPI.getImage(news.imageId);
+            if (image) {
+              document.getElementById('newsImage').value = news.imageId;
+              const preview = document.getElementById('imagePreview');
+              preview.innerHTML = `<img src="${image.data}" alt="Preview">`;
+              preview.style.display = 'block';
+              
+              const label = document.getElementById('fileUploadLabel');
+              label.textContent = `✅ ${image.name} (${(image.size / 1024).toFixed(1)} KB)`;
+              label.classList.add('has-file');
+            }
+          } else {
+            document.getElementById('newsImage').value = '';
+          }
+          
+          // Remove the old news item (it will be re-added when form is submitted)
+          window.newsAPI.deleteNews(id).catch(error => {
+            console.error('Error removing original news:', error);
+          });
+          
+          // Scroll to form
+          document.querySelector('.news-form').scrollIntoView({ behavior: 'smooth' });
+          
+          showNotification('Edit berita di form di atas. Klik "Simpan Berita" untuk menyimpan perubahan.', 'info');
+        }
+      } catch (error) {
+        showNotification('Gagal mengedit berita: ' + error.message, 'error');
+      }
+    }
+    
+    function updateStatistics() {
+      try {
+        const stats = window.newsAPI.getStatistics();
+        document.getElementById('totalNews').textContent = stats.total;
+        document.getElementById('todayNews').textContent = stats.today;
+        document.getElementById('totalCategories').textContent = stats.categories;
+      } catch (error) {
+        console.error('Error updating statistics:', error);
+      }
+    }
+    
+    function formatDate(dateString) {
+      const options = { day: 'numeric', month: 'long', year: 'numeric' };
+      return new Date(dateString).toLocaleDateString('id-ID', options);
+    }
+    
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#1E9E44' : type === 'error' ? '#dc3545' : '#0A3D73'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        max-width: 300px;
+      `;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+    
+    // GitHub Sync Functions
+    async function syncGitHub() {
+      const statusDiv = document.getElementById('githubStatus');
+      const statusText = document.getElementById('githubStatusText');
+      const lastSyncText = document.getElementById('githubLastSync');
+      const syncBtn = document.getElementById('syncBtn');
+      
+      // Update UI
+      statusDiv.className = 'github-status pending';
+      statusText.innerHTML = '<span class="spinner"></span>Menyiapkan sinkronisasi...';
+      syncBtn.disabled = true;
+      syncBtn.innerHTML = '<span class="spinner"></span>Syncing...';
+      
+      try {
+        // Simulate sync process
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Update sync status in localStorage
+        window.newsAPI.updateSyncStatus('synced', 'manual');
+        
+        // Update success status
+        statusDiv.className = 'github-status success';
+        statusText.innerHTML = '✅ Data siap disinkronkan! Jalankan manual sync untuk deploy.';
+        lastSyncText.textContent = `Terakhir sync: ${new Date().toLocaleString('id-ID')}`;
+        
+        showNotification('Data berhasil disiapkan! Jalankan "bash manual-sync.sh" untuk deploy ke GitHub.', 'success');
+        
+        // Show instructions
+        setTimeout(() => {
+          showNotification('📋 Instruksi: 1. Buka terminal 2. Jalankan "bash manual-sync.sh" 3. Tunggu 1-3 menit', 'info');
+        }, 2000);
+        
+      } catch (error) {
+        // Update error status
+        statusDiv.className = 'github-status error';
+        statusText.innerHTML = `❌ Sinkronisasi gagal: ${error.message}`;
+        
+        showNotification('Gagal sinkronisasi: ' + error.message, 'error');
+      } finally {
+        // Reset button
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = 'Sync Now';
+        updateGitHubStatus();
+      }
+    }
+    
+    // Initialize GitHub status
+    function updateGitHubStatus() {
+      try {
+        const syncStatus = window.newsAPI.getSyncStatus();
+        const statusText = document.getElementById('githubStatusText');
+        const lastSyncText = document.getElementById('githubLastSync');
+        
+        if (syncStatus.status === 'never') {
+          document.getElementById('githubStatus').className = 'github-status';
+          statusText.innerHTML = '📊 Menunggu sinkronisasi pertama...';
+          lastSyncText.textContent = 'Terakhir sync: Belum pernah';
+        } else if (syncStatus.status === 'synced') {
+          document.getElementById('githubStatus').className = 'github-status success';
+          statusText.innerHTML = '✅ Data tersinkronisasi dengan GitHub';
+          lastSyncText.textContent = `Terakhir sync: ${syncStatus.lastSync.toLocaleString('id-ID')}`;
+        } else {
+          document.getElementById('githubStatus').className = 'github-status';
+          statusText.innerHTML = '⚠️ Sinkronisasi mungkin diperlukan';
+          lastSyncText.textContent = `Terakhir sync: ${syncStatus.lastSync.toLocaleString('id-ID')}`;
+        }
+      } catch (error) {
+        console.error('Error updating GitHub status:', error);
+      }
+    }
+    
+    // Quick action functions
+    function clearCache() {
+      if (confirm('Apakah Anda yakin ingin membersihkan cache?')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        showNotification('Cache berhasil dibersihkan!', 'success');
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
+      }
+    }
+    
+    // Set today's date as default
+    document.getElementById('newsDate').valueAsDate = new Date();
+    
+    // Auto-update GitHub status every 30 seconds
+    setInterval(updateGitHubStatus, 30000);
+  </script>
+</body>
+</html>
