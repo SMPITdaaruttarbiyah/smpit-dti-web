@@ -1011,6 +1011,11 @@
       
       async updateFile(newsData, message = 'Update berita') {
         try {
+          console.log('🔄 Starting GitHub file update...');
+          console.log('📁 Repository:', `${this.config.owner}/${this.config.repo}`);
+          console.log('📄 File path:', this.config.filePath);
+          console.log('📰 News count:', newsData.length);
+          
           const currentFile = await this.getFile();
           
           const dataToSave = {
@@ -1025,6 +1030,7 @@
             }
           };
           
+          console.log('📦 Preparing data for GitHub...');
           const jsonString = JSON.stringify(dataToSave, null, 2);
           const content = Base64.encode(jsonString);
           
@@ -1036,8 +1042,12 @@
           
           if (currentFile && currentFile.sha) {
             body.sha = currentFile.sha;
+            console.log('🔄 Updating existing file (SHA:', currentFile.sha.substring(0, 7) + '...)');
+          } else {
+            console.log('➕ Creating new file');
           }
           
+          console.log('🚀 Sending request to GitHub API...');
           const response = await fetch(
             `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}`,
             {
@@ -1051,14 +1061,21 @@
             }
           );
           
+          console.log('📡 GitHub API response status:', response.status);
+          
           if (!response.ok) {
             const error = await response.json();
+            console.error('❌ GitHub API error:', error);
             throw new Error(error.message || 'Failed to update file');
           }
           
-          return await response.json();
+          const result = await response.json();
+          console.log('✅ GitHub update successful!');
+          console.log('🔗 Commit URL:', result.commit.html_url);
+          
+          return result;
         } catch (error) {
-          console.error('Update file error:', error);
+          console.error('❌ Update file error:', error);
           throw error;
         }
       }
@@ -1087,12 +1104,14 @@
       
       loadConfig(password) {
         try {
+          console.log('🔍 Loading config with password...');
           const encrypted = localStorage.getItem(this.KEYS.CONFIG);
           if (!encrypted) {
-            console.log('❌ No config found');
+            console.log('❌ No config found in localStorage');
             return null;
           }
           
+          console.log('🔓 Decrypting config...');
           const decrypted = CryptoManager.decrypt(encrypted, password);
           if (!decrypted) {
             console.log('❌ Decryption failed - wrong password');
@@ -1100,7 +1119,11 @@
           }
           
           const config = JSON.parse(decrypted);
-          console.log('✅ Config loaded successfully');
+          console.log('✅ Config loaded successfully:', { 
+            hasToken: !!config.token, 
+            username: config.username, 
+            repo: config.repo 
+          });
           return config;
         } catch (error) {
           console.error('❌ Config load error:', error);
