@@ -1,0 +1,52 @@
+{
+  "name": "smpit-dti-website",
+  "version": "1.0.0",
+  "description": "Website SMPIT Daarut Tarbiyah - High-Tech & High-Touch Islamic Education",
+  "main": "index.js",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "eleventy",
+    "clean": "rimraf _site",
+    "dev": "eleventy --serve --watch",
+    "debug": "DEBUG=* eleventy"
+  },
+  "keywords": [
+    "eleventy",
+    "static-site-generator",
+    "jamstack",
+    "education",
+    "islamic"
+  ],
+  "author": "SMPIT Daarut Tarbiyah",
+  "license": "MIT",
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
+    "html-minifier": "^4.0.0",
+    "markdown-it": "^13.0.2",
+    "markdown-it-anchor": "^8.6.7",
+    "rimraf": "^5.0.5"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.16",
+    "@types/node": "^24.9.2",
+    "@types/react": "^19.2.2",
+    "@types/socket.io": "^3.0.1",
+    "autoprefixer": "^10.4.21",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "gsap": "^3.12.4",
+    "intersection-observer": "^0.12.2",
+    "lucide": "^0.312.0",
+    "next": "^16.0.1",
+    "postcss": "^8.5.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "scrollmagic": "^2.0.8",
+    "socket.io": "^4.8.1",
+    "swiper": "^11.0.5",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.16",
+    "typescript": "^5.9.3"
+  }
+}

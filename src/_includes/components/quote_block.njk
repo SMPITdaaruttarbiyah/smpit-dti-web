@@ -1,0 +1,160 @@
+<section class="content-block">
+    <div class="container">
+        <h2 class="block-title">{{ block.title or "Kutipan Inspiratif" }}</h2>
+        <div class="quote-container" id="quote-container">
+            <div class="quote-loading loading" id="quote-loading">
+                <p>Memuat kutipan...</p>
+            </div>
+            <div class="quote-error" id="quote-error" style="display: none;">
+                <p>Gagal memuat kutipan. Silakan coba lagi.</p>
+            </div>
+            <div id="quote-content" style="display: none;">
+                <div class="quote-text" id="quote-text"></div>
+                <div class="quote-author" id="quote-author"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+(function() {
+    const container = document.getElementById('quote-container');
+    const loading = document.getElementById('quote-loading');
+    const error = document.getElementById('quote-error');
+    const content = document.getElementById('quote-content');
+    const quoteText = document.getElementById('quote-text');
+    const quoteAuthor = document.getElementById('quote-author');
+    
+    // Configuration from block or defaults
+    const config = {
+        keyword: '{{ block.keyword or "ilmu" }}',
+        maxLength: {{ block.max_length or 200 }},
+        refreshInterval: {{ block.refresh_interval or 30000 }}, // 30 seconds default
+        autoRefresh: {{ block.auto_refresh | default(true) | string | lower }}
+    };
+    
+    let refreshTimer;
+    
+    async function fetchQuote() {
+        try {
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            content.style.display = 'none';
+            
+            // Build API URL for Islamic Quotes API
+            let apiUrl = 'https://islamic-quotes-api.vercel.app/quotes';
+            
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                // Filter quotes that contain the keyword
+                const filteredQuotes = data.filter(quote => {
+                    const quoteText = (quote.quote || quote.text || '').toLowerCase();
+                    const quoteAuthor = (quote.author || '').toLowerCase();
+                    return quoteText.includes(config.keyword.toLowerCase()) || 
+                           quoteAuthor.includes(config.keyword.toLowerCase());
+                });
+                
+                // If no quotes found with keyword, use first quote
+                const selectedQuote = filteredQuotes.length > 0 ? 
+                    filteredQuotes[Math.floor(Math.random() * filteredQuotes.length)] : 
+                    data[Math.floor(Math.random() * data.length)];
+                
+                const quoteText = selectedQuote.quote || selectedQuote.text || '';
+                const quoteAuthor = selectedQuote.author || 'Unknown';
+                
+                displayQuote(quoteText, quoteAuthor);
+            } else {
+                throw new Error('No quotes found');
+            }
+            
+        } catch (err) {
+            console.error('Error fetching quote:', err);
+            loading.style.display = 'none';
+            error.style.display = 'block';
+            
+            // Show fallback quote after error
+            setTimeout(() => {
+                displayQuote(
+                    "Menuntut ilmu adalah kewajiban bagi setiap muslim.",
+                    "HR. Ibnu Majah"
+                );
+            }, 2000);
+        }
+    }
+    
+    function displayQuote(text, author) {
+        quoteText.textContent = `"${text}"`;
+        quoteAuthor.textContent = `— ${author}`;
+        
+        loading.style.display = 'none';
+        error.style.display = 'none';
+        content.style.display = 'block';
+        
+        // Add fade-in animation
+        content.style.opacity = '0';
+        content.style.transform = 'translateY(20px)';
+        content.style.transition = 'all 0.5s ease';
+        
+        setTimeout(() => {
+            content.style.opacity = '1';
+            content.style.transform = 'translateY(0)';
+        }, 100);
+    }
+    
+    function startAutoRefresh() {
+        if (config.autoRefresh && config.refreshInterval > 0) {
+            refreshTimer = setInterval(fetchQuote, config.refreshInterval);
+        }
+    }
+    
+    function stopAutoRefresh() {
+        if (refreshTimer) {
+            clearInterval(refreshTimer);
+            refreshTimer = null;
+        }
+    }
+    
+    // Manual refresh button
+    const refreshButton = document.createElement('button');
+    refreshButton.textContent = '🔄 Refresh Kutipan';
+    refreshButton.style.cssText = `
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.3s ease;
+    `;
+    refreshButton.addEventListener('click', () => {
+        stopAutoRefresh();
+        fetchQuote();
+        startAutoRefresh();
+    });
+    refreshButton.addEventListener('mouseenter', () => {
+        refreshButton.style.background = '#157a34';
+    });
+    refreshButton.addEventListener('mouseleave', () => {
+        refreshButton.style.background = 'var(--accent)';
+    });
+    container.appendChild(refreshButton);
+    
+    // Initial fetch
+    fetchQuote();
+    
+    // Start auto-refresh
+    startAutoRefresh();
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', stopAutoRefresh);
+})();
+</script>
