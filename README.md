@@ -1,122 +1,115 @@
-# SMPIT Daarut Tarbiyah Website
+# 🏫 SMPIT DAARUT TARBIYAH INDONESIA
 
-Website resmi SMPIT Daarut Tarbiyah - Menggabungkan teknologi modern dengan nilai-nilai Islami dalam pengalaman pendidikan yang premium.
+> Membangun Peradaban Islam Rahmatan Lil' Aalamiin
 
-## 🚀 Teknologi yang Digunakan
+## 🌐 Website Official
 
-- **Static Site Generator**: Eleventy (11ty)
-- **Template Engine**: Nunjucks
-- **Styling**: CSS3 dengan animasi GSAP
-- **JavaScript**: ES6+ dengan modern libraries
-- **CMS**: Decap CMS untuk konten management
-- **Deployment**: GitHub Pages
+**URL**: https://smpitdaaruttarbiyah.github.io/smpit-dti-web/
 
-## 🎨 Fitur Desain
+## 📱 Admin Panel
 
-### High-Tech & High-Touch Experience
-- Animasi halus dengan GSAP dan ScrollMagic
-- Header sticky dengan efek hover yang elegan
-- Transisi halus antar section
-- Responsive design untuk semua perangkat
-- Optimasi performa untuk mobile
+**URL**: https://smpitdaaruttarbiyah.github.io/smpit-dti-web/admin.html
 
-### Komponen Interaktif
-- **Navigasi**: Header sticky dengan efek hover dan underline animation
-- **Galeri**: Swiper.js dengan efek Cube/Coverflow
-- **Quotes**: Islamic quotes dengan animasi typewriter
-- **Statistik**: Counter animation untuk angka pencapaian
-- **Peta**: Google Maps integration dengan fade-in effect
-- **Footer**: Ikon media sosial dengan bouncing effect
+**Login**: 
+- Username: `admin`
+- Password: `smpitdti2024`
 
-### Skema Warna
-- **Biru Daarut**: #0A3D73 (Primary)
-- **Hijau Pertumbuhan**: #1E9E44 (Secondary)
-- **Putih Murni**: #FFFFFF (Text)
-- **Putih Gading**: #FDFCF9 (Background)
-- **Abu-abu Sejuk**: #F0F4F8 (Section Background)
+## ✨ Features
 
-## 📁 Struktur Proyek
+### 🎓 Main Website
+- ✅ Responsive design untuk semua device
+- ✅ Islamic quotes dengan rotasi otomatis
+- ✅ Dynamic news system dengan API
+- ✅ Beautiful modal untuk detail berita
+- ✅ Smooth animations dan transitions
+- ✅ Mobile-optimized navigation
+
+### 🛠 Admin Panel
+- ✅ Content management system
+- ✅ Create, edit, delete news articles
+- ✅ GitHub synchronization otomatis
+- ✅ Real-time sync status monitoring
+- ✅ Category management (Prestasi, Kegiatan, dll)
+- ✅ Draft/Published status control
+
+### 🔧 Technical Features
+- ✅ RESTful API endpoints
+- ✅ Modern JavaScript (ES6+)
+- ✅ Responsive CSS Grid & Flexbox
+- ✅ Loading states & error handling
+- ✅ Accessibility features
+- ✅ SEO optimized
+
+## 📁 Project Structure
 
 ```
-smpit-dti-website/
+smpit-dti-web/
 ├── src/
-│   ├── _includes/
-│   │   ├── layouts/
-│   │   ├── components/
-│   │   └── partials/
-│   ├── _data/
+│   ├── admin.html              # Admin panel interface
+│   ├── index.html              # Main website
+│   ├── app/
+│   │   └── api/
+│   │       ├── news/           # News management API
+│   │       └── github-sync/    # GitHub sync API
 │   ├── assets/
-│   │   ├── css/
-│   │   ├── js/
-│   │   ├── images/
-│   │   └── fonts/
-│   ├── pages/
-│   ├── posts/
-│   └── galleries/
-├── admin/
-├── _site/
-└── package.json
+│   │   ├── css/                # Stylesheets
+│   │   ├── js/                 # JavaScript files
+│   │   └── images/             # Images & assets
+│   └── _data/                  # Data files
+├── docs/                       # Documentation
+└── README.md                   # This file
 ```
 
-## 🛠️ Development
+## 🚀 Quick Start
 
-### Install Dependencies
-```bash
-npm install
-```
+### For Visitors
+1. Buka: https://smpitdaaruttarbiyah.github.io/smpit-dti-web/
+2. Explore website features
+3. Read latest news & updates
 
-### Development Server
-```bash
-npm run dev
-```
+### For Admins
+1. Buka: https://smpitdaaruttarbiyah.github.io/smpit-dti-web/admin.html
+2. Login dengan credentials di atas
+3. Create/manage news articles
+4. Monitor GitHub sync status
 
-### Production Build
-```bash
-npm run build
-```
+## 🔄 Update Process
 
-### Clean Build
-```bash
-npm run clean
-```
+### Automatic Updates
+- Admin panel → Create news → Auto-sync to GitHub
+- Changes appear live within minutes
 
-## 📝 Content Management
+### Manual Updates
+1. Edit files locally
+2. Commit changes: `git add . && git commit -m "Update message"`
+3. Push to GitHub: `git push origin master`
 
-Website menggunakan Decap CMS untuk memudahkan pengelolaan konten:
+## 🎨 Design System
 
-1. **Blog Posts**: Artikel dan berita terkini
-2. **Galleries**: Foto-foto kegiatan sekolah
-3. **Pages**: Halaman statis (Profil, Visi Misi, dll)
-4. **Settings**: Konfigurasi website
+### Colors
+- **Primary**: #0A3D73 (Biru Daarut)
+- **Secondary**: #1E9E44 (Hijau Pertumbuhan)
+- **White**: #FFFFFF (Putih Murni)
+- **Background**: #FDFCF9 (Putih Gading)
 
-## 🚀 Deployment
+### Typography
+- **Font**: Inter (Google Fonts)
+- **Headings**: 700 weight
+- **Body**: 400 weight
+- **Responsive**: 16px base size
 
-Website di-deploy menggunakan GitHub Pages dengan GitHub Actions:
+## 📞 Support
 
-1. Push code ke repository
-2. GitHub Actions akan otomatis build dan deploy
-3. Website akan tersedia di GitHub Pages
+For technical support or questions:
+- 📧 Email: admin@smpitdaaruttarbiyah.sch.id
+- 🌐 Website: https://smpitdaaruttarbiyah.sch.id
+- 📱 GitHub: https://github.com/SMPITdaaruttarbiyah/smpit-dti-web
 
-## 📱 Responsive Design
+## 📜 License
 
-- **Mobile**: Optimized animasi dan performa
-- **Tablet**: Adaptive layout untuk tablet
-- **Desktop**: Full experience dengan semua animasi
-
-## 🎯 Performance Optimization
-
-- Lazy loading untuk images
-- Optimized animations untuk mobile
-- Minified CSS dan JavaScript
-- Efficient asset loading
-
-## 📞 Kontak
-
-- **Alamat**: Jl. Raya Cibinong No. 123, Bogor
-- **Telepon**: (021) 1234-5678
-- **Email**: info@smpitdaaruttarbiyah.sch.id
-- **Website**: www.smpitdaaruttarbiyah.sch.id
+© 2024 SMPIT DAARUT TARBIYAH INDONESIA
+All rights reserved.
 
 ---
 
-© 2024 SMPIT Daarut Tarbiyah. All rights reserved.Force rebuild
+**Building Islamic Civilization Excellence** 🏛️
