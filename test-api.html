@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Berita</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Test API Berita</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Debug Info</h2>
+            <div id="debug" class="text-sm text-gray-600"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">API Response</h2>
+            <button onclick="testAPI()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">
+                Test API
+            </button>
+            <button onclick="testAPIWithBypass()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4 ml-2">
+                Test API (Bypass Cache)
+            </button>
+            <pre id="result" class="bg-gray-100 p-4 rounded text-sm overflow-auto"></pre>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">News Items</h2>
+            <div id="newsItems" class="grid gap-4"></div>
+        </div>
+    </div>
+
+    <script>
+        function updateDebug(message) {
+            const debug = document.getElementById('debug');
+            debug.innerHTML += `<p>${new Date().toLocaleTimeString()}: ${message}</p>`;
+        }
+
+        async function testAPI() {
+            updateDebug('Testing API...');
+            try {
+                const response = await fetch('/api/news');
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                displayNews(data);
+                updateDebug(`API Success: ${data.totalNews} news items found`);
+            } catch (error) {
+                updateDebug(`API Error: ${error.message}`);
+                document.getElementById('result').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testAPIWithBypass() {
+            updateDebug('Testing API with bypass cache...');
+            try {
+                const response = await fetch('/api/news?bypassCache=true');
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                displayNews(data);
+                updateDebug(`API Bypass Success: ${data.totalNews} news items found`);
+            } catch (error) {
+                updateDebug(`API Bypass Error: ${error.message}`);
+                document.getElementById('result').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function displayNews(data) {
+            const container = document.getElementById('newsItems');
+            if (!data.news || data.news.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No news items found</p>';
+                return;
+            }
+
+            container.innerHTML = data.news.map(item => `
+                <div class="border rounded p-4">
+                    <h3 class="font-semibold">${item.title}</h3>
+                    <p class="text-sm text-gray-600">${item.category} - ${item.date}</p>
+                    <p class="text-sm mt-2">${item.content.substring(0, 100)}...</p>
+                </div>
+            `).join('');
+        }
+
+        // Auto test on load
+        window.onload = () => {
+            updateDebug('Page loaded');
+            testAPI();
+        };
+    </script>
+</body>
+</html>

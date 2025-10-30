@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, Clock, Tag, Newspaper } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Calendar, Clock, Tag, Newspaper, RefreshCw } from 'lucide-react'
 
 interface NewsItem {
   id: string
@@ -36,10 +37,11 @@ export default function NewsSection() {
     fetchNews()
   }, [])
 
-  const fetchNews = async () => {
+  const fetchNews = async (bypassCache = false) => {
     try {
       setLoading(true)
-      const response = await fetch('/api/news')
+      const url = bypassCache ? '/api/news?bypassCache=true' : '/api/news'
+      const response = await fetch(url)
       
       if (!response.ok) {
         throw new Error('Failed to fetch news')
@@ -99,10 +101,17 @@ export default function NewsSection() {
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto">
               <p className="text-red-600">{error}</p>
               <button 
-                onClick={fetchNews}
-                className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                onClick={() => fetchNews(false)}
+                className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 mr-2"
               >
                 Coba Lagi
+              </button>
+              <button 
+                onClick={() => fetchNews(true)}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh Data
               </button>
             </div>
           </div>
@@ -132,7 +141,18 @@ export default function NewsSection() {
     <section className="py-12">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-emerald-800 mb-4">Berita Terkini</h2>
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-emerald-800">Berita Terkini</h2>
+            <Button
+              onClick={() => fetchNews(true)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </Button>
+          </div>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Dapatkan informasi terbaru tentang kegiatan dan prestasi SMPIT DAARUT TARBIYAH INDONESIA
           </p>

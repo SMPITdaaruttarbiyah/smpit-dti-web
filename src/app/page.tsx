@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
   BookOpen, 
-  Mosque, 
+  Building, 
   Users, 
   GraduationCap,
   Heart,
@@ -104,7 +104,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
               <Card className="text-center">
                 <CardContent className="pt-6">
-                  <Mosque className="w-8 h-8 mx-auto mb-2 text-emerald-600" />
+                  <Building className="w-8 h-8 mx-auto mb-2 text-emerald-600" />
                   <h3 className="text-2xl font-bold text-emerald-800">11</h3>
                   <p className="text-sm text-gray-600">Program Kegiatan</p>
                 </CardContent>
@@ -255,7 +255,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               <Card className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
-                  <Mosque className="w-12 h-12 text-emerald-600 mb-4" />
+                  <Building className="w-12 h-12 text-emerald-600 mb-4" />
                   <h3 className="font-semibold text-emerald-800 mb-2">Masjid</h3>
                   <p className="text-sm text-gray-600">
                     Merupakan tempat yang menjiwai setiap aktivitas murid/santri

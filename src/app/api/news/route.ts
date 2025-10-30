@@ -8,8 +8,8 @@ const GITHUB_CONFIG = {
   filePath: 'assets/data/news.json'
 };
 
-// Cache duration in milliseconds (5 minutes)
-const CACHE_DURATION = 5 * 60 * 1000;
+// Cache duration in milliseconds (1 minute for faster updates)
+const CACHE_DURATION = 1 * 60 * 1000;
 let cachedData: any = null;
 let lastFetch = 0;
 
@@ -49,7 +49,20 @@ async function fetchNewsFromGitHub() {
     const content = Buffer.from(data.content, 'base64').toString('utf-8');
     const newsData = JSON.parse(content);
 
-    return newsData;
+    // Transform data to match expected structure
+    const transformedData = {
+      version: newsData.version || '2.0.0',
+      lastUpdated: newsData.lastUpdated || new Date().toISOString(),
+      website: 'SMPIT DAARUT TARBIYAH INDONESIA',
+      totalNews: newsData.news ? newsData.news.length : 0,
+      news: newsData.news || [],
+      metadata: {
+        updatedAt: newsData.lastUpdated || new Date().toISOString(),
+        updatedBy: 'GitHub API'
+      }
+    };
+
+    return transformedData;
   } catch (error) {
     console.error('Error fetching news from GitHub:', error);
     // Return empty data structure on error
@@ -71,18 +84,27 @@ async function fetchNewsFromGitHub() {
 export async function GET(request: NextRequest) {
   try {
     const now = Date.now();
+    const { searchParams } = new URL(request.url);
+    const bypassCache = searchParams.get('bypassCache') === 'true';
     
-    // Check if we have cached data that's still valid
-    if (cachedData && (now - lastFetch) < CACHE_DURATION) {
+    // Check if we have cached data that's still valid (unless bypassing cache)
+    if (!bypassCache && cachedData && (now - lastFetch) < CACHE_DURATION) {
+      console.log('Returning cached data');
       return NextResponse.json(cachedData);
     }
 
+    console.log(bypassCache ? 'Bypassing cache - fetching fresh data' : 'Fetching fresh data from GitHub');
     // Fetch fresh data from GitHub
     const newsData = await fetchNewsFromGitHub();
     
     // Update cache
     cachedData = newsData;
     lastFetch = now;
+
+    console.log('News data loaded:', {
+      totalNews: newsData.totalNews,
+      lastUpdated: newsData.lastUpdated
+    });
 
     return NextResponse.json(newsData);
   } catch (error) {

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Berita - SMPIT DTI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .news-card {
+            transition: transform 0.2s;
+        }
+        .news-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-emerald-800 mb-2">Test Berita SMPIT DTI</h1>
+            <p class="text-gray-600">Memeriksa apakah berita dari GitHub muncul dengan benar</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold">Status API</h2>
+                <button onclick="loadNews()" class="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700">
+                    Refresh Data
+                </button>
+            </div>
+            <div id="status" class="text-sm text-gray-600">Memuat...</div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Debug Info</h2>
+            <div id="debug" class="text-xs text-gray-500 font-mono bg-gray-100 p-4 rounded max-h-40 overflow-y-auto"></div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-emerald-800 mb-4">Berita Terkini</h2>
+            <div id="newsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- News items will be loaded here -->
+            </div>
+        </div>
+
+        <div id="noNews" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+            <div class="text-yellow-600 text-lg">Belum ada berita tersedia</div>
+            <p class="text-yellow-500 text-sm mt-2">Silakan coba refresh atau periksa koneksi</p>
+        </div>
+    </div>
+
+    <script>
+        let debugLog = [];
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.push(`[${timestamp}] ${message}`);
+            updateDebug();
+        }
+
+        function updateDebug() {
+            document.getElementById('debug').innerHTML = debugLog.join('<br>');
+        }
+
+        async function loadNews() {
+            const statusEl = document.getElementById('status');
+            const containerEl = document.getElementById('newsContainer');
+            const noNewsEl = document.getElementById('noNews');
+
+            log('Mulai memuat berita...');
+            statusEl.innerHTML = '<span class="text-blue-600">Memuat data...</span>';
+
+            try {
+                const response = await fetch('/api/news');
+                log(`Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                log(`Data received: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.news && data.news.length > 0) {
+                    log(`Menampilkan ${data.news.length} berita`);
+                    statusEl.innerHTML = `<span class="text-green-600">✓ ${data.news.length} berita dimuat</span>`;
+                    containerEl.innerHTML = data.news.map(item => createNewsCard(item)).join('');
+                    noNewsEl.classList.add('hidden');
+                } else {
+                    log('Tidak ada berita dalam data');
+                    statusEl.innerHTML = '<span class="text-yellow-600">Tidak ada berita</span>';
+                    containerEl.innerHTML = '';
+                    noNewsEl.classList.remove('hidden');
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`);
+                statusEl.innerHTML = `<span class="text-red-600">✗ Error: ${error.message}</span>`;
+                containerEl.innerHTML = '';
+                noNewsEl.classList.remove('hidden');
+            }
+        }
+
+        function createNewsCard(item) {
+            const tags = item.tags ? item.tags.split(',').map(tag => 
+                `<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">${tag.trim()}</span>`
+            ).join(' ') : '';
+
+            return `
+                <div class="news-card bg-white border rounded-lg overflow-hidden shadow-md hover:shadow-lg">
+                    ${item.image ? `
+                        <div class="h-48 bg-gray-200">
+                            <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
+                        </div>
+                    ` : ''}
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                            <span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded">${item.category}</span>
+                            <span>•</span>
+                            <span>${formatDate(item.date)}</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-emerald-800 mb-2">${item.title}</h3>
+                        <p class="text-gray-600 text-sm mb-4">${item.content}</p>
+                        ${tags ? `<div class="flex flex-wrap gap-1">${tags}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        // Load news on page load
+        window.addEventListener('load', () => {
+            log('Page loaded');
+            loadNews();
+        });
+    </script>
+</body>
+</html>
