@@ -1334,7 +1334,7 @@
       console.log('✅ Form validation passed');
       
       publishCallback = async function(password) {
-        console.log('🔐 Executing publish callback');
+        console.log('🔐 Executing publish callback with password:', password ? '***' : 'null');
         
         const publishBtn = document.getElementById('publishBtn');
         publishBtn.disabled = true;
@@ -1426,12 +1426,13 @@
       console.log('🔒 Closing password modal');
       document.getElementById('passwordModal').classList.remove('active');
       document.getElementById('passwordError').classList.remove('show');
-      publishCallback = null;
+      // Don't reset publishCallback here - let it be reset after execution
     }
     
     function closeModalOnBackdrop(event) {
       if (event.target.id === 'passwordModal') {
         closePasswordModal();
+        publishCallback = null; // Reset when cancelled
       }
     }
     
@@ -1466,12 +1467,14 @@
         
         console.log('✅ Password valid');
         errorEl.classList.remove('show');
-        closePasswordModal();
         
         if (publishCallback) {
           console.log('🚀 Executing publish callback');
           publishCallback(password);
+          publishCallback = null; // Reset after execution
         }
+        
+        closePasswordModal();
         
         confirmBtn.disabled = false;
         confirmBtn.innerHTML = '✅ Konfirmasi';
