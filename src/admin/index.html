@@ -71,7 +71,7 @@
       font-weight: 500;
     }
     
-    .form-group input {
+    .form-group input, .form-group textarea {
       width: 100%;
       padding: 0.75rem 1rem;
       border: 2px solid #e1e5e9;
@@ -80,7 +80,7 @@
       transition: border-color 0.3s ease;
     }
     
-    .form-group input:focus {
+    .form-group input:focus, .form-group textarea:focus {
       outline: none;
       border-color: #0A3D73;
     }
@@ -308,6 +308,96 @@
       background: #c82333;
     }
     
+    /* Image Upload Styles */
+    .file-upload {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      width: 100%;
+    }
+    
+    .file-upload input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    .file-upload-label {
+      display: block;
+      padding: 0.75rem 1rem;
+      background: #f8f9fa;
+      border: 2px dashed #0A3D73;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .file-upload-label:hover {
+      background: #e9ecef;
+      border-color: #082b52;
+    }
+    
+    .file-upload-label.has-file {
+      background: #e8f5e8;
+      border-color: #1E9E44;
+      border-style: solid;
+    }
+    
+    .image-preview {
+      margin-top: 1rem;
+      max-width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .image-preview img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #0A3D73;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* GitHub Status */
+    .github-status {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #0A3D73;
+    }
+    
+    .github-status.success {
+      border-left-color: #1E9E44;
+      background: #e8f5e8;
+    }
+    
+    .github-status.error {
+      border-left-color: #dc3545;
+      background: #fee;
+    }
+    
+    .github-status.pending {
+      border-left-color: #ffc107;
+      background: #fff3cd;
+    }
+    
     @media (max-width: 768px) {
       .login-container {
         margin: 1rem;
@@ -415,14 +505,21 @@
             <div class="form-row single">
               <div class="form-group">
                 <label for="newsContent">Konten Berita</label>
-                <textarea id="newsContent" name="content" rows="5" style="width: 100%; padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px; resize: vertical;" required></textarea>
+                <textarea id="newsContent" name="content" rows="5" required></textarea>
               </div>
             </div>
             
             <div class="form-row">
               <div class="form-group">
-                <label for="newsImage">URL Gambar</label>
-                <input type="url" id="newsImage" name="image" placeholder="https://...">
+                <label for="newsImageFile">Upload Gambar</label>
+                <div class="file-upload">
+                  <input type="file" id="newsImageFile" name="imageFile" accept="image/*" onchange="handleImageUpload(event)">
+                  <label for="newsImageFile" class="file-upload-label" id="fileUploadLabel">
+                    📷 Klik untuk upload gambar atau drag & drop
+                  </label>
+                </div>
+                <div id="imagePreview" class="image-preview" style="display: none;"></div>
+                <input type="hidden" id="newsImage" name="image">
               </div>
               <div class="form-group">
                 <label for="newsTags">Tags</label>
@@ -432,7 +529,7 @@
             
             <div class="btn-group">
               <button type="submit" class="btn btn-primary">Simpan Berita</button>
-              <button type="reset" class="btn btn-secondary">Reset Form</button>
+              <button type="reset" class="btn btn-secondary" onclick="resetImageUpload()">Reset Form</button>
             </div>
           </form>
         </div>
@@ -445,14 +542,20 @@
         </div>
       </div>
       
-      <!-- Quick Actions Section -->
+      <!-- GitHub Status -->
       <div class="admin-section">
-        <h2>⚡ Aksi Cepat</h2>
+        <h2>🔄 GitHub Sync Status</h2>
+        <div class="github-status" id="githubStatus">
+          <h4>📊 Status Sinkronisasi</h4>
+          <p id="githubStatusText">Menunggu sinkronisasi...</p>
+          <small id="githubLastSync">Terakhir sync: Belum pernah</small>
+        </div>
+        
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
           <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
             <h3 style="color: #0A3D73; margin-bottom: 1rem;">🔄 Sync GitHub</h3>
             <p style="color: #666; margin-bottom: 1rem;">Sinkronkan perubahan ke repository GitHub</p>
-            <button class="btn btn-primary" onclick="syncGitHub()">Sync Now</button>
+            <button class="btn btn-primary" id="syncBtn" onclick="syncGitHub()">Sync Now</button>
           </div>
           
           <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
@@ -490,6 +593,7 @@
     </div>
   </div>
   
+  <script src="/assets/data/news-api.js"></script>
   <script>
     // Login functionality
     const loginForm = document.getElementById('loginForm');
@@ -502,9 +606,6 @@
     // News management
     const newsForm = document.getElementById('newsForm');
     const newsItems = document.getElementById('newsItems');
-    
-    // Load news from localStorage
-    let newsData = JSON.parse(localStorage.getItem('smpitNews') || '[]');
     
     // Check if already logged in
     if (sessionStorage.getItem('isLoggedIn') === 'true') {
@@ -558,6 +659,7 @@
       
       loadNews();
       updateStatistics();
+      updateGitHubStatus();
     }
     
     function showLoginForm() {
@@ -570,95 +672,169 @@
       successMessage.style.display = 'none';
     }
     
+    // Image upload handler
+    async function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        try {
+          showNotification('Mengupload gambar...', 'info');
+          const uploadedImage = await window.newsAPI.uploadImage(file);
+          
+          // Update form
+          document.getElementById('newsImage').value = uploadedImage.id;
+          
+          // Show preview
+          const preview = document.getElementById('imagePreview');
+          preview.innerHTML = `<img src="${uploadedImage.data}" alt="Preview">`;
+          preview.style.display = 'block';
+          
+          // Update label
+          const label = document.getElementById('fileUploadLabel');
+          label.textContent = `✅ ${uploadedImage.name} (${(uploadedImage.size / 1024).toFixed(1)} KB)`;
+          label.classList.add('has-file');
+          
+          showNotification('Gambar berhasil diupload!', 'success');
+        } catch (error) {
+          showNotification('Gagal upload gambar: ' + error.message, 'error');
+        }
+      }
+    }
+    
+    // Reset image upload
+    function resetImageUpload() {
+      document.getElementById('imagePreview').style.display = 'none';
+      document.getElementById('fileUploadLabel').textContent = '📷 Klik untuk upload gambar atau drag & drop';
+      document.getElementById('fileUploadLabel').classList.remove('has-file');
+      document.getElementById('newsImage').value = '';
+    }
+    
     // News management functions
-    newsForm.addEventListener('submit', function(e) {
+    newsForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      const formData = new FormData(newsForm);
-      const newsItem = {
-        id: Date.now(),
-        title: formData.get('title'),
-        category: formData.get('category') || 'Umum',
-        date: formData.get('date'),
-        content: formData.get('content'),
-        image: formData.get('image') || `https://picsum.photos/seed/${Date.now()}/400/300.jpg`,
-        tags: formData.get('tags') ? formData.get('tags').split(',').map(tag => tag.trim()) : [],
-        createdAt: new Date().toISOString()
-      };
-      
-      newsData.unshift(newsItem);
-      localStorage.setItem('smpitNews', JSON.stringify(newsData));
-      
-      newsForm.reset();
-      loadNews();
-      updateStatistics();
-      
-      // Show success message
-      showNotification('Berita berhasil ditambahkan!', 'success');
+      try {
+        const formData = new FormData(newsForm);
+        const imageId = formData.get('image');
+        
+        const newsData = {
+          title: formData.get('title'),
+          category: formData.get('category') || 'Umum',
+          date: formData.get('date'),
+          content: formData.get('content'),
+          imageId: imageId || null,
+          tags: formData.get('tags') ? formData.get('tags').split(',').map(tag => tag.trim()) : []
+        };
+        
+        // Add news using API
+        const newNews = await window.newsAPI.addNews(newsData);
+        
+        // Reset form including image
+        newsForm.reset();
+        resetImageUpload();
+        
+        loadNews();
+        updateStatistics();
+        
+        showNotification('Berita berhasil ditambahkan!', 'success');
+        
+      } catch (error) {
+        showNotification('Gagal menambah berita: ' + error.message, 'error');
+      }
     });
     
     function loadNews() {
-      if (newsData.length === 0) {
-        newsItems.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Belum ada berita. Tambahkan berita pertama!</div>';
-        return;
-      }
-      
-      newsItems.innerHTML = newsData.map(news => `
-        <div class="news-item">
-          <div>
-            <h4>${news.title}</h4>
-            <p>${news.content.substring(0, 100)}...</p>
-            <div class="meta">
-              📅 ${formatDate(news.date)} | 🏷️ ${news.category} | 🏷️ ${news.tags.join(', ')}
+      try {
+        const news = window.newsAPI.getAllNews();
+        
+        if (news.length === 0) {
+          newsItems.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Belum ada berita. Tambahkan berita pertama!</div>';
+          return;
+        }
+        
+        newsItems.innerHTML = news.map(item => `
+          <div class="news-item">
+            <div style="flex: 1; margin-right: 1rem;">
+              <h4>${item.title}</h4>
+              <p>${item.content.substring(0, 100)}...</p>
+              <div class="meta">
+                📅 ${formatDate(item.date)} | 🏷️ ${item.category} | 🏷️ ${item.tags.join(', ')}
+              </div>
+            </div>
+            <div class="news-actions">
+              <button class="btn btn-small btn-edit" onclick="editNews(${item.id})">Edit</button>
+              <button class="btn btn-small btn-delete" onclick="deleteNews(${item.id})">Hapus</button>
             </div>
           </div>
-          <div class="news-actions">
-            <button class="btn btn-small btn-edit" onclick="editNews(${news.id})">Edit</button>
-            <button class="btn btn-small btn-delete" onclick="deleteNews(${news.id})">Hapus</button>
-          </div>
-        </div>
-      `).join('');
+        `).join('');
+      } catch (error) {
+        showNotification('Gagal memuat berita: ' + error.message, 'error');
+      }
     }
     
-    function deleteNews(id) {
+    async function deleteNews(id) {
       if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
-        newsData = newsData.filter(news => news.id !== id);
-        localStorage.setItem('smpitNews', JSON.stringify(newsData));
-        loadNews();
-        updateStatistics();
-        showNotification('Berita berhasil dihapus!', 'success');
+        try {
+          await window.newsAPI.deleteNews(id);
+          loadNews();
+          updateStatistics();
+          showNotification('Berita berhasil dihapus!', 'success');
+        } catch (error) {
+          showNotification('Gagal menghapus berita: ' + error.message, 'error');
+        }
       }
     }
     
     function editNews(id) {
-      const news = newsData.find(n => n.id === id);
-      if (news) {
-        document.getElementById('newsTitle').value = news.title;
-        document.getElementById('newsCategory').value = news.category;
-        document.getElementById('newsDate').value = news.date;
-        document.getElementById('newsContent').value = news.content;
-        document.getElementById('newsImage').value = news.image;
-        document.getElementById('newsTags').value = news.tags.join(', ');
-        
-        // Remove the old news item
-        newsData = newsData.filter(n => n.id !== id);
-        localStorage.setItem('smpitNews', JSON.stringify(newsData));
-        
-        // Scroll to form
-        document.querySelector('.news-form').scrollIntoView({ behavior: 'smooth' });
-        
-        showNotification('Edit berita di form di atas. Klik "Simpan Berita" untuk menyimpan perubahan.', 'info');
+      try {
+        const news = window.newsAPI.getNewsById(id);
+        if (news) {
+          document.getElementById('newsTitle').value = news.title;
+          document.getElementById('newsCategory').value = news.category;
+          document.getElementById('newsDate').value = news.date;
+          document.getElementById('newsContent').value = news.content;
+          document.getElementById('newsTags').value = news.tags.join(', ');
+          
+          // Handle image
+          if (news.imageId) {
+            const image = window.newsAPI.getImage(news.imageId);
+            if (image) {
+              document.getElementById('newsImage').value = news.imageId;
+              const preview = document.getElementById('imagePreview');
+              preview.innerHTML = `<img src="${image.data}" alt="Preview">`;
+              preview.style.display = 'block';
+              
+              const label = document.getElementById('fileUploadLabel');
+              label.textContent = `✅ ${image.name} (${(image.size / 1024).toFixed(1)} KB)`;
+              label.classList.add('has-file');
+            }
+          } else {
+            document.getElementById('newsImage').value = '';
+          }
+          
+          // Remove the old news item (it will be re-added when form is submitted)
+          window.newsAPI.deleteNews(id).catch(error => {
+            console.error('Error removing original news:', error);
+          });
+          
+          // Scroll to form
+          document.querySelector('.news-form').scrollIntoView({ behavior: 'smooth' });
+          
+          showNotification('Edit berita di form di atas. Klik "Simpan Berita" untuk menyimpan perubahan.', 'info');
+        }
+      } catch (error) {
+        showNotification('Gagal mengedit berita: ' + error.message, 'error');
       }
     }
     
     function updateStatistics() {
-      const today = new Date().toISOString().split('T')[0];
-      const todayNews = newsData.filter(news => news.date === today);
-      const categories = [...new Set(newsData.map(news => news.category))];
-      
-      document.getElementById('totalNews').textContent = newsData.length;
-      document.getElementById('todayNews').textContent = todayNews.length;
-      document.getElementById('totalCategories').textContent = categories.length;
+      try {
+        const stats = window.newsAPI.getStatistics();
+        document.getElementById('totalNews').textContent = stats.total;
+        document.getElementById('todayNews').textContent = stats.today;
+        document.getElementById('totalCategories').textContent = stats.categories;
+      } catch (error) {
+        console.error('Error updating statistics:', error);
+      }
     }
     
     function formatDate(dateString) {
@@ -672,7 +848,7 @@
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? '#1E9E44' : '#0A3D73'};
+        background: ${type === 'success' ? '#1E9E44' : type === 'error' ? '#dc3545' : '#0A3D73'};
         color: white;
         padding: 1rem 1.5rem;
         border-radius: 8px;
@@ -689,11 +865,70 @@
       }, 3000);
     }
     
-    // Quick action functions
-    function syncGitHub() {
-      showNotification('Sync dengan GitHub akan segera hadir!', 'info');
+    // GitHub Sync Functions
+    async function syncGitHub() {
+      const statusDiv = document.getElementById('githubStatus');
+      const statusText = document.getElementById('githubStatusText');
+      const lastSyncText = document.getElementById('githubLastSync');
+      const syncBtn = document.getElementById('syncBtn');
+      
+      // Update UI
+      statusDiv.className = 'github-status pending';
+      statusText.innerHTML = '<span class="spinner"></span>Menyiapkan sinkronisasi...';
+      syncBtn.disabled = true;
+      syncBtn.innerHTML = '<span class="spinner"></span>Syncing...';
+      
+      try {
+        // Use API to sync to GitHub
+        const result = await window.newsAPI.syncToGitHub();
+        
+        // Update success status
+        statusDiv.className = 'github-status success';
+        statusText.innerHTML = '✅ Sinkronisasi berhasil! Data telah disimpan ke GitHub.';
+        lastSyncText.textContent = `Terakhir sync: ${new Date().toLocaleString('id-ID')}`;
+        
+        showNotification('Data berhasil disinkronkan ke GitHub!', 'success');
+        
+      } catch (error) {
+        // Update error status
+        statusDiv.className = 'github-status error';
+        statusText.innerHTML = `❌ Sinkronisasi gagal: ${error.message}`;
+        
+        showNotification('Gagal sinkronisasi ke GitHub: ' + error.message, 'error');
+      } finally {
+        // Reset button
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = 'Sync Now';
+        updateGitHubStatus();
+      }
     }
     
+    // Initialize GitHub status
+    function updateGitHubStatus() {
+      try {
+        const syncStatus = window.newsAPI.getSyncStatus();
+        const statusText = document.getElementById('githubStatusText');
+        const lastSyncText = document.getElementById('githubLastSync');
+        
+        if (syncStatus.status === 'never') {
+          document.getElementById('githubStatus').className = 'github-status';
+          statusText.innerHTML = '📊 Menunggu sinkronisasi pertama...';
+          lastSyncText.textContent = 'Terakhir sync: Belum pernah';
+        } else if (syncStatus.status === 'synced') {
+          document.getElementById('githubStatus').className = 'github-status success';
+          statusText.innerHTML = '✅ Data tersinkronisasi dengan GitHub';
+          lastSyncText.textContent = `Terakhir sync: ${syncStatus.lastSync.toLocaleString('id-ID')}`;
+        } else {
+          document.getElementById('githubStatus').className = 'github-status';
+          statusText.innerHTML = '⚠️ Sinkronisasi mungkin diperlukan';
+          lastSyncText.textContent = `Terakhir sync: ${syncStatus.lastSync.toLocaleString('id-ID')}`;
+        }
+      } catch (error) {
+        console.error('Error updating GitHub status:', error);
+      }
+    }
+    
+    // Quick action functions
     function clearCache() {
       if (confirm('Apakah Anda yakin ingin membersihkan cache?')) {
         localStorage.clear();
@@ -707,6 +942,9 @@
     
     // Set today's date as default
     document.getElementById('newsDate').valueAsDate = new Date();
+    
+    // Auto-update GitHub status every 30 seconds
+    setInterval(updateGitHubStatus, 30000);
   </script>
 </body>
 </html>
