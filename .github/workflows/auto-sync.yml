@@ -5,6 +5,8 @@ on:
     branches: [ main ]
     paths:
       - 'src/admin/index.html'
+  repository_dispatch:
+    types: [news-sync]
   workflow_dispatch:
     inputs:
       sync_type:
@@ -18,12 +20,19 @@ on:
 
 # Set permissions for the workflow
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   sync-news:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     
     steps:
@@ -41,9 +50,6 @@ jobs:
         
     - name: Install dependencies
       run: npm ci
-      
-    - name: Build site
-      run: npm run build
       
     - name: Extract news data
       id: extract-news
@@ -69,12 +75,21 @@ jobs:
           exit 1
         fi
         
-    - name: Update GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/main'
+    - name: Build site
+      run: npm run build
+      
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./_site
+        path: './_site'
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      if: github.ref == 'refs/heads/main'
         
     - name: Create summary
       run: |

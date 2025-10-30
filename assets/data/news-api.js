@@ -12,6 +12,10 @@ class NewsDataExtractor {
       // Read the admin HTML file
       const adminHtml = fs.readFileSync(this.adminHtmlPath, 'utf8');
       
+      // Look for localStorage data in the HTML
+      // This is a simplified approach - in production, you'd connect to a real database
+      const localStorageMatch = adminHtml.match(/localStorage\.setItem\('smpitNews',\s*'([^']+)'\)/);
+      
       let newsData = {
         lastUpdated: new Date().toISOString(),
         syncType: process.env.SYNC_TYPE || 'automatic',
@@ -24,31 +28,23 @@ class NewsDataExtractor {
         }
       };
 
-      // Try to extract news data from localStorage simulation
-      // Since we can't access actual localStorage in Node.js, we'll look for
-      // patterns in the HTML that indicate news data or use a default approach
-      
-      try {
-        // For now, we'll create a default news structure
-        // In a real implementation, you might want to:
-        // 1. Connect to a database
-        // 2. Read from a JSON file that's updated by the admin panel
-        // 3. Use an API endpoint to get the data
-        
-        // Check if there's a news data file from previous syncs
-        const existingDataPath = 'assets/data/news.json';
-        if (fs.existsSync(existingDataPath)) {
-          const existingData = JSON.parse(fs.readFileSync(existingDataPath, 'utf8'));
-          if (existingData.news && existingData.news.length > 0) {
-            newsData = existingData;
-            newsData.lastUpdated = new Date().toISOString();
-            newsData.syncType = process.env.SYNC_TYPE || 'automatic';
-            console.log(`✅ Found existing news data: ${newsData.news.length} items`);
-          }
+      if (localStorageMatch) {
+        try {
+          // Decode the localStorage data
+          const encodedNews = localStorageMatch[1];
+          const decodedNews = decodeURIComponent(encodedNews);
+          newsData.news = JSON.parse(decodedNews);
+          
+          // Calculate statistics
+          newsData.statistics.totalNews = newsData.news.length;
+          newsData.news.forEach(article => {
+            const category = article.category || 'Uncategorized';
+            newsData.statistics.categories[category] = (newsData.statistics.categories[category] || 0) + 1;
+          });
+          
+        } catch (parseError) {
+          console.warn('Could not parse news data from HTML, using empty array');
         }
-        
-      } catch (parseError) {
-        console.warn('Could not parse existing news data, using empty array');
       }
 
       return newsData;
@@ -96,7 +92,6 @@ class NewsDataExtractor {
 
   async extractAndSave() {
     console.log('🚀 Starting news data extraction...');
-    console.log(`📝 Sync type: ${process.env.SYNC_TYPE || 'automatic'}`);
     
     const newsData = this.extractNewsFromHtml();
     const success = this.saveNewsData(newsData);
