@@ -46,7 +46,7 @@ git commit -m "Manual sync: Update news data and build $(date '+%Y-%m-%d %H:%M:%
 
 # Push to GitHub
 echo "🚀 Pushing to GitHub..."
-git push origin main
+git push origin master
 
 if [ $? -eq 0 ]; then
     echo "✅ Sync completed successfully!"
