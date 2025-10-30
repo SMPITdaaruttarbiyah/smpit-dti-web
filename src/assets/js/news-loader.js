@@ -1,337 +1,153 @@
-/**
- * SMPIT DAARUT TARBIYAH INDONESIA - News Loader
- * Memuat berita dari API dan menampilkannya di halaman utama
- */
-
+// Dynamic News Loader for SMPIT DTI
 class NewsLoader {
     constructor() {
-        this.newsContainer = null;
-        this.newsData = [];
+        this.newsContainer = document.querySelector('.news-grid');
+        this.loadingIndicator = this.createLoadingIndicator();
+        this.errorIndicator = this.createErrorIndicator();
         this.init();
     }
 
     init() {
-        // Tunggu DOM siap
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.loadNews());
-        } else {
-            this.loadNews();
-        }
+        this.loadNews();
+        // Auto refresh every 5 minutes
+        setInterval(() => this.loadNews(), 5 * 60 * 1000);
+    }
+
+    createLoadingIndicator() {
+        const loader = document.createElement('div');
+        loader.className = 'news-loading';
+        loader.innerHTML = `
+            <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
+                <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #10b981; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <p style="margin-top: 16px; color: #6b7280;">Memuat berita terbaru...</p>
+            </div>
+            <style>
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        `;
+        return loader;
+    }
+
+    createErrorIndicator() {
+        const error = document.createElement('div');
+        error.className = 'news-error';
+        error.innerHTML = `
+            <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
+                <div style="color: #ef4444; font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                <h3 style="color: #dc2626; margin-bottom: 8px;">Gagal Memuat Berita</h3>
+                <p style="color: #6b7280; margin-bottom: 16px;">Terjadi kesalahan saat mengambil data berita.</p>
+                <button onclick="location.reload()" style="background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Coba Lagi</button>
+            </div>
+        `;
+        return error;
     }
 
     async loadNews() {
-        // Cari container berita
-        this.newsContainer = document.querySelector('.news-grid');
-        
-        if (!this.newsContainer) {
-            console.warn('News container not found');
-            return;
-        }
+        if (!this.newsContainer) return;
+
+        // Show loading
+        this.newsContainer.innerHTML = '';
+        this.newsContainer.appendChild(this.loadingIndicator);
 
         try {
-            // Tampilkan loading state
-            this.showLoadingState();
+            const response = await fetch('https://raw.githubusercontent.com/SMPITdaaruttarbiyah/smpit-dti-web/main/assets/data/news.json');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
 
-            // Ambil data berita dari API
-            const response = await fetch('/api/news');
             const data = await response.json();
-
-            if (data && data.news) {
-                this.newsData = data.news;
-                this.renderNews();
+            
+            if (data.news && data.news.length > 0) {
+                this.displayNews(data.news);
             } else {
-                this.showErrorState();
+                this.displayEmpty();
             }
         } catch (error) {
             console.error('Error loading news:', error);
-            this.showErrorState();
+            this.newsContainer.innerHTML = '';
+            this.newsContainer.appendChild(this.errorIndicator);
         }
     }
 
-    showLoadingState() {
-        this.newsContainer.innerHTML = `
-            <div class="news-loading" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
-                <p>Memuat berita terbaru...</p>
-            </div>
-        `;
-    }
-
-    showErrorState() {
-        this.newsContainer.innerHTML = `
-            <div class="news-error" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                <p>Maaf, terjadi kesalahan saat memuat berita.</p>
-                <button onclick="location.reload()" class="btn" style="margin-top: 15px;">Coba Lagi</button>
-            </div>
-        `;
-    }
-
-    renderNews() {
-        if (this.newsData.length === 0) {
-            this.newsContainer.innerHTML = `
-                <div class="news-empty" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                    <p>Belum ada berita tersedia.</p>
-                </div>
-            `;
-            return;
-        }
-
-        const newsHTML = this.newsData.map((news, index) => {
-            const date = new Date(news.date);
-            const formattedDate = date.toLocaleDateString('id-ID', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-            });
-
-            const categoryColors = {
-                'Pengumuman': '#f59e0b',
-                'Kegiatan': '#3b82f6',
-                'Prestasi': '#10b981',
-                'Akademik': '#8b5cf6',
-                'Umum': '#6b7280'
-            };
-
-            const categoryColor = categoryColors[news.category] || '#6b7280';
-
-            return `
-                <article class="news-card" data-aos="fade-up" data-aos-delay="${(index + 1) * 100}">
-                    <div class="news-image">
-                        ${news.image ? 
-                            `<img src="${news.image}" alt="${news.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/news${news.id}/400/250'">` :
-                            `<img src="https://picsum.photos/seed/news${news.id}/400/250" alt="${news.title}" loading="lazy">`
-                        }
-                        <div class="news-date">${formattedDate}</div>
-                        <div class="news-category" style="background-color: ${categoryColor};">
-                            ${news.category}
-                        </div>
-                    </div>
-                    <div class="news-content">
-                        <h3>${news.title}</h3>
-                        <p>${news.content.substring(0, 120)}...</p>
-                        <div class="news-meta">
-                            <span class="news-author">Admin</span>
-                            <span class="news-status">Published</span>
-                        </div>
-                        <button class="news-link" onclick="newsLoader.showNewsDetail('${news.id}')">
-                            Baca Selengkapnya →
-                        </button>
-                    </div>
-                </article>
-            `;
-        }).join('');
-
-        this.newsContainer.innerHTML = newsHTML;
-
-        // Re-initialize AOS for new elements
-        if (typeof AOS !== 'undefined') {
-            AOS.refresh();
-        }
-    }
-
-    showNewsDetail(newsId) {
-        const news = this.newsData.find(n => n.id === newsId);
-        if (!news) return;
-
-        // Buat modal untuk detail berita
-        const modal = document.createElement('div');
-        modal.className = 'news-modal';
-        modal.innerHTML = `
-            <div class="news-modal-overlay" onclick="this.parentElement.remove()"></div>
-            <div class="news-modal-content">
-                <button class="news-modal-close" onclick="this.closest('.news-modal').remove()">×</button>
-                <div class="news-modal-header">
-                    <h2>${news.title}</h2>
-                    <div class="news-modal-meta">
-                        <span class="news-category" style="background-color: ${this.getCategoryColor(news.category)};">
-                            ${news.category}
-                        </span>
-                        <span class="news-date">${new Date(news.date).toLocaleDateString('id-ID', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                        })}</span>
-                        <span class="news-author">Admin</span>
-                    </div>
-                </div>
-                <div class="news-modal-body">
-                    ${news.image ? `<img src="${news.image}" alt="${news.title}" style="width: 100%; border-radius: 8px; margin-bottom: 20px;">` : ''}
-                    <div class="news-content-full">
-                        ${news.content.split('\n').map(paragraph => `<p>${paragraph}</p>`).join('')}
-                    </div>
-                    ${news.tags ? `
-                        <div class="news-tags" style="margin-top: 20px;">
-                            <strong>Tags:</strong> ${news.tags.split(',').map(tag => 
-                                `<span class="tag" style="background: #e5e7eb; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">${tag.trim()}</span>`
-                            ).join('')}
-                        </div>
-                    ` : ''}
-                </div>
-                <div class="news-modal-footer">
-                    <button class="btn" onclick="this.closest('.news-modal').remove()">Tutup</button>
-                </div>
-            </div>
-        `;
-
-        // Tambahkan style untuk modal
-        if (!document.querySelector('#news-modal-styles')) {
-            const style = document.createElement('style');
-            style.id = 'news-modal-styles';
-            style.textContent = `
-                .news-modal {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    z-index: 9999;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                
-                .news-modal-overlay {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0, 0, 0, 0.5);
-                    backdrop-filter: blur(4px);
-                }
-                
-                .news-modal-content {
-                    position: relative;
-                    background: white;
-                    border-radius: 12px;
-                    max-width: 800px;
-                    max-height: 90vh;
-                    width: 90%;
-                    overflow-y: auto;
-                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-                }
-                
-                .news-modal-close {
-                    position: absolute;
-                    top: 15px;
-                    right: 15px;
-                    background: #f3f4f6;
-                    border: none;
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    cursor: pointer;
-                    font-size: 18px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 1;
-                }
-                
-                .news-modal-close:hover {
-                    background: #e5e7eb;
-                }
-                
-                .news-modal-header {
-                    padding: 30px 30px 20px;
-                    border-bottom: 1px solid #e5e7eb;
-                }
-                
-                .news-modal-header h2 {
-                    margin: 0 0 15px 0;
-                    color: #1f2937;
-                }
-                
-                .news-modal-meta {
-                    display: flex;
-                    gap: 15px;
-                    align-items: center;
-                    flex-wrap: wrap;
-                }
-                
-                .news-modal-body {
-                    padding: 30px;
-                }
-                
-                .news-content-full p {
-                    margin: 0 0 15px 0;
-                    line-height: 1.6;
-                    color: #374151;
-                }
-                
-                .news-modal-footer {
-                    padding: 20px 30px;
-                    border-top: 1px solid #e5e7eb;
-                    text-align: right;
-                }
-                
-                .news-category {
-                    padding: 4px 12px;
-                    border-radius: 20px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    color: white;
-                    text-transform: uppercase;
-                }
-                
-                @media (max-width: 768px) {
-                    .news-modal-content {
-                        width: 95%;
-                        max-height: 95vh;
-                    }
-                    
-                    .news-modal-header,
-                    .news-modal-body,
-                    .news-modal-footer {
-                        padding: 20px;
-                    }
-                    
-                    .news-modal-meta {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 8px;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
-        document.body.appendChild(modal);
+    displayNews(newsItems) {
+        this.newsContainer.innerHTML = '';
         
-        // Prevent body scroll when modal is open
-        document.body.style.overflow = 'hidden';
-        
-        // Restore body scroll when modal is closed
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal || e.target.classList.contains('news-modal-overlay')) {
-                document.body.style.overflow = '';
-            }
+        newsItems.slice(0, 6).forEach((item, index) => {
+            const newsCard = this.createNewsCard(item, index);
+            this.newsContainer.appendChild(newsCard);
         });
     }
 
-    getCategoryColor(category) {
-        const categoryColors = {
-            'Pengumuman': '#f59e0b',
-            'Kegiatan': '#3b82f6',
-            'Prestasi': '#10b981',
-            'Akademik': '#8b5cf6',
-            'Umum': '#6b7280'
-        };
-        return categoryColors[category] || '#6b7280';
+    displayEmpty() {
+        this.newsContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
+                <div style="color: #9ca3af; font-size: 48px; margin-bottom: 16px;">📰</div>
+                <h3 style="color: #6b7280; margin-bottom: 8px;">Belum Ada Berita</h3>
+                <p style="color: #9ca3af;">Belum ada berita tersedia saat ini.</p>
+            </div>
+        `;
     }
 
-    // Method untuk refresh berita
-    async refreshNews() {
-        await this.loadNews();
+    createNewsCard(item, index) {
+        const article = document.createElement('article');
+        article.className = 'news-card';
+        article.setAttribute('data-aos', 'fade-up');
+        article.setAttribute('data-aos-delay', (index + 1) * 100);
+
+        const formattedDate = this.formatDate(item.date);
+        const tags = item.tags ? this.createTags(item.tags) : '';
+
+        article.innerHTML = `
+            <div class="news-image">
+                ${item.image ? 
+                    `<img src="${item.image}" alt="${item.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/smpitdti${item.id}/400/250'">` :
+                    `<img src="https://picsum.photos/seed/smpitdti${item.id}/400/250" alt="${item.title}" loading="lazy">`
+                }
+                <div class="news-date">${formattedDate}</div>
+                ${item.category ? `<div class="news-category">${item.category}</div>` : ''}
+            </div>
+            <div class="news-content">
+                <h3>${item.title}</h3>
+                <p>${item.content}</p>
+                ${tags}
+                <a href="#" class="news-link" onclick="event.preventDefault(); alert('Berita: ${item.title.replace(/'/g, "\\'")}');">Baca Selengkapnya →</a>
+            </div>
+        `;
+
+        return article;
+    }
+
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        return date.toLocaleDateString('id-ID', options);
+    }
+
+    createTags(tagsString) {
+        if (!tagsString) return '';
+        
+        const tags = tagsString.split(',').slice(0, 3); // Max 3 tags
+        return `
+            <div class="news-tags">
+                ${tags.map(tag => `<span class="news-tag">${tag.trim()}</span>`).join('')}
+            </div>
+        `;
     }
 }
 
-// Inisialisasi news loader
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.newsLoader = new NewsLoader();
+    // Check if we're on the news section
+    if (document.querySelector('#news')) {
+        new NewsLoader();
+    }
 });
 
-// Export untuk penggunaan di modul lain
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = NewsLoader;
+// Also initialize when AOS is ready (for dynamic content)
+if (window.AOS) {
+    AOS.refresh();
 }

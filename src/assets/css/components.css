@@ -667,6 +667,75 @@
 }
 
 /* ===================================
+   News Section Styles
+   =================================== */
+
+.news-category {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: var(--hijau-pertumbuhan);
+  color: var(--putih-murni);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(30, 158, 68, 0.3);
+  z-index: 2;
+}
+
+.news-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.news-tag {
+  background: var(--abu-abu-sejuk);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  transition: var(--transition-base);
+}
+
+.news-tag:hover {
+  background: var(--hijau-pertumbuhan);
+  color: var(--putih-murni);
+  transform: translateY(-1px);
+}
+
+/* News Loading State */
+.news-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  grid-column: 1 / -1;
+}
+
+/* News Error State */
+.news-error {
+  grid-column: 1 / -1;
+}
+
+/* Enhanced News Card Hover Effects */
+.news-card:hover .news-category {
+  background: var(--biru-daarut);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.news-card:hover .news-tag {
+  border-color: var(--hijau-pertumbuhan);
+}
+
+/* ===================================
    Print Styles
    =================================== */
 
