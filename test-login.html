@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login - SMPIT DTI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0A3D73 0%, #1E9E44 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .login-header h1 {
+            color: #0A3D73;
+            margin: 0 0 0.5rem 0;
+        }
+        .login-header p {
+            color: #666;
+            margin: 0;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #0A3D73;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0A3D73;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-btn:hover {
+            background: #082b52;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .login-info {
+            background: #e8f5e8;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .admin-panel {
+            display: none;
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Login Form -->
+        <div id="loginSection">
+            <div class="login-header">
+                <h1>🔐 Admin Panel</h1>
+                <p>SMPIT DAARUT TARBIYAH INDONESIA</p>
+            </div>
+            
+            <div class="error-message" id="errorMessage">
+                Username atau password salah!
+            </div>
+            
+            <div class="success-message" id="successMessage">
+                Login berhasil! Mengalihkan...
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+            
+            <div class="login-info">
+                <strong>🔑 Informasi Login:</strong><br><br>
+                Username: <strong>admin</strong><br>
+                Password: <strong>smpitdti2024</strong><br><br>
+                <small>⚠️ Gunakan kredensial di atas untuk mengakses panel admin</small>
+            </div>
+        </div>
+        
+        <!-- Admin Panel -->
+        <div id="adminSection" class="admin-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div>
+                    <h1 style="color: #0A3D73; margin: 0;">🎉 Selamat Datang!</h1>
+                    <p style="color: #666; margin: 0;">Anda berhasil login ke Admin Panel</p>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+            
+            <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #1E9E44;">
+                <h3 style="color: #1E9E44; margin: 0 0 1rem 0;">✅ Login Berhasil!</h3>
+                <p style="margin: 0;">Sekarang Anda dapat mengakses Admin Panel lengkap di:</p>
+                <p style="margin: 1rem 0 0 0;">
+                    <strong>📱 <a href="/admin" target="_blank" style="color: #0A3D73;">/admin</a></strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginSection = document.getElementById('loginSection');
+            const adminSection = document.getElementById('adminSection');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Check if already logged in
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                showAdminPanel();
+            }
+            
+            // Login form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                console.log('Login attempt:', { username, password });
+                
+                // Simple authentication
+                if (username === 'admin' && password === 'smpitdti2024') {
+                    console.log('Login successful!');
+                    errorMessage.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        sessionStorage.setItem('isLoggedIn', 'true');
+                        sessionStorage.setItem('username', username);
+                        showAdminPanel();
+                    }, 1000);
+                } else {
+                    console.log('Login failed!');
+                    errorMessage.style.display = 'block';
+                    successMessage.style.display = 'none';
+                    
+                    // Clear password field
+                    document.getElementById('password').value = '';
+                    
+                    // Hide error after 3 seconds
+                    setTimeout(() => {
+                        errorMessage.style.display = 'none';
+                    }, 3000);
+                }
+            });
+            
+            function showAdminPanel() {
+                loginSection.style.display = 'none';
+                adminSection.style.display = 'block';
+            }
+            
+            window.logout = function() {
+                sessionStorage.removeItem('isLoggedIn');
+                sessionStorage.removeItem('username');
+                loginSection.style.display = 'block';
+                adminSection.style.display = 'none';
+                loginForm.reset();
+            };
+        });
+    </script>
+</body>
+</html>
