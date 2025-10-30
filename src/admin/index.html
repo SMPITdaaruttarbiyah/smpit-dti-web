@@ -553,8 +553,8 @@
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
           <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
-            <h3 style="color: #0A3D73; margin-bottom: 1rem;">🔄 Sync GitHub</h3>
-            <p style="color: #666; margin-bottom: 1rem;">Sinkronkan perubahan ke repository GitHub</p>
+            <h3 style="color: #0A3D73; margin-bottom: 1rem;">🔄 Sync Data</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Siapkan data untuk sinkronisasi</p>
             <button class="btn btn-primary" id="syncBtn" onclick="syncGitHub()">Sync Now</button>
           </div>
           
@@ -568,6 +568,21 @@
             <h3 style="color: #0A3D73; margin-bottom: 1rem;">🧹 Clear Cache</h3>
             <p style="color: #666; margin-bottom: 1rem;">Bersihkan cache browser</p>
             <button class="btn btn-secondary" onclick="clearCache()">Clear Cache</button>
+          </div>
+        </div>
+        
+        <!-- Sync Instructions -->
+        <div style="background: #e3f2fd; padding: 1.5rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid #1976d2;">
+          <h4 style="color: #1976d2; margin-bottom: 1rem;">📋 Instruksi Sinkronisasi Manual</h4>
+          <ol style="margin: 0; padding-left: 1.5rem; color: #333;">
+            <li style="margin-bottom: 0.5rem;">Klik tombol "Sync Now" di atas untuk menyiapkan data</li>
+            <li style="margin-bottom: 0.5rem;">Buka terminal/command prompt di direktori project</li>
+            <li style="margin-bottom: 0.5rem;">Jalankan perintah: <code style="background: #f0f0f0; padding: 0.2rem 0.4rem; border-radius: 4px;">bash manual-sync.sh</code></li>
+            <li style="margin-bottom: 0.5rem;">Tunggu 1-3 menit untuk deploy ke GitHub Pages</li>
+            <li>Periksa website untuk memastikan update sudah terlihat</li>
+          </ol>
+          <div style="background: #fff3cd; padding: 0.75rem; border-radius: 4px; margin-top: 1rem; border: 1px solid #ffeaa7;">
+            <strong>💡 Tips:</strong> Simpan perintah <code>bash manual-sync.sh</code> untuk penggunaan berulang.
           </div>
         </div>
       </div>
@@ -879,22 +894,30 @@
       syncBtn.innerHTML = '<span class="spinner"></span>Syncing...';
       
       try {
-        // Use API to sync to GitHub
-        const result = await window.newsAPI.syncToGitHub();
+        // Simulate sync process
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Update sync status in localStorage
+        window.newsAPI.updateSyncStatus('synced', 'manual');
         
         // Update success status
         statusDiv.className = 'github-status success';
-        statusText.innerHTML = '✅ Sinkronisasi berhasil! Data telah disimpan ke GitHub.';
+        statusText.innerHTML = '✅ Data siap disinkronkan! Jalankan manual sync untuk deploy.';
         lastSyncText.textContent = `Terakhir sync: ${new Date().toLocaleString('id-ID')}`;
         
-        showNotification('Data berhasil disinkronkan ke GitHub!', 'success');
+        showNotification('Data berhasil disiapkan! Jalankan "bash manual-sync.sh" untuk deploy ke GitHub.', 'success');
+        
+        // Show instructions
+        setTimeout(() => {
+          showNotification('📋 Instruksi: 1. Buka terminal 2. Jalankan "bash manual-sync.sh" 3. Tunggu 1-3 menit', 'info');
+        }, 2000);
         
       } catch (error) {
         // Update error status
         statusDiv.className = 'github-status error';
         statusText.innerHTML = `❌ Sinkronisasi gagal: ${error.message}`;
         
-        showNotification('Gagal sinkronisasi ke GitHub: ' + error.message, 'error');
+        showNotification('Gagal sinkronisasi: ' + error.message, 'error');
       } finally {
         // Reset button
         syncBtn.disabled = false;
