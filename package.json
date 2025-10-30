@@ -4,16 +4,15 @@
   "description": "Website SMPIT Daarut Tarbiyah - High-Tech & High-Touch Islamic Education",
   "main": "index.js",
   "scripts": {
-    "start": "eleventy --serve",
-    "build": "eleventy",
-    "clean": "rimraf _site",
-    "dev": "eleventy --serve --watch",
-    "debug": "DEBUG=* eleventy"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "keywords": [
-    "eleventy",
-    "static-site-generator",
-    "jamstack",
+    "nextjs",
+    "react",
+    "typescript",
     "education",
     "islamic"
   ],
