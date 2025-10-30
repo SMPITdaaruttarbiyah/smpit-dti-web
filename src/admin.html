@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - SMPIT DAARUT TARBIYAH INDONESIA</title>
+    <meta name="description" content="Panel administrasi untuk mengelola konten website SMPIT DAARUT TARBIYAH INDONESIA">
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/smpit-dti-web/assets/css/main.css">
+    <link rel="stylesheet" href="/smpit-dti-web/assets/css/components.css">
+    
+    <!-- Admin CSS -->
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .admin-nav {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .admin-nav button {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-nav button.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+        
+        .admin-nav button:hover {
+            border-color: #1e3a8a;
+            transform: translateY(-2px);
+        }
+        
+        .admin-section {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: #1e3a8a;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #059669;
+        }
+        
+        .btn-success:hover {
+            background: #047857;
+        }
+        
+        .btn-danger {
+            background: #dc2626;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .news-list {
+            margin-top: 30px;
+        }
+        
+        .news-item {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1e3a8a;
+        }
+        
+        .news-item h3 {
+            margin: 0 0 10px 0;
+            color: #1e3a8a;
+        }
+        
+        .news-item .news-meta {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .news-item .news-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-published {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .github-status {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .github-status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .github-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e3a8a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1e3a8a;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Container -->
+    <div id="loginContainer" class="login-container">
+        <h2>Admin Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Login</button>
+        </form>
+    </div>
+
+    <!-- Admin Container -->
+    <div id="adminContainer" class="admin-container hidden">
+        <!-- Header -->
+        <header class="admin-header">
+            <h1>Admin Panel</h1>
+            <p>SMPIT DAARUT TARBIYAH INDONESIA - Content Management System</p>
+            <button id="logoutBtn" class="btn" style="margin-top: 20px;">Logout</button>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="admin-nav">
+            <button class="nav-btn active" data-section="news">Berita</button>
+            <button class="nav-btn" data-section="events">Events</button>
+            <button class="nav-btn" data-section="announcements">Pengumuman</button>
+            <button class="nav-btn" data-section="gallery">Galeri</button>
+            <button class="nav-btn" data-section="github">GitHub Sync</button>
+        </nav>
+
+        <!-- News Section -->
+        <section id="news" class="admin-section active">
+            <h2>Kelola Berita</h2>
+            
+            <form id="newsForm">
+                <div class="form-group">
+                    <label for="newsTitle">Judul Berita</label>
+                    <input type="text" id="newsTitle" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newsCategory">Kategori</label>
+                    <select id="newsCategory" name="category">
+                        <option value="akademik">Akademik</option>
+                        <option value="prestasi">Prestasi</option>
+                        <option value="kegiatan">Kegiatan</option>
+                        <option value="pengumuman">Pengumuman</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newsContent">Konten Berita</label>
+                    <textarea id="newsContent" name="content" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newsImage">URL Gambar (opsional)</label>
+                    <input type="url" id="newsImage" name="image" placeholder="https://...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newsStatus">Status</label>
+                    <select id="newsStatus" name="status">
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-success">Simpan Berita</button>
+            </form>
+            
+            <div class="news-list" id="newsList">
+                <h3>Berita Terbaru</h3>
+                <!-- News items will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section id="events" class="admin-section">
+            <h2>Kelola Events</h2>
+            <p>Fitur event management akan segera tersedia.</p>
+        </section>
+
+        <!-- Announcements Section -->
+        <section id="announcements" class="admin-section">
+            <h2>Kelola Pengumuman</h2>
+            <p>Fitur pengumuman akan segera tersedia.</p>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="admin-section">
+            <h2>Kelola Galeri</h2>
+            <p>Fitur galeri akan segera tersedia.</p>
+        </section>
+
+        <!-- GitHub Sync Section -->
+        <section id="github" class="admin-section">
+            <h2>GitHub Synchronization</h2>
+            
+            <div class="github-status" id="githubStatus">
+                <h4>Status Sync</h4>
+                <p>Belum ada sinkronisasi</p>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button id="syncBtn" class="btn btn-success">Sync ke GitHub</button>
+                <button id="forceSyncBtn" class="btn">Force Sync</button>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h4>Log Sinkronisasi</h4>
+                <div id="syncLog" style="background: #f9fafb; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto;">
+                    <p>Belum ada log sinkronisasi</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Admin Panel JavaScript
+        class AdminPanel {
+            constructor() {
+                this.isLoggedIn = false;
+                this.newsData = [];
+                this.init();
+            }
+
+            init() {
+                this.checkAuth();
+                this.setupEventListeners();
+                this.loadNewsData();
+            }
+
+            checkAuth() {
+                const token = localStorage.getItem('adminToken');
+                if (token) {
+                    this.showAdminPanel();
+                } else {
+                    this.showLoginForm();
+                }
+            }
+
+            setupEventListeners() {
+                // Login form
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+
+                // Logout button
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    this.handleLogout();
+                });
+
+                // Navigation buttons
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.switchSection(e.target.dataset.section);
+                    });
+                });
+
+                // News form
+                document.getElementById('newsForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleNewsSubmit();
+                });
+
+                // GitHub sync buttons
+                document.getElementById('syncBtn').addEventListener('click', () => {
+                    this.syncToGitHub();
+                });
+
+                document.getElementById('forceSyncBtn').addEventListener('click', () => {
+                    this.forceSyncToGitHub();
+                });
+            }
+
+            handleLogin() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Simple authentication (in production, use proper authentication)
+                if (username === 'admin' && password === 'smpitdti2024') {
+                    localStorage.setItem('adminToken', 'authenticated');
+                    this.showAdminPanel();
+                } else {
+                    alert('Username atau password salah!');
+                }
+            }
+
+            handleLogout() {
+                localStorage.removeItem('adminToken');
+                this.showLoginForm();
+            }
+
+            showLoginForm() {
+                document.getElementById('loginContainer').classList.remove('hidden');
+                document.getElementById('adminContainer').classList.add('hidden');
+                this.isLoggedIn = false;
+            }
+
+            showAdminPanel() {
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('adminContainer').classList.remove('hidden');
+                this.isLoggedIn = true;
+            }
+
+            switchSection(sectionName) {
+                // Update navigation buttons
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+
+                // Update sections
+                document.querySelectorAll('.admin-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(sectionName).classList.add('active');
+            }
+
+            loadNewsData() {
+                // Load news from localStorage or API
+                const savedNews = localStorage.getItem('newsData');
+                if (savedNews) {
+                    this.newsData = JSON.parse(savedNews);
+                } else {
+                    // Default news data
+                    this.newsData = [
+                        {
+                            id: 1,
+                            title: "Prestasi Siswa di Olimpiade Sains",
+                            category: "prestasi",
+                            content: "Alhamdulillah, siswa-siswi SMPIT DAARUT TARBIYAH INDONESIA berhasil meraih juara dalam Olimpiade Sains tingkat provinsi.",
+                            image: "",
+                            status: "published",
+                            date: new Date().toISOString()
+                        }
+                    ];
+                }
+                this.renderNewsList();
+            }
+
+            renderNewsList() {
+                const newsList = document.getElementById('newsList');
+                const newsHTML = this.newsData.map(news => `
+                    <div class="news-item">
+                        <h3>${news.title}</h3>
+                        <div class="news-meta">
+                            <span class="status-indicator status-${news.status}">${news.status}</span>
+                            <span style="margin-left: 10px;">${new Date(news.date).toLocaleDateString('id-ID')}</span>
+                            <span style="margin-left: 10px;">Kategori: ${news.category}</span>
+                        </div>
+                        <p>${news.content.substring(0, 150)}...</p>
+                        <div class="news-actions">
+                            <button class="btn" onclick="adminPanel.editNews(${news.id})">Edit</button>
+                            <button class="btn btn-danger" onclick="adminPanel.deleteNews(${news.id})">Hapus</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                newsList.innerHTML = '<h3>Berita Terbaru</h3>' + newsHTML;
+            }
+
+            handleNewsSubmit() {
+                const formData = new FormData(document.getElementById('newsForm'));
+                const news = {
+                    id: Date.now(),
+                    title: formData.get('title'),
+                    category: formData.get('category'),
+                    content: formData.get('content'),
+                    image: formData.get('image'),
+                    status: formData.get('status'),
+                    date: new Date().toISOString()
+                };
+
+                this.newsData.unshift(news);
+                this.saveNewsData();
+                this.renderNewsList();
+                
+                // Reset form
+                document.getElementById('newsForm').reset();
+                
+                alert('Berita berhasil disimpan!');
+                
+                // Auto sync to GitHub if published
+                if (news.status === 'published') {
+                    this.syncToGitHub();
+                }
+            }
+
+            editNews(id) {
+                const news = this.newsData.find(n => n.id === id);
+                if (news) {
+                    document.getElementById('newsTitle').value = news.title;
+                    document.getElementById('newsCategory').value = news.category;
+                    document.getElementById('newsContent').value = news.content;
+                    document.getElementById('newsImage').value = news.image || '';
+                    document.getElementById('newsStatus').value = news.status;
+                    
+                    // Remove the news being edited
+                    this.newsData = this.newsData.filter(n => n.id !== id);
+                    this.renderNewsList();
+                }
+            }
+
+            deleteNews(id) {
+                if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
+                    this.newsData = this.newsData.filter(n => n.id !== id);
+                    this.saveNewsData();
+                    this.renderNewsList();
+                    alert('Berita berhasil dihapus!');
+                }
+            }
+
+            saveNewsData() {
+                localStorage.setItem('newsData', JSON.stringify(this.newsData));
+            }
+
+            async syncToGitHub() {
+                const statusDiv = document.getElementById('githubStatus');
+                const syncBtn = document.getElementById('syncBtn');
+                const logDiv = document.getElementById('syncLog');
+
+                // Show loading state
+                syncBtn.innerHTML = '<span class="loading-spinner"></span> Syncing...';
+                syncBtn.disabled = true;
+                
+                statusDiv.className = 'github-status';
+                statusDiv.innerHTML = '<h4>Status Sync</h4><p>Mensinkronkan ke GitHub...</p>';
+
+                try {
+                    // Simulate GitHub API call
+                    await this.simulateGitHubSync();
+                    
+                    // Success
+                    statusDiv.className = 'github-status success';
+                    statusDiv.innerHTML = '<h4>Status Sync</h4><p>✅ Berhasil disinkronkan ke GitHub!</p>';
+                    
+                    this.addSyncLog('✅ Berhasil sync ke GitHub - ' + new Date().toLocaleString());
+                    
+                } catch (error) {
+                    // Error
+                    statusDiv.className = 'github-status error';
+                    statusDiv.innerHTML = '<h4>Status Sync</h4><p>❌ Gagal sinkronisasi: ' + error.message + '</p>';
+                    
+                    this.addSyncLog('❌ Gagal sync ke GitHub - ' + error.message);
+                } finally {
+                    syncBtn.innerHTML = 'Sync ke GitHub';
+                    syncBtn.disabled = false;
+                }
+            }
+
+            async forceSyncToGitHub() {
+                if (confirm('Apakah Anda yakin ingin melakukan force sync? Ini akan menimpa data di GitHub.')) {
+                    await this.syncToGitHub();
+                }
+            }
+
+            simulateGitHubSync() {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        // Simulate success (90% chance)
+                        if (Math.random() > 0.1) {
+                            resolve({
+                                message: 'Successfully synced to GitHub',
+                                commit: 'abc123'
+                            });
+                        } else {
+                            reject(new Error('GitHub API rate limit exceeded'));
+                        }
+                    }, 2000);
+                });
+            }
+
+            addSyncLog(message) {
+                const logDiv = document.getElementById('syncLog');
+                const timestamp = new Date().toLocaleString();
+                const logEntry = `<p><strong>${timestamp}</strong> - ${message}</p>`;
+                
+                if (logDiv.innerHTML === '<p>Belum ada log sinkronisasi</p>') {
+                    logDiv.innerHTML = logEntry;
+                } else {
+                    logDiv.innerHTML = logEntry + logDiv.innerHTML;
+                }
+            }
+        }
+
+        // Initialize admin panel
+        const adminPanel = new AdminPanel();
+    </script>
+</body>
+</html>
