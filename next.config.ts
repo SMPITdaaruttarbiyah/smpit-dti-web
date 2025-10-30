@@ -10,13 +10,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   turbopack: {},
-  output: 'export',
-  trailingSlash: true,
-  images: {
-    unoptimized: true,
-  },
-  basePath: '/smpit-dti-web',
-  assetPrefix: '/smpit-dti-web',
 };
 
 export default nextConfig;
