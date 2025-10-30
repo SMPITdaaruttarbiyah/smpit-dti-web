@@ -445,7 +445,7 @@
     <form id="loginForm">
       <div class="form-group">
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
+        <input type="text" id="username" name="username" autocomplete="username" required>
       </div>
       
       <div class="form-group">
@@ -610,364 +610,407 @@
   
   <script src="/assets/data/news-api.js"></script>
   <script>
-    // Login functionality
-    const loginForm = document.getElementById('loginForm');
-    const loginContainer = document.getElementById('loginContainer');
-    const adminPanel = document.getElementById('adminPanel');
-    const errorMessage = document.getElementById('errorMessage');
-    const successMessage = document.getElementById('successMessage');
-    const logoutBtn = document.getElementById('logoutBtn');
-    
-    // News management
-    const newsForm = document.getElementById('newsForm');
-    const newsItems = document.getElementById('newsItems');
-    
-    // Check if already logged in
-    if (sessionStorage.getItem('isLoggedIn') === 'true') {
-      showAdminPanel();
-    }
-    
-    // Login form submission
-    loginForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      
-      // Simple authentication (in production, use proper authentication)
-      if (username === 'admin' && password === 'smpitdti2024') {
-        errorMessage.style.display = 'none';
-        successMessage.style.display = 'block';
+    // Wait for newsAPI to be available
+    function waitForNewsAPI() {
+      return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const maxAttempts = 50;
         
-        setTimeout(() => {
-          sessionStorage.setItem('isLoggedIn', 'true');
-          sessionStorage.setItem('username', username);
-          showAdminPanel();
-        }, 1000);
-      } else {
-        errorMessage.style.display = 'block';
-        successMessage.style.display = 'none';
-        
-        // Clear password field
-        document.getElementById('password').value = '';
-        
-        // Hide error after 3 seconds
-        setTimeout(() => {
-          errorMessage.style.display = 'none';
-        }, 3000);
-      }
-    });
-    
-    // Logout functionality
-    logoutBtn.addEventListener('click', function() {
-      sessionStorage.removeItem('isLoggedIn');
-      sessionStorage.removeItem('username');
-      showLoginForm();
-    });
-    
-    function showAdminPanel() {
-      const username = sessionStorage.getItem('username') || 'Admin';
-      document.getElementById('userDisplay').textContent = username;
-      
-      loginContainer.style.display = 'none';
-      adminPanel.style.display = 'block';
-      
-      loadNews();
-      updateStatistics();
-      updateGitHubStatus();
-    }
-    
-    function showLoginForm() {
-      loginContainer.style.display = 'flex';
-      adminPanel.style.display = 'none';
-      
-      // Clear form
-      loginForm.reset();
-      errorMessage.style.display = 'none';
-      successMessage.style.display = 'none';
-    }
-    
-    // Image upload handler
-    async function handleImageUpload(event) {
-      const file = event.target.files[0];
-      if (file && file.type.startsWith('image/')) {
-        try {
-          showNotification('Mengupload gambar...', 'info');
-          const uploadedImage = await window.newsAPI.uploadImage(file);
-          
-          // Update form
-          document.getElementById('newsImage').value = uploadedImage.id;
-          
-          // Show preview
-          const preview = document.getElementById('imagePreview');
-          preview.innerHTML = `<img src="${uploadedImage.data}" alt="Preview">`;
-          preview.style.display = 'block';
-          
-          // Update label
-          const label = document.getElementById('fileUploadLabel');
-          label.textContent = `✅ ${uploadedImage.name} (${(uploadedImage.size / 1024).toFixed(1)} KB)`;
-          label.classList.add('has-file');
-          
-          showNotification('Gambar berhasil diupload!', 'success');
-        } catch (error) {
-          showNotification('Gagal upload gambar: ' + error.message, 'error');
+        function checkAPI() {
+          attempts++;
+          if (window.newsAPI) {
+            console.log('✅ News API loaded successfully');
+            resolve();
+          } else if (attempts < maxAttempts) {
+            console.log(`⏳ Waiting for News API... (${attempts}/${maxAttempts})`);
+            setTimeout(checkAPI, 100);
+          } else {
+            console.error('❌ News API failed to load');
+            reject(new Error('News API failed to load'));
+          }
         }
-      }
+        
+        checkAPI();
+      });
     }
     
-    // Reset image upload
-    function resetImageUpload() {
-      document.getElementById('imagePreview').style.display = 'none';
-      document.getElementById('fileUploadLabel').textContent = '📷 Klik untuk upload gambar atau drag & drop';
-      document.getElementById('fileUploadLabel').classList.remove('has-file');
-      document.getElementById('newsImage').value = '';
-    }
+    // Initialize after API is ready
+    waitForNewsAPI().then(() => {
+      initializeApp();
+    }).catch(error => {
+      console.error('Application initialization failed:', error);
+      // Show error message to user
+      document.body.innerHTML += `
+        <div style="position: fixed; top: 0; left: 0; right: 0; background: #dc3545; color: white; padding: 1rem; text-align: center; z-index: 9999;">
+          ❌ Failed to load application. Please refresh the page.
+        </div>
+      `;
+    });
     
-    // News management functions
-    newsForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
+    function initializeApp() {
+      console.log('🚀 Initializing SMPIT DTI Admin Panel...');
       
-      try {
-        const formData = new FormData(newsForm);
-        const imageId = formData.get('image');
+      // Login functionality
+      const loginForm = document.getElementById('loginForm');
+      const loginContainer = document.getElementById('loginContainer');
+      const adminPanel = document.getElementById('adminPanel');
+      const errorMessage = document.getElementById('errorMessage');
+      const successMessage = document.getElementById('successMessage');
+      const logoutBtn = document.getElementById('logoutBtn');
+      
+      // News management
+      const newsForm = document.getElementById('newsForm');
+      const newsItems = document.getElementById('newsItems');
+      
+      // Check if already logged in
+      if (sessionStorage.getItem('isLoggedIn') === 'true') {
+        showAdminPanel();
+      }
+    
+      // Login form submission
+      loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        const newsData = {
-          title: formData.get('title'),
-          category: formData.get('category') || 'Umum',
-          date: formData.get('date'),
-          content: formData.get('content'),
-          imageId: imageId || null,
-          tags: formData.get('tags') ? formData.get('tags').split(',').map(tag => tag.trim()) : []
-        };
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
         
-        // Add news using API
-        const newNews = await window.newsAPI.addNews(newsData);
+        // Simple authentication (in production, use proper authentication)
+        if (username === 'admin' && password === 'smpitdti2024') {
+          errorMessage.style.display = 'none';
+          successMessage.style.display = 'block';
+          
+          setTimeout(() => {
+            sessionStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('username', username);
+            showAdminPanel();
+          }, 1000);
+        } else {
+          errorMessage.style.display = 'block';
+          successMessage.style.display = 'none';
+          
+          // Clear password field
+          document.getElementById('password').value = '';
+          
+          // Hide error after 3 seconds
+          setTimeout(() => {
+            errorMessage.style.display = 'none';
+          }, 3000);
+        }
+      });
+      
+      // Logout functionality
+      logoutBtn.addEventListener('click', function() {
+        sessionStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('username');
+        showLoginForm();
+      });
+      
+      function showAdminPanel() {
+        const username = sessionStorage.getItem('username') || 'Admin';
+        document.getElementById('userDisplay').textContent = username;
         
-        // Reset form including image
-        newsForm.reset();
-        resetImageUpload();
+        loginContainer.style.display = 'none';
+        adminPanel.style.display = 'block';
         
         loadNews();
         updateStatistics();
-        
-        showNotification('Berita berhasil ditambahkan!', 'success');
-        
-      } catch (error) {
-        showNotification('Gagal menambah berita: ' + error.message, 'error');
-      }
-    });
-    
-    function loadNews() {
-      try {
-        const news = window.newsAPI.getAllNews();
-        
-        if (news.length === 0) {
-          newsItems.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Belum ada berita. Tambahkan berita pertama!</div>';
-          return;
-        }
-        
-        newsItems.innerHTML = news.map(item => `
-          <div class="news-item">
-            <div style="flex: 1; margin-right: 1rem;">
-              <h4>${item.title}</h4>
-              <p>${item.content.substring(0, 100)}...</p>
-              <div class="meta">
-                📅 ${formatDate(item.date)} | 🏷️ ${item.category} | 🏷️ ${item.tags.join(', ')}
-              </div>
-            </div>
-            <div class="news-actions">
-              <button class="btn btn-small btn-edit" onclick="editNews(${item.id})">Edit</button>
-              <button class="btn btn-small btn-delete" onclick="deleteNews(${item.id})">Hapus</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (error) {
-        showNotification('Gagal memuat berita: ' + error.message, 'error');
-      }
-    }
-    
-    async function deleteNews(id) {
-      if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
-        try {
-          await window.newsAPI.deleteNews(id);
-          loadNews();
-          updateStatistics();
-          showNotification('Berita berhasil dihapus!', 'success');
-        } catch (error) {
-          showNotification('Gagal menghapus berita: ' + error.message, 'error');
-        }
-      }
-    }
-    
-    function editNews(id) {
-      try {
-        const news = window.newsAPI.getNewsById(id);
-        if (news) {
-          document.getElementById('newsTitle').value = news.title;
-          document.getElementById('newsCategory').value = news.category;
-          document.getElementById('newsDate').value = news.date;
-          document.getElementById('newsContent').value = news.content;
-          document.getElementById('newsTags').value = news.tags.join(', ');
-          
-          // Handle image
-          if (news.imageId) {
-            const image = window.newsAPI.getImage(news.imageId);
-            if (image) {
-              document.getElementById('newsImage').value = news.imageId;
-              const preview = document.getElementById('imagePreview');
-              preview.innerHTML = `<img src="${image.data}" alt="Preview">`;
-              preview.style.display = 'block';
-              
-              const label = document.getElementById('fileUploadLabel');
-              label.textContent = `✅ ${image.name} (${(image.size / 1024).toFixed(1)} KB)`;
-              label.classList.add('has-file');
-            }
-          } else {
-            document.getElementById('newsImage').value = '';
-          }
-          
-          // Remove the old news item (it will be re-added when form is submitted)
-          window.newsAPI.deleteNews(id).catch(error => {
-            console.error('Error removing original news:', error);
-          });
-          
-          // Scroll to form
-          document.querySelector('.news-form').scrollIntoView({ behavior: 'smooth' });
-          
-          showNotification('Edit berita di form di atas. Klik "Simpan Berita" untuk menyimpan perubahan.', 'info');
-        }
-      } catch (error) {
-        showNotification('Gagal mengedit berita: ' + error.message, 'error');
-      }
-    }
-    
-    function updateStatistics() {
-      try {
-        const stats = window.newsAPI.getStatistics();
-        document.getElementById('totalNews').textContent = stats.total;
-        document.getElementById('todayNews').textContent = stats.today;
-        document.getElementById('totalCategories').textContent = stats.categories;
-      } catch (error) {
-        console.error('Error updating statistics:', error);
-      }
-    }
-    
-    function formatDate(dateString) {
-      const options = { day: 'numeric', month: 'long', year: 'numeric' };
-      return new Date(dateString).toLocaleDateString('id-ID', options);
-    }
-    
-    function showNotification(message, type) {
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#1E9E44' : type === 'error' ? '#dc3545' : '#0A3D73'};
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 1000;
-        max-width: 300px;
-      `;
-      notification.textContent = message;
-      
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.remove();
-      }, 3000);
-    }
-    
-    // GitHub Sync Functions
-    async function syncGitHub() {
-      const statusDiv = document.getElementById('githubStatus');
-      const statusText = document.getElementById('githubStatusText');
-      const lastSyncText = document.getElementById('githubLastSync');
-      const syncBtn = document.getElementById('syncBtn');
-      
-      // Update UI
-      statusDiv.className = 'github-status pending';
-      statusText.innerHTML = '<span class="spinner"></span>Menyiapkan sinkronisasi...';
-      syncBtn.disabled = true;
-      syncBtn.innerHTML = '<span class="spinner"></span>Syncing...';
-      
-      try {
-        // Simulate sync process
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Update sync status in localStorage
-        window.newsAPI.updateSyncStatus('synced', 'manual');
-        
-        // Update success status
-        statusDiv.className = 'github-status success';
-        statusText.innerHTML = '✅ Data siap disinkronkan! Jalankan manual sync untuk deploy.';
-        lastSyncText.textContent = `Terakhir sync: ${new Date().toLocaleString('id-ID')}`;
-        
-        showNotification('Data berhasil disiapkan! Jalankan "bash manual-sync.sh" untuk deploy ke GitHub.', 'success');
-        
-        // Show instructions
-        setTimeout(() => {
-          showNotification('📋 Instruksi: 1. Buka terminal 2. Jalankan "bash manual-sync.sh" 3. Tunggu 1-3 menit', 'info');
-        }, 2000);
-        
-      } catch (error) {
-        // Update error status
-        statusDiv.className = 'github-status error';
-        statusText.innerHTML = `❌ Sinkronisasi gagal: ${error.message}`;
-        
-        showNotification('Gagal sinkronisasi: ' + error.message, 'error');
-      } finally {
-        // Reset button
-        syncBtn.disabled = false;
-        syncBtn.innerHTML = 'Sync Now';
         updateGitHubStatus();
       }
-    }
-    
-    // Initialize GitHub status
-    function updateGitHubStatus() {
-      try {
-        const syncStatus = window.newsAPI.getSyncStatus();
+      
+      function showLoginForm() {
+        loginContainer.style.display = 'flex';
+        adminPanel.style.display = 'none';
+        
+        // Clear form
+        loginForm.reset();
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+      }
+      
+      // Image upload handler
+      async function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+          try {
+            showNotification('Mengupload gambar...', 'info');
+            const uploadedImage = await window.newsAPI.uploadImage(file);
+            
+            // Update form
+            document.getElementById('newsImage').value = uploadedImage.id;
+            
+            // Show preview
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `<img src="${uploadedImage.data}" alt="Preview">`;
+            preview.style.display = 'block';
+            
+            // Update label
+            const label = document.getElementById('fileUploadLabel');
+            label.textContent = `✅ ${uploadedImage.name} (${(uploadedImage.size / 1024).toFixed(1)} KB)`;
+            label.classList.add('has-file');
+            
+            showNotification('Gambar berhasil diupload!', 'success');
+          } catch (error) {
+            showNotification('Gagal upload gambar: ' + error.message, 'error');
+          }
+        }
+      }
+      
+      // Reset image upload
+      function resetImageUpload() {
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('fileUploadLabel').textContent = '📷 Klik untuk upload gambar atau drag & drop';
+        document.getElementById('fileUploadLabel').classList.remove('has-file');
+        document.getElementById('newsImage').value = '';
+      }
+      
+      // News management functions
+      newsForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        try {
+          const formData = new FormData(newsForm);
+          const imageId = formData.get('image');
+          
+          const newsData = {
+            title: formData.get('title'),
+            category: formData.get('category') || 'Umum',
+            date: formData.get('date'),
+            content: formData.get('content'),
+            imageId: imageId || null,
+            tags: formData.get('tags') ? formData.get('tags').split(',').map(tag => tag.trim()) : []
+          };
+          
+          // Add news using API
+          const newNews = await window.newsAPI.addNews(newsData);
+          
+          // Reset form including image
+          newsForm.reset();
+          resetImageUpload();
+          
+          loadNews();
+          updateStatistics();
+          
+          showNotification('Berita berhasil ditambahkan!', 'success');
+          
+        } catch (error) {
+          showNotification('Gagal menambah berita: ' + error.message, 'error');
+        }
+      });
+      
+      function loadNews() {
+        try {
+          const news = window.newsAPI.getAllNews();
+          
+          if (news.length === 0) {
+            newsItems.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Belum ada berita. Tambahkan berita pertama!</div>';
+            return;
+          }
+          
+          newsItems.innerHTML = news.map(item => `
+            <div class="news-item">
+              <div style="flex: 1; margin-right: 1rem;">
+                <h4>${item.title}</h4>
+                <p>${item.content.substring(0, 100)}...</p>
+                <div class="meta">
+                  📅 ${formatDate(item.date)} | 🏷️ ${item.category} | 🏷️ ${item.tags.join(', ')}
+                </div>
+              </div>
+              <div class="news-actions">
+                <button class="btn btn-small btn-edit" onclick="editNews(${item.id})">Edit</button>
+                <button class="btn btn-small btn-delete" onclick="deleteNews(${item.id})">Hapus</button>
+              </div>
+            </div>
+          `).join('');
+        } catch (error) {
+          showNotification('Gagal memuat berita: ' + error.message, 'error');
+        }
+      }
+      
+      async function deleteNews(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
+          try {
+            await window.newsAPI.deleteNews(id);
+            loadNews();
+            updateStatistics();
+            showNotification('Berita berhasil dihapus!', 'success');
+          } catch (error) {
+            showNotification('Gagal menghapus berita: ' + error.message, 'error');
+          }
+        }
+      }
+      
+      function editNews(id) {
+        try {
+          const news = window.newsAPI.getNewsById(id);
+          if (news) {
+            document.getElementById('newsTitle').value = news.title;
+            document.getElementById('newsCategory').value = news.category;
+            document.getElementById('newsDate').value = news.date;
+            document.getElementById('newsContent').value = news.content;
+            document.getElementById('newsTags').value = news.tags.join(', ');
+            
+            // Handle image
+            if (news.imageId) {
+              const image = window.newsAPI.getImage(news.imageId);
+              if (image) {
+                document.getElementById('newsImage').value = news.imageId;
+                const preview = document.getElementById('imagePreview');
+                preview.innerHTML = `<img src="${image.data}" alt="Preview">`;
+                preview.style.display = 'block';
+                
+                const label = document.getElementById('fileUploadLabel');
+                label.textContent = `✅ ${image.name} (${(image.size / 1024).toFixed(1)} KB)`;
+                label.classList.add('has-file');
+              }
+            } else {
+              document.getElementById('newsImage').value = '';
+            }
+            
+            // Remove the old news item (it will be re-added when form is submitted)
+            window.newsAPI.deleteNews(id).catch(error => {
+              console.error('Error removing original news:', error);
+            });
+            
+            // Scroll to form
+            document.querySelector('.news-form').scrollIntoView({ behavior: 'smooth' });
+            
+            showNotification('Edit berita di form di atas. Klik "Simpan Berita" untuk menyimpan perubahan.', 'info');
+          }
+        } catch (error) {
+          showNotification('Gagal mengedit berita: ' + error.message, 'error');
+        }
+      }
+      
+      function updateStatistics() {
+        try {
+          const stats = window.newsAPI.getStatistics();
+          document.getElementById('totalNews').textContent = stats.total;
+          document.getElementById('todayNews').textContent = stats.today;
+          document.getElementById('totalCategories').textContent = stats.categories;
+        } catch (error) {
+          console.error('Error updating statistics:', error);
+        }
+      }
+      
+      function formatDate(dateString) {
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return new Date(dateString).toLocaleDateString('id-ID', options);
+      }
+      
+      function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: ${type === 'success' ? '#1E9E44' : type === 'error' ? '#dc3545' : '#0A3D73'};
+          color: white;
+          padding: 1rem 1.5rem;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          z-index: 1000;
+          max-width: 300px;
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+      
+      // GitHub Sync Functions
+      async function syncGitHub() {
+        const statusDiv = document.getElementById('githubStatus');
         const statusText = document.getElementById('githubStatusText');
         const lastSyncText = document.getElementById('githubLastSync');
+        const syncBtn = document.getElementById('syncBtn');
         
-        if (syncStatus.status === 'never') {
-          document.getElementById('githubStatus').className = 'github-status';
-          statusText.innerHTML = '📊 Menunggu sinkronisasi pertama...';
-          lastSyncText.textContent = 'Terakhir sync: Belum pernah';
-        } else if (syncStatus.status === 'synced') {
-          document.getElementById('githubStatus').className = 'github-status success';
-          statusText.innerHTML = '✅ Data tersinkronisasi dengan GitHub';
-          lastSyncText.textContent = `Terakhir sync: ${syncStatus.lastSync.toLocaleString('id-ID')}`;
-        } else {
-          document.getElementById('githubStatus').className = 'github-status';
-          statusText.innerHTML = '⚠️ Sinkronisasi mungkin diperlukan';
-          lastSyncText.textContent = `Terakhir sync: ${syncStatus.lastSync.toLocaleString('id-ID')}`;
+        // Update UI
+        statusDiv.className = 'github-status pending';
+        statusText.innerHTML = '<span class="spinner"></span>Menyiapkan sinkronisasi...';
+        syncBtn.disabled = true;
+        syncBtn.innerHTML = '<span class="spinner"></span>Syncing...';
+        
+        try {
+          // Simulate sync process
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Update sync status in localStorage
+          window.newsAPI.updateSyncStatus('synced', 'manual');
+          
+          // Update success status
+          statusDiv.className = 'github-status success';
+          statusText.innerHTML = '✅ Data siap disinkronkan! Jalankan manual sync untuk deploy.';
+          lastSyncText.textContent = `Terakhir sync: ${new Date().toLocaleString('id-ID')}`;
+          
+          showNotification('Data berhasil disiapkan! Jalankan "bash manual-sync.sh" untuk deploy ke GitHub.', 'success');
+          
+          // Show instructions
+          setTimeout(() => {
+            showNotification('📋 Instruksi: 1. Buka terminal 2. Jalankan "bash manual-sync.sh" 3. Tunggu 1-3 menit', 'info');
+          }, 2000);
+          
+        } catch (error) {
+          // Update error status
+          statusDiv.className = 'github-status error';
+          statusText.innerHTML = `❌ Sinkronisasi gagal: ${error.message}`;
+          
+          showNotification('Gagal sinkronisasi: ' + error.message, 'error');
+        } finally {
+          // Reset button
+          syncBtn.disabled = false;
+          syncBtn.innerHTML = 'Sync Now';
+          updateGitHubStatus();
         }
-      } catch (error) {
-        console.error('Error updating GitHub status:', error);
       }
-    }
-    
-    // Quick action functions
-    function clearCache() {
-      if (confirm('Apakah Anda yakin ingin membersihkan cache?')) {
-        localStorage.clear();
-        sessionStorage.clear();
-        showNotification('Cache berhasil dibersihkan!', 'success');
-        setTimeout(() => {
-          location.reload();
-        }, 1000);
+      
+      // Initialize GitHub status
+      function updateGitHubStatus() {
+        try {
+          const syncStatus = window.newsAPI.getSyncStatus();
+          const statusText = document.getElementById('githubStatusText');
+          const lastSyncText = document.getElementById('githubLastSync');
+          
+          if (syncStatus.status === 'never') {
+            document.getElementById('githubStatus').className = 'github-status';
+            statusText.innerHTML = '📊 Menunggu sinkronisasi pertama...';
+            lastSyncText.textContent = 'Terakhir sync: Belum pernah';
+          } else if (syncStatus.status === 'synced') {
+            document.getElementById('githubStatus').className = 'github-status success';
+            statusText.innerHTML = '✅ Data tersinkronisasi dengan GitHub';
+            lastSyncText.textContent = `Terakhir sync: ${syncStatus.lastSync.toLocaleString('id-ID')}`;
+          } else {
+            document.getElementById('githubStatus').className = 'github-status';
+            statusText.innerHTML = '⚠️ Sinkronisasi mungkin diperlukan';
+            lastSyncText.textContent = `Terakhir sync: ${syncStatus.lastSync.toLocaleString('id-ID')}`;
+          }
+        } catch (error) {
+          console.error('Error updating GitHub status:', error);
+        }
       }
+      
+      // Quick action functions
+      function clearCache() {
+        if (confirm('Apakah Anda yakin ingin membersihkan cache?')) {
+          localStorage.clear();
+          sessionStorage.clear();
+          showNotification('Cache berhasil dibersihkan!', 'success');
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
+        }
+      }
+      
+      // Set today's date as default
+      document.getElementById('newsDate').valueAsDate = new Date();
+      
+      // Auto-update GitHub status every 30 seconds
+      setInterval(updateGitHubStatus, 30000);
+      
+      console.log('✅ SMPIT DTI Admin Panel initialized successfully');
     }
-    
-    // Set today's date as default
-    document.getElementById('newsDate').valueAsDate = new Date();
-    
-    // Auto-update GitHub status every 30 seconds
-    setInterval(updateGitHubStatus, 30000);
   </script>
 </body>
 </html>
