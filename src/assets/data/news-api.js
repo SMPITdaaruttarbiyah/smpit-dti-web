@@ -1,186 +1,135 @@
-// News API for SMPIT DAARUT TARBIYAH
-// This file provides API-like functions for news management
+/**
+ * SMPIT DTI News API
+ * Handles news management, image uploads, and GitHub synchronization
+ */
 
 class NewsAPI {
   constructor() {
     this.storageKey = 'smpitNews';
-    this.imageStorageKey = 'uploadedImages';
-    this.syncStorageKey = 'lastGitHubSync';
+    this.imageStorageKey = 'smpitImages';
+    this.syncStatusKey = 'smpitSyncStatus';
+    this.initializeStorage();
   }
 
-  // Get all news
+  initializeStorage() {
+    if (!localStorage.getItem(this.storageKey)) {
+      localStorage.setItem(this.storageKey, JSON.stringify([]));
+    }
+    if (!localStorage.getItem(this.imageStorageKey)) {
+      localStorage.setItem(this.imageStorageKey, JSON.stringify({}));
+    }
+    if (!localStorage.getItem(this.syncStatusKey)) {
+      localStorage.setItem(this.syncStatusKey, JSON.stringify({
+        status: 'never',
+        lastSync: null,
+        lastSyncType: null
+      }));
+    }
+  }
+
+  // News Management
   getAllNews() {
     try {
       const news = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
-      return news.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      return news.sort((a, b) => new Date(b.date) - new Date(a.date));
     } catch (error) {
       console.error('Error loading news:', error);
       return [];
     }
   }
 
-  // Get news by ID
   getNewsById(id) {
     try {
       const news = this.getAllNews();
-      return news.find(item => item.id === parseInt(id));
+      return news.find(item => item.id === id);
     } catch (error) {
-      console.error('Error getting news by ID:', error);
+      console.error('Error finding news:', error);
       return null;
     }
   }
 
-  // Get news by category
-  getNewsByCategory(category) {
-    try {
-      const news = this.getAllNews();
-      return news.filter(item => item.category === category);
-    } catch (error) {
-      console.error('Error getting news by category:', error);
-      return [];
-    }
-  }
-
-  // Add new news
   addNews(newsData) {
-    try {
-      const news = this.getAllNews();
-      const newNews = {
-        id: Date.now(),
-        title: newsData.title,
-        category: newsData.category || 'Umum',
-        date: newsData.date || new Date().toISOString().split('T')[0],
-        content: newsData.content,
-        image: newsData.image || `https://picsum.photos/seed/${Date.now()}/400/300.jpg`,
-        imageId: newsData.imageId || null,
-        tags: newsData.tags || [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      news.unshift(newNews);
-      localStorage.setItem(this.storageKey, JSON.stringify(news));
-      
-      // Trigger auto-sync
-      this.triggerAutoSync();
-      
-      return newNews;
-    } catch (error) {
-      console.error('Error adding news:', error);
-      throw error;
-    }
+    return new Promise((resolve, reject) => {
+      try {
+        const news = this.getAllNews();
+        const newNews = {
+          id: Date.now(),
+          ...newsData,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        news.push(newNews);
+        localStorage.setItem(this.storageKey, JSON.stringify(news));
+        
+        // Update sync status
+        this.updateSyncStatus('pending');
+        
+        resolve(newNews);
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 
-  // Update news
   updateNews(id, newsData) {
-    try {
-      const news = this.getAllNews();
-      const index = news.findIndex(item => item.id === parseInt(id));
-      
-      if (index === -1) {
-        throw new Error('News not found');
+    return new Promise((resolve, reject) => {
+      try {
+        const news = this.getAllNews();
+        const index = news.findIndex(item => item.id === id);
+        
+        if (index === -1) {
+          reject(new Error('News not found'));
+          return;
+        }
+        
+        news[index] = {
+          ...news[index],
+          ...newsData,
+          updatedAt: new Date().toISOString()
+        };
+        
+        localStorage.setItem(this.storageKey, JSON.stringify(news));
+        this.updateSyncStatus('pending');
+        
+        resolve(news[index]);
+      } catch (error) {
+        reject(error);
       }
-      
-      news[index] = {
-        ...news[index],
-        ...newsData,
-        updatedAt: new Date().toISOString()
-      };
-      
-      localStorage.setItem(this.storageKey, JSON.stringify(news));
-      
-      // Trigger auto-sync
-      this.triggerAutoSync();
-      
-      return news[index];
-    } catch (error) {
-      console.error('Error updating news:', error);
-      throw error;
-    }
+    });
   }
 
-  // Delete news
   deleteNews(id) {
-    try {
-      const news = this.getAllNews();
-      const filteredNews = news.filter(item => item.id !== parseInt(id));
-      
-      if (news.length === filteredNews.length) {
-        throw new Error('News not found');
+    return new Promise((resolve, reject) => {
+      try {
+        const news = this.getAllNews();
+        const filteredNews = news.filter(item => item.id !== id);
+        
+        if (news.length === filteredNews.length) {
+          reject(new Error('News not found'));
+          return;
+        }
+        
+        localStorage.setItem(this.storageKey, JSON.stringify(filteredNews));
+        this.updateSyncStatus('pending');
+        
+        resolve(true);
+      } catch (error) {
+        reject(error);
       }
-      
-      localStorage.setItem(this.storageKey, JSON.stringify(filteredNews));
-      
-      // Trigger auto-sync
-      this.triggerAutoSync();
-      
-      return true;
-    } catch (error) {
-      console.error('Error deleting news:', error);
-      throw error;
-    }
+    });
   }
 
-  // Get categories
-  getCategories() {
-    try {
-      const news = this.getAllNews();
-      const categories = [...new Set(news.map(item => item.category))];
-      return categories.sort();
-    } catch (error) {
-      console.error('Error getting categories:', error);
-      return [];
-    }
-  }
-
-  // Get statistics
-  getStatistics() {
-    try {
-      const news = this.getAllNews();
-      const today = new Date().toISOString().split('T')[0];
-      const todayNews = news.filter(item => item.date === today);
-      const categories = this.getCategories();
-      
-      return {
-        total: news.length,
-        today: todayNews.length,
-        categories: categories.length,
-        latestUpdate: news.length > 0 ? news[0].createdAt : null
-      };
-    } catch (error) {
-      console.error('Error getting statistics:', error);
-      return {
-        total: 0,
-        today: 0,
-        categories: 0,
-        latestUpdate: null
-      };
-    }
-  }
-
-  // Search news
-  searchNews(query) {
-    try {
-      const news = this.getAllNews();
-      const lowercaseQuery = query.toLowerCase();
-      
-      return news.filter(item => 
-        item.title.toLowerCase().includes(lowercaseQuery) ||
-        item.content.toLowerCase().includes(lowercaseQuery) ||
-        item.category.toLowerCase().includes(lowercaseQuery) ||
-        item.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
-      );
-    } catch (error) {
-      console.error('Error searching news:', error);
-      return [];
-    }
-  }
-
-  // Image management
-  uploadImage(file) {
+  // Image Management
+  async uploadImage(file) {
     return new Promise((resolve, reject) => {
       if (!file || !file.type.startsWith('image/')) {
-        reject(new Error('Invalid file type'));
+        reject(new Error('Invalid file type. Please upload an image.'));
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        reject(new Error('File too large. Maximum size is 5MB.'));
         return;
       }
 
@@ -188,25 +137,30 @@ class NewsAPI {
       reader.onload = (e) => {
         try {
           const images = JSON.parse(localStorage.getItem(this.imageStorageKey) || '{}');
-          const imageId = 'img_' + Date.now();
+          const imageId = Date.now().toString();
           
-          images[imageId] = {
+          const imageData = {
             id: imageId,
-            data: e.target.result,
             name: file.name,
             size: file.size,
             type: file.type,
+            data: e.target.result,
             uploadedAt: new Date().toISOString()
           };
           
+          images[imageId] = imageData;
           localStorage.setItem(this.imageStorageKey, JSON.stringify(images));
-          resolve(images[imageId]);
+          
+          resolve(imageData);
         } catch (error) {
-          reject(error);
+          reject(new Error('Failed to save image: ' + error.message));
         }
       };
       
-      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'));
+      };
+      
       reader.readAsDataURL(file);
     });
   }
@@ -216,7 +170,7 @@ class NewsAPI {
       const images = JSON.parse(localStorage.getItem(this.imageStorageKey) || '{}');
       return images[imageId] || null;
     } catch (error) {
-      console.error('Error getting image:', error);
+      console.error('Error loading image:', error);
       return null;
     }
   }
@@ -233,122 +187,300 @@ class NewsAPI {
     }
   }
 
-  // GitHub sync functions
-  async syncToGitHub() {
+  // Statistics
+  getStatistics() {
     try {
-      const newsData = {
-        news: this.getAllNews(),
-        images: JSON.parse(localStorage.getItem(this.imageStorageKey) || '{}'),
-        statistics: this.getStatistics(),
-        lastUpdated: new Date().toISOString(),
-        version: '1.0.0'
+      const news = this.getAllNews();
+      const today = new Date().toISOString().split('T')[0];
+      
+      const stats = {
+        total: news.length,
+        today: news.filter(item => item.date === today).length,
+        categories: new Set(news.map(item => item.category || 'Umum')).size
       };
-
-      // In a real implementation, this would make actual GitHub API calls
-      // For now, we'll simulate the sync
-      await this.simulateGitHubSync(newsData);
       
-      // Update last sync timestamp
-      localStorage.setItem(this.syncStorageKey, new Date().toISOString());
-      
-      return { success: true, message: 'Sync successful' };
+      return stats;
     } catch (error) {
-      console.error('Error syncing to GitHub:', error);
-      throw error;
+      console.error('Error calculating statistics:', error);
+      return { total: 0, today: 0, categories: 0 };
     }
   }
 
-  async simulateGitHubSync(data) {
-    // Simulate API delay
+  // Search and Filter
+  searchNews(query) {
+    try {
+      const news = this.getAllNews();
+      const lowerQuery = query.toLowerCase();
+      
+      return news.filter(item => 
+        item.title.toLowerCase().includes(lowerQuery) ||
+        item.content.toLowerCase().includes(lowerQuery) ||
+        item.category.toLowerCase().includes(lowerQuery) ||
+        item.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+      );
+    } catch (error) {
+      console.error('Error searching news:', error);
+      return [];
+    }
+  }
+
+  getNewsByCategory(category) {
+    try {
+      const news = this.getAllNews();
+      return news.filter(item => 
+        (item.category || 'Umum').toLowerCase() === category.toLowerCase()
+      );
+    } catch (error) {
+      console.error('Error filtering by category:', error);
+      return [];
+    }
+  }
+
+  getNewsByDateRange(startDate, endDate) {
+    try {
+      const news = this.getAllNews();
+      return news.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
+      });
+    } catch (error) {
+      console.error('Error filtering by date range:', error);
+      return [];
+    }
+  }
+
+  // GitHub Synchronization
+  async syncToGitHub() {
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Simulate 95% success rate
-        if (Math.random() > 0.05) {
-          resolve({ success: true });
-        } else {
-          reject(new Error('GitHub API rate limit exceeded'));
-        }
-      }, 1500);
+      try {
+        // Prepare data for GitHub
+        const newsData = this.getAllNews();
+        const images = JSON.parse(localStorage.getItem(this.imageStorageKey) || '{}');
+        
+        const syncData = {
+          news: newsData,
+          images: images,
+          metadata: {
+            lastUpdated: new Date().toISOString(),
+            version: '1.0.0',
+            totalNews: newsData.length,
+            totalImages: Object.keys(images).length
+          }
+        };
+
+        // Create a GitHub API request (simplified for demo)
+        // In production, this would use GitHub's REST API
+        this.simulateGitHubSync(syncData)
+          .then(() => {
+            this.updateSyncStatus('synced', 'manual');
+            resolve({ success: true, message: 'Data synced to GitHub' });
+          })
+          .catch(error => {
+            this.updateSyncStatus('error');
+            reject(error);
+          });
+          
+      } catch (error) {
+        reject(new Error('Failed to prepare sync data: ' + error.message));
+      }
     });
   }
 
-  triggerAutoSync() {
-    const lastSync = localStorage.getItem(this.syncStorageKey);
-    const now = new Date();
-    
-    // Only auto-sync if last sync was more than 5 minutes ago
-    if (!lastSync || (now - new Date(lastSync)) > 5 * 60 * 1000) {
+  simulateGitHubSync(data) {
+    return new Promise((resolve, reject) => {
+      // Simulate API call delay
       setTimeout(() => {
-        this.syncToGitHub().catch(error => {
-          console.error('Auto-sync failed:', error);
-        });
-      }, 2000);
+        try {
+          // In a real implementation, this would make an actual API call to GitHub
+          console.log('Syncing data to GitHub:', data);
+          
+          // Simulate success (90% success rate for demo)
+          if (Math.random() > 0.1) {
+            resolve({ success: true });
+          } else {
+            reject(new Error('GitHub API temporarily unavailable'));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      }, 2000); // 2 second delay to simulate network request
+    });
+  }
+
+  updateSyncStatus(status, type = 'automatic') {
+    try {
+      const syncStatus = {
+        status: status,
+        lastSync: new Date().toISOString(),
+        lastSyncType: type
+      };
+      
+      localStorage.setItem(this.syncStatusKey, JSON.stringify(syncStatus));
+    } catch (error) {
+      console.error('Error updating sync status:', error);
     }
   }
 
   getSyncStatus() {
-    const lastSync = localStorage.getItem(this.syncStorageKey);
-    
-    if (!lastSync) {
+    try {
+      const syncStatus = JSON.parse(localStorage.getItem(this.syncStatusKey) || '{}');
+      
+      if (!syncStatus.lastSync) {
+        return {
+          status: 'never',
+          lastSync: new Date(),
+          lastSyncType: null
+        };
+      }
+      
+      return {
+        status: syncStatus.status || 'never',
+        lastSync: new Date(syncStatus.lastSync),
+        lastSyncType: syncStatus.lastSyncType
+      };
+    } catch (error) {
+      console.error('Error getting sync status:', error);
       return {
         status: 'never',
-        lastSync: null,
-        needsSync: true
+        lastSync: new Date(),
+        lastSyncType: null
       };
     }
-    
-    const syncDate = new Date(lastSync);
-    const now = new Date();
-    const diffMinutes = Math.floor((now - syncDate) / 60000);
-    
-    return {
-      status: diffMinutes < 5 ? 'synced' : 'pending',
-      lastSync: syncDate,
-      needsSync: diffMinutes >= 5
-    };
   }
 
-  // Export/Import functions
+  // Export/Import functionality
   exportData() {
     try {
-      const data = {
-        news: this.getAllNews(),
-        images: JSON.parse(localStorage.getItem(this.imageStorageKey) || '{}'),
+      const news = this.getAllNews();
+      const images = JSON.parse(localStorage.getItem(this.imageStorageKey) || '{}');
+      
+      const exportData = {
+        news: news,
+        images: images,
+        syncStatus: this.getSyncStatus(),
         exportedAt: new Date().toISOString(),
         version: '1.0.0'
       };
       
-      return JSON.stringify(data, null, 2);
+      return JSON.stringify(exportData, null, 2);
     } catch (error) {
-      console.error('Error exporting data:', error);
-      throw error;
+      throw new Error('Failed to export data: ' + error.message);
     }
   }
 
   importData(jsonData) {
+    return new Promise((resolve, reject) => {
+      try {
+        const importData = JSON.parse(jsonData);
+        
+        if (!importData.news || !Array.isArray(importData.news)) {
+          throw new Error('Invalid data format');
+        }
+        
+        // Validate and import news
+        localStorage.setItem(this.storageKey, JSON.stringify(importData.news));
+        
+        // Import images if available
+        if (importData.images) {
+          localStorage.setItem(this.imageStorageKey, JSON.stringify(importData.images));
+        }
+        
+        // Update sync status
+        this.updateSyncStatus('imported', 'manual');
+        
+        resolve({
+          success: true,
+          importedNews: importData.news.length,
+          importedImages: Object.keys(importData.images || {}).length
+        });
+        
+      } catch (error) {
+        reject(new Error('Failed to import data: ' + error.message));
+      }
+    });
+  }
+
+  // Cleanup and maintenance
+  cleanupOldImages() {
     try {
-      const data = JSON.parse(jsonData);
+      const news = this.getAllNews();
+      const images = JSON.parse(localStorage.getItem(this.imageStorageKey) || '{}');
       
-      if (data.news && Array.isArray(data.news)) {
-        localStorage.setItem(this.storageKey, JSON.stringify(data.news));
+      // Find all image IDs used in news
+      const usedImageIds = new Set();
+      news.forEach(item => {
+        if (item.imageId) {
+          usedImageIds.add(item.imageId);
+        }
+      });
+      
+      // Remove unused images
+      let deletedCount = 0;
+      Object.keys(images).forEach(imageId => {
+        if (!usedImageIds.has(imageId)) {
+          delete images[imageId];
+          deletedCount++;
+        }
+      });
+      
+      if (deletedCount > 0) {
+        localStorage.setItem(this.imageStorageKey, JSON.stringify(images));
       }
       
-      if (data.images && typeof data.images === 'object') {
-        localStorage.setItem(this.imageStorageKey, JSON.stringify(data.images));
-      }
-      
-      return { success: true, imported: data.news?.length || 0 };
+      return deletedCount;
     } catch (error) {
-      console.error('Error importing data:', error);
-      throw error;
+      console.error('Error cleaning up images:', error);
+      return 0;
+    }
+  }
+
+  getStorageUsage() {
+    try {
+      const newsData = localStorage.getItem(this.storageKey) || '[]';
+      const imageData = localStorage.getItem(this.imageStorageKey) || '{}';
+      const syncData = localStorage.getItem(this.syncStatusKey) || '{}';
+      
+      return {
+        news: {
+          size: newsData.length,
+          count: JSON.parse(newsData).length
+        },
+        images: {
+          size: imageData.length,
+          count: Object.keys(JSON.parse(imageData)).length
+        },
+        sync: {
+          size: syncData.length
+        },
+        total: newsData.length + imageData.length + syncData.length
+      };
+    } catch (error) {
+      console.error('Error calculating storage usage:', error);
+      return { total: 0, news: { size: 0, count: 0 }, images: { size: 0, count: 0 }, sync: { size: 0 } };
     }
   }
 }
 
-// Initialize global API
+// Initialize the API
 window.newsAPI = new NewsAPI();
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = NewsAPI;
-}
+// Auto-sync every 5 minutes if there are pending changes
+setInterval(() => {
+  const syncStatus = window.newsAPI.getSyncStatus();
+  if (syncStatus.status === 'pending') {
+    console.log('Auto-syncing pending changes to GitHub...');
+    window.newsAPI.syncToGitHub()
+      .then(() => console.log('Auto-sync completed'))
+      .catch(error => console.error('Auto-sync failed:', error));
+  }
+}, 5 * 60 * 1000); // 5 minutes
+
+// Cleanup unused images on page load
+window.addEventListener('load', () => {
+  const deletedCount = window.newsAPI.cleanupOldImages();
+  if (deletedCount > 0) {
+    console.log(`Cleaned up ${deletedCount} unused images`);
+  }
+});
+
+console.log('SMPIT DTI News API initialized successfully');

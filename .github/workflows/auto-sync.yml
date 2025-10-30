@@ -42,31 +42,25 @@ jobs:
       id: extract-news
       run: |
         echo "Extracting news data from admin panel..."
-        # Create a script to extract news data
-        cat > extract-news.js << 'EOF'
-        const fs = require('fs');
-        const path = require('path');
         
-        // Read the admin HTML file
-        const adminHtml = fs.readFileSync('src/admin/index.html', 'utf8');
+        # Ensure assets/data directory exists
+        mkdir -p assets/data
         
-        // Extract news data from localStorage simulation
-        // In a real implementation, this would connect to a database
-        const newsData = {
-          lastUpdated: new Date().toISOString(),
-          syncType: process.env.SYNC_TYPE || 'automatic',
-          version: '1.0.0'
-        };
-        
-        // Save news data to a JSON file
-        fs.writeFileSync('assets/data/news.json', JSON.stringify(newsData, null, 2));
-        
-        console.log('News data extracted successfully');
-        EOF
-        
-        # Set environment variable and run script
+        # Set environment variable
         export SYNC_TYPE="${{ github.event.inputs.sync_type || 'automatic' }}"
+        
+        # Run the extraction script
         node extract-news.js
+        
+        # Verify file was created
+        if [ -f "assets/data/news.json" ]; then
+          echo "✅ news.json created successfully"
+          echo "📄 File size: $(wc -c < assets/data/news.json) bytes"
+          echo "📊 News items: $(grep -o '"id":' assets/data/news.json | wc -l)"
+        else
+          echo "❌ news.json was not created"
+          exit 1
+        fi
         
     - name: Commit and push changes
       run: |
