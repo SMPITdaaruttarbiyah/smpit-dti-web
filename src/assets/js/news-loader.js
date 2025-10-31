@@ -1,4 +1,4 @@
-// News Loader v2.4 – CORS-safe, same-origin first, multi-proxy image fallback
+// News Loader v2.5 – same-origin fallback, multi-proxy image, eager load
 (function () {
   'use strict';
 
@@ -31,7 +31,7 @@
     newsPath: 'data/news.json',
     maxNews: 6,
     cacheTime: 2 * 60 * 1000,
-    version: '2.4',
+    version: '2.5',
     basePath: detectBasePath()
   };
 
@@ -83,12 +83,13 @@
 
   function isHttpUrl(u) {
     if (!u || typeof u !== 'string') return false;
-    try {
-      const x = new URL(u);
-      return x.protocol === 'http:' || x.protocol === 'https:';
-    } catch { return false; }
+    try { const x = new URL(u); return x.protocol === 'http:' || x.protocol === 'https:'; } catch { return false; }
+  }
+  function getHost(u) {
+    try { return new URL(u).host.toLowerCase(); } catch { return ''; }
   }
 
+  // Proxies
   function getProxyUrl(url) {
     try {
       const u = new URL(url);
@@ -103,18 +104,33 @@
       return 'https://wsrv.nl/?url=ssl:' + path;
     } catch { return url; }
   }
+  function getProxyUrl3(url) {
+    try {
+      const u = new URL(url);
+      const path = u.host + u.pathname; // abaikan query untuk statically
+      return 'https://cdn.statically.io/img/' + path.replace(/^https?:\/\//, '');
+    } catch { return url; }
+  }
 
+  // onerror fallback berjenjang + log
   window.newsImgError = function (img) {
-    // Fallback berjenjang: original -> proxy1 -> proxy2 -> placeholder
+    const orig = img.getAttribute('data-original') || img.src;
     const step = img.getAttribute('data-step') || '0';
+    console.warn('[img] error step', step, 'url:', img.src);
+
     if (step === '0') {
       img.setAttribute('data-step', '1');
-      img.src = getProxyUrl(img.getAttribute('data-original') || img.src);
+      img.src = getProxyUrl(orig);
       return;
     }
     if (step === '1') {
       img.setAttribute('data-step', '2');
-      img.src = getProxyUrl2(img.getAttribute('data-original') || img.src);
+      img.src = getProxyUrl2(orig);
+      return;
+    }
+    if (step === '2') {
+      img.setAttribute('data-step', '3');
+      img.src = getProxyUrl3(orig);
       return;
     }
     // Gagal semua -> placeholder
@@ -151,23 +167,21 @@
   }
 
   async function fetchSameOrigin() {
+    // Catatan: di GitHub Pages, folder "data" tidak di-serve (Jekyll data), jadi 404 itu normal.
     const url = new URL(`${CONFIG.basePath}/${CONFIG.newsPath}?t=${Date.now()}`, location.origin).href;
     console.log('📡 Trying (same-origin):', url);
     return fetchJson(url);
   }
-
   async function fetchRaw() {
     const url = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.newsPath}?t=${Date.now()}`;
     console.log('📡 Trying (raw.githubusercontent):', url);
     return fetchJson(url);
   }
-
   async function fetchJsDelivr() {
     const url = `https://cdn.jsdelivr.net/gh/${CONFIG.owner}/${CONFIG.repo}@${CONFIG.branch}/${CONFIG.newsPath}?nocache=${Date.now()}`;
     console.log('📡 Trying (jsDelivr):', url);
     return fetchJson(url);
   }
-
   async function fetchGitHubAPI() {
     const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.newsPath}?ref=${CONFIG.branch}`;
     console.log('📡 Trying (GitHub API):', url);
@@ -216,16 +230,24 @@
     const title = escapeHtml(n.title);
     const date = formatDate(n.date || n.createdAt);
     const excerpt = escapeHtml(truncateText(n.content));
-    const img = n.image && isHttpUrl(n.image) ? n.image : '';
+    const imgUrl = n.image && isHttpUrl(n.image) ? n.image : '';
 
-    const imageHTML = img
+    // Jika host i.ibb.co/ibb.co, langsung mulai dari proxy1 (bypass blokir)
+    const host = getHost(imgUrl);
+    const startWithProxy = host === 'i.ibb.co' || host === 'ibb.co';
+    const initialSrc = startWithProxy ? getProxyUrl(imgUrl) : imgUrl;
+    const initialStep = startWithProxy ? '1' : '0';
+
+    const imageHTML = imgUrl
       ? `<img 
-           src="${img}"
-           data-original="${img}"
-           data-step="0"
+           src="${initialSrc}"
+           data-original="${imgUrl}"
+           data-step="${initialStep}"
            alt="${title}"
            class="news-image"
-           loading="lazy"
+           loading="eager"
+           fetchpriority="high"
+           decoding="async"
            referrerpolicy="no-referrer"
            onerror="window.newsImgError(this)"
            style="width:100%;height:100%;object-fit:cover;display:block;"
@@ -321,17 +343,19 @@
 
     const img = document.getElementById('newsModalImage');
     if (n.image && isHttpUrl(n.image)) {
+      const host = getHost(n.image);
+      const startWithProxy = host === 'i.ibb.co' || host === 'ibb.co';
       img.style.display = 'block';
-      img.setAttribute('data-step', '0');
       img.setAttribute('data-original', n.image);
+      img.setAttribute('data-step', startWithProxy ? '1' : '0');
       img.onerror = function () {
         window.newsImgError(img);
-        // kalau sudah proxy kedua tetap gagal, sembunyikan
-        if (img.getAttribute('data-step') === '2' && img.src.includes('wsrv.nl')) {
+        // Jika sudah 3x fallback masih gagal, sembunyikan
+        if (img.getAttribute('data-step') === '3') {
           img.style.display = 'none';
         }
       };
-      img.src = n.image;
+      img.src = startWithProxy ? getProxyUrl(n.image) : n.image;
     } else {
       img.style.display = 'none';
     }
