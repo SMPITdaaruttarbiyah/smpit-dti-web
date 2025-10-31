@@ -1,1 +1,23 @@
-{"version":"2.0.0","lastUpdated":"2025-10-31T05:30:00.000Z","website":"SMPIT DAARUT TARBIYAH INDONESIA","totalNews":1,"news":[{"id":"1730329200000","title":"sasa","category":"Pengumuman","date":"2025-10-31","content":"sas","tags":"pengumuman"}]}
+{
+  "version": "2.0.0",
+  "lastUpdated": "2025-10-31T07:18:36.094Z",
+  "website": "SMPIT DAARUT TARBIYAH INDONESIA",
+  "totalNews": 1,
+  "news": [
+    {
+      "id": "1761895115173",
+      "title": "sasa",
+      "category": "Pengumuman",
+      "date": "2025-10-30",
+      "content": "sasa",
+      "image": "https://i.ibb.co/S4FdLbGL/35093c3b5d79.jpg",
+      "published": true,
+      "createdAt": "2025-10-31T07:18:35.173Z",
+      "updatedAt": "2025-10-31T07:18:35.173Z"
+    }
+  ],
+  "metadata": {
+    "updatedAt": "2025-10-31T07:18:36.094Z",
+    "updatedBy": "Admin Panel v2.0"
+  }
+}
