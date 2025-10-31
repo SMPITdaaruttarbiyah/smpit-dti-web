@@ -291,7 +291,9 @@
                 document.getElementById('connectionStatus').textContent = 'Mengambil data dari GitHub...';
                 
                 // Try to load from GitHub raw file
-                const githubUrl = 'https://raw.githubusercontent.com/SMPITdaaruttarbiyah/smpit-dti-web/main/data/news.json';
+                // Add timestamp to prevent caching
+                const timestamp = new Date().getTime();
+                const githubUrl = `https://raw.githubusercontent.com/SMPITdaaruttarbiyah/smpit-dti-web/main/data/news.json?t=${timestamp}`;
                 console.log('Fetching from:', githubUrl);
                 
                 const response = await fetch(githubUrl);
