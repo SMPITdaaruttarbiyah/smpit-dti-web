@@ -1,8 +1,7 @@
-// News Loader for SMPIT DTI Website - 2025 Edition
+// News Loader for SMPIT DTI Website - ImgBB Fixed Version
 (function() {
     'use strict';
     
-    // Auto-detect configuration
     function detectGitHubConfig() {
         const url = window.location.href;
         
@@ -25,7 +24,6 @@
             }
         }
         
-        // Default - GANTI dengan username GitHub Anda
         return {
             owner: 'smpitdaaruttarbiyah',
             repo: 'smpit-dti-web'
@@ -44,7 +42,6 @@
     
     console.log('📋 News Loader Config:', CONFIG);
     
-    // Cache management
     const cache = {
         data: null,
         timestamp: null,
@@ -87,10 +84,15 @@
             }
             
             return null;
+        },
+        
+        clear() {
+            this.data = null;
+            this.timestamp = null;
+            sessionStorage.removeItem('news_cache');
         }
     };
     
-    // Fetch news from multiple sources
     async function fetchNews() {
         try {
             const cached = cache.get();
@@ -99,14 +101,14 @@
                 return cached;
             }
             
-            console.log('🔄 Fetching news...');
+            console.log('🔄 Fetching news from GitHub...');
             
+            const timestamp = Date.now();
             const urls = [
-                `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.newsPath}`,
+                `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.newsPath}?t=${timestamp}`,
                 `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.newsPath}?ref=${CONFIG.branch}`,
-                `/smpit-dti-web/data/news.json`,
-                `/data/news.json`,
-                `./data/news.json`
+                `/smpit-dti-web/data/news.json?t=${timestamp}`,
+                `/data/news.json?t=${timestamp}`
             ];
             
             let lastError = null;
@@ -142,8 +144,29 @@
                         }
                         
                         if (data && data.news) {
+                            // VALIDASI & FIX IMAGE URLs
+                            data.news = data.news.map(news => {
+                                if (news.image) {
+                                    // Hanya terima URL yang valid
+                                    if (!news.image.startsWith('http://') && 
+                                        !news.image.startsWith('https://') && 
+                                        !news.image.startsWith('data:')) {
+                                        console.warn('⚠️ Invalid image URL:', news.title, '-', news.image);
+                                        news.image = ''; // Clear invalid URL
+                                    }
+                                }
+                                return news;
+                            });
+                            
                             cache.set(data);
                             console.log(`✅ Loaded ${data.news.length} news from ${url}`);
+                            
+                            // Debug images
+                            data.news.forEach((news, i) => {
+                                if (news.image) {
+                                    console.log(`📷 News ${i+1} image:`, news.image.substring(0, 60) + '...');
+                                }
+                            });
                             
                             localStorage.setItem('news_fallback', JSON.stringify(data));
                             
@@ -175,7 +198,6 @@
         }
     }
     
-    // Format date
     function formatDate(dateString) {
         const options = { 
             year: 'numeric', 
@@ -196,7 +218,6 @@
         }
     }
     
-    // Truncate text
     function truncateText(text, maxLength = 150) {
         if (!text) return '';
         text = text.trim();
@@ -204,7 +225,17 @@
         return text.substring(0, maxLength).trim() + '...';
     }
     
-    // Create news card
+    function isValidImageUrl(url) {
+        if (!url || typeof url !== 'string') return false;
+        
+        // Must start with http/https or data:
+        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+            return true;
+        }
+        
+        return false;
+    }
+    
     function createNewsCard(news) {
         const categoryColors = {
             'Pengumuman': 'badge-primary',
@@ -215,15 +246,23 @@
         
         const badgeClass = categoryColors[news.category] || 'badge-secondary';
         
-        // Handle image
+        // Handle image with strict validation
         let imageHTML;
-        if (news.image && news.image.trim() !== '') {
-            const imageSrc = news.image.startsWith('data:') || news.image.startsWith('http') 
-                ? news.image 
-                : news.image;
-                
-            imageHTML = `<img src="${imageSrc}" alt="${escapeHtml(news.title)}" class="news-image" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'news-placeholder-image\\'><span>📰</span></div>';">`;
+        
+        if (news.image && isValidImageUrl(news.image)) {
+            console.log('✅ Valid image URL:', news.title, '-', news.image.substring(0, 50));
+            
+            imageHTML = `
+                <img 
+                    src="${news.image}" 
+                    alt="${escapeHtml(news.title)}" 
+                    class="news-image" 
+                    loading="lazy" 
+                    onerror="console.error('❌ Image failed:', this.src); this.onerror=null; this.parentElement.innerHTML='<div class=\\'news-placeholder-image\\'><span>📰</span></div>';"
+                    onload="console.log('✅ Image loaded:', this.alt)">
+            `;
         } else {
+            console.log('❌ No valid image for:', news.title);
             imageHTML = `<div class="news-placeholder-image"><span>📰</span></div>`;
         }
         
@@ -247,14 +286,12 @@
         `;
     }
     
-    // Escape HTML
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
     
-    // Render news
     function renderNews(data) {
         const container = document.querySelector('#news .news-grid');
         
@@ -274,11 +311,10 @@
             return;
         }
         
-        // PENTING: Tampilkan semua berita, jangan filter berdasarkan tanggal
         const validNews = data.news
             .filter(news => {
                 if (!news.title || !news.content) return false;
-                return true; // Tampilkan semua berita termasuk tanggal masa depan
+                return true;
             })
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(0, CONFIG.maxNews);
@@ -293,6 +329,7 @@
             return;
         }
         
+        console.log('📰 Rendering news cards...');
         const newsHTML = validNews.map(news => createNewsCard(news)).join('');
         container.innerHTML = newsHTML;
         
@@ -300,10 +337,9 @@
             AOS.refresh();
         }
         
-        console.log(`📰 Rendered ${validNews.length} news items`);
+        console.log(`✅ Rendered ${validNews.length} news items`);
     }
     
-    // Create modal if not exists
     function createModal() {
         if (document.getElementById('newsModal')) return;
         
@@ -340,7 +376,6 @@
         });
     }
     
-    // View news detail
     window.viewNewsDetail = function(newsId) {
         const cached = cache.get();
         if (!cached || !cached.news) return;
@@ -367,10 +402,11 @@
         document.getElementById('newsModalContent').textContent = news.content;
         
         const modalImage = document.getElementById('newsModalImage');
-        if (news.image && news.image.trim() !== '') {
+        if (news.image && isValidImageUrl(news.image)) {
             modalImage.src = news.image;
             modalImage.style.display = 'block';
             modalImage.onerror = function() {
+                console.error('Modal image failed:', this.src);
                 this.style.display = 'none';
             };
         } else {
@@ -381,7 +417,6 @@
         document.body.style.overflow = 'hidden';
     };
     
-    // Close news detail
     window.closeNewsDetail = function() {
         const modal = document.getElementById('newsModal');
         if (modal) {
@@ -390,7 +425,6 @@
         }
     };
     
-    // Initialize
     async function init() {
         console.log('🚀 Initializing news loader...');
         
@@ -413,12 +447,10 @@
         }
     }
     
-    // Auto-refresh
     setInterval(async () => {
         console.log('🔄 Auto-refreshing news...');
         try {
-            cache.data = null;
-            cache.timestamp = null;
+            cache.clear();
             const newsData = await fetchNews();
             if (newsData && newsData.news) {
                 renderNews(newsData);
@@ -428,24 +460,39 @@
         }
     }, CONFIG.cacheTime);
     
-    // Start
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }
     
-    // Export for debugging
     window.newsLoader = {
         CONFIG,
         cache,
         fetchNews,
         renderNews,
         reload: async function() {
-            cache.data = null;
-            cache.timestamp = null;
+            console.log('🔄 Manual reload');
+            cache.clear();
+            localStorage.removeItem('news_fallback');
             const data = await fetchNews();
             renderNews(data);
+            return data;
+        },
+        debugImages: function() {
+            const data = cache.get();
+            if (!data || !data.news) {
+                console.log('No news data');
+                return;
+            }
+            
+            console.log('=== IMAGE DEBUG ===');
+            data.news.forEach((news, i) => {
+                console.log(`\nNews ${i+1}: ${news.title}`);
+                console.log('Has image:', !!news.image);
+                console.log('Image URL:', news.image || 'NONE');
+                console.log('Valid URL:', isValidImageUrl(news.image));
+            });
         }
     };
 })();
