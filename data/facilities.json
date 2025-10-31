@@ -4,24 +4,81 @@
 "title": "Perpustakaan Digital",
 "desc": "Pusat literasi dengan koleksi fisik dan digital, nyaman untuk belajar mandiri dan kolaboratif.",
 "category": "akademik",
-"image": "/smpit-dti-web/assets/images/facilities/library1-1200.jpg",
-"thumb": "/smpit-dti-web/assets/images/facilities/library1-320.jpg"
+"image": "https://picsum.photos/seed/library1/1200/800",
+"thumb": "https://picsum.photos/seed/library1/320/220"
 },
 {
 "id": "mosque1",
 "title": "Masjid Sekolah",
 "desc": "Ruang ibadah representatif untuk membangun karakter spiritual siswa.",
 "category": "ibadah",
-"image": "/smpit-dti-web/assets/images/facilities/mosque1-1200.jpg",
-"thumb": "/smpit-dti-web/assets/images/facilities/mosque1-320.jpg"
+"image": "https://picsum.photos/seed/mosque1/1200/800",
+"thumb": "https://picsum.photos/seed/mosque1/320/220"
 },
 {
 "id": "lab1",
 "title": "Laboratorium IPA",
 "desc": "Fasilitas praktikum modern untuk eksplorasi sains secara langsung.",
 "category": "akademik",
-"image": "/smpit-dti-web/assets/images/facilities/lab1-1200.jpg",
-"thumb": "/smpit-dti-web/assets/images/facilities/lab1-320.jpg"
+"image": "https://picsum.photos/seed/laboratory1/1200/800",
+"thumb": "https://picsum.photos/seed/laboratory1/320/220"
+},
+{
+"id": "computer1",
+"title": "Ruang Komputer",
+"desc": "Akses teknologi informasi untuk mengasah literasi digital.",
+"category": "akademik",
+"image": "https://picsum.photos/seed/computer1/1200/800",
+"thumb": "https://picsum.photos/seed/computer1/320/220"
+},
+{
+"id": "sports1",
+"title": "Lapangan Olahraga",
+"desc": "Mendukung aktivitas fisik, sportivitas, dan kesehatan siswa.",
+"category": "sarana",
+"image": "https://picsum.photos/seed/sports1/1200/800",
+"thumb": "https://picsum.photos/seed/sports1/320/220"
+},
+{
+"id": "hall1",
+"title": "Aula Serbaguna",
+"desc": "Ruang untuk acara, seminar, dan kegiatan siswa.",
+"category": "sarana",
+"image": "https://picsum.photos/seed/hall1/1200/800",
+"thumb": "https://picsum.photos/seed/hall1/320/220"
+},
+{
+"id": "garden1",
+"title": "Taman Sekolah",
+"desc": "Ruang hijau untuk rekreasi dan belajar di luar ruangan.",
+"category": "sarana",
+"image": "https://picsum.photos/seed/garden1/1200/800",
+"thumb": "https://picsum.photos/seed/garden1/320/220"
+},
+{
+"id": "library2",
+"title": "Ruang Baca",
+"desc": "Suasana tenang untuk fokus belajar.",
+"category": "akademik",
+"image": "https://picsum.photos/seed/library2/1200/800",
+"thumb": "https://picsum.photos/seed/library2/320/220"
+},
+{
+"id": "lab2",
+"title": "Laboratorium Komputer",
+"desc": "Mendukung pembelajaran berbasis teknologi.",
+"category": "akademik",
+"image": "https://picsum.photos/seed/lab2/1200/800",
+"thumb": "https://picsum.photos/seed/lab2/320/220"
+},
+{
+"id": "canteen1",
+"title": "Kantin Sehat",
+"desc": "Makanan bergizi dengan standar kebersihan.",
+"category": "sarana",
+"image": "https://picsum.photos/seed/canteen1/1200/800",
+"thumb": "https://picsum.photos/seed/canteen1/320/220"
 }
-/* Tambah item sebanyak yang dibutuhkan, format sama */
+  /* Tambah item sebanyak yang dibutuhkan, format sama */
+]
 ]
