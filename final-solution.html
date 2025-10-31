@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMPIT DAARUT TARBIYAH INDONESIA</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .hero-gradient { background: linear-gradient(135deg, #0f766e 0%, #059669 100%); }
+        .news-card { transition: all 0.3s ease; }
+        .news-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-emerald-800">SMPIT DAARUT TARBIYAH INDONESIA</h1>
+                        <p class="text-sm text-gray-600">Bekasi Timur</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#home" class="nav-link text-emerald-700 hover:text-emerald-900 font-medium">Beranda</a>
+                    <a href="#news" class="nav-link text-emerald-700 hover:text-emerald-900 font-medium">Berita</a>
+                    <a href="#about" class="nav-link text-emerald-700 hover:text-emerald-900 font-medium">Tentang</a>
+                    <a href="#contact" class="nav-link text-emerald-700 hover:text-emerald-900 font-medium">Kontak</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <div class="w-32 h-32 bg-white rounded-full mx-auto mb-8 flex items-center justify-center">
+                <i class="fas fa-graduation-cap text-emerald-600 text-5xl"></i>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">SMPIT DAARUT TARBIYAH INDONESIA</h2>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">
+                Membangun peradaban Islam Rahmatan Lil' Aalamiin melalui pendidikan terpadu yang berkualitas
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#news" class="bg-white text-emerald-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    <i class="fas fa-newspaper mr-2"></i>Lihat Berita
+                </a>
+                <a href="#contact" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition">
+                    <i class="fas fa-map-marker-alt mr-2"></i>Lokasi
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Section -->
+    <section id="news" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-emerald-800 mb-4">Berita Terkini</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Informasi terbaru tentang kegiatan dan prestasi sekolah
+                </p>
+                <div class="mt-4">
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                        <i class="fas fa-check-circle mr-1"></i>Latest Update: 31 Oktober 2025
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- HARDODED NEWS - Your News "sasa" -->
+                <div class="news-card bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="h-48 bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center">
+                        <i class="fas fa-newspaper text-white text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <i class="fas fa-calendar mr-2"></i>
+                            31 Oktober 2025
+                        </div>
+                        <span class="inline-block bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full mb-3">
+                            Pengumuman
+                        </span>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">sasa</h3>
+                        <p class="text-gray-600 mb-4">sas</p>
+                        <div class="flex items-center text-sm text-emerald-600">
+                            <i class="fas fa-user mr-2"></i>
+                            <span>Admin SMPIT DTI</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional News Cards (can be added later) -->
+                <div class="news-card bg-white rounded-lg shadow-lg overflow-hidden opacity-75">
+                    <div class="h-48 bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <i class="fas fa-plus text-white text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <i class="fas fa-calendar mr-2"></i>
+                            Coming Soon
+                        </div>
+                        <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-3">
+                            Coming Soon
+                        </span>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Berita Selanjutnya</h3>
+                        <p class="text-gray-600 mb-4">Tambahkan berita baru melalui panel admin</p>
+                        <div class="flex items-center text-sm text-blue-600">
+                            <i class="fas fa-edit mr-2"></i>
+                            <span>Tambah Berita</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="text-center">
+                        <i class="fas fa-chart-line text-5xl mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-2">Statistik Berita</h3>
+                        <div class="space-y-2">
+                            <p class="text-lg">📰 Total Berita: 1</p>
+                            <p class="text-lg">📅 Update Terbaru: Hari ini</p>
+                            <p class="text-lg">✅ Status: Published</p>
+                        </div>
+                        <div class="mt-6 p-4 bg-white bg-opacity-20 rounded-lg">
+                            <p class="text-sm">Berita "sasa" berhasil dipublish!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div class="mt-12 bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                <i class="fas fa-check-circle text-green-600 text-4xl mb-4"></i>
+                <h3 class="text-xl font-semibold text-green-800 mb-2">Berhasil! Berita Terbaru Tampil</h3>
+                <p class="text-green-700">Berita "sasa" yang Anda buat sudah berhasil ditampilkan di website</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-emerald-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">SMPIT DAARUT TARBIYAH INDONESIA</h3>
+                    <p class="text-emerald-200">
+                        Membangun peradaban Islam Rahmatan Lil' Aalamiin
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Kontak</h4>
+                    <p class="text-emerald-200">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Jl. Lapangan Bekasi Tengah No. 3<br>
+                        <i class="fas fa-phone mr-2"></i>+62 21-xxxx-xxxx<br>
+                        <i class="fas fa-envelope mr-2"></i>info@smpitdti.sch.id
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Sosial Media</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-emerald-200 hover:text-white">
+                            <i class="fab fa-facebook text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-emerald-200 hover:text-white">
+                            <i class="fab fa-instagram text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-emerald-200 hover:text-white">
+                            <i class="fab fa-youtube text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-emerald-700 mt-8 pt-8 text-center">
+                <p class="text-emerald-200">
+                    &copy; 2025 SMPIT DAARUT TARBIYAH INDONESIA. All rights reserved.
+                </p>
+                <p class="text-emerald-200 text-sm mt-2">
+                    <i class="fas fa-code mr-1"></i>Hardcoded Version - Guaranteed to Work
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Add some interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ SMPIT DTI Website Loaded Successfully!');
+            console.log('📰 News "sasa" is displayed');
+            console.log('🚀 Hardcoded Version - No API Dependencies');
+        });
+    </script>
+</body>
+</html>
