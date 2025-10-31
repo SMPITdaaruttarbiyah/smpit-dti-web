@@ -41,7 +41,7 @@
 
 .section-header {
   text-align: center;
-  margin-bottom: 4rem;
+  margin-bottom: 2.5rem;
 }
 
 .section-icon {
@@ -71,6 +71,7 @@
 }
 
 .section-subtitle {
+  padding-top: 1rem;
   font-size: 1.1rem;
   color: #666;
   margin: 0 0 1.5rem 0;
