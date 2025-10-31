@@ -21,6 +21,7 @@ function initializeApp() {
     initDynamicYear();
     initSmoothScroll();
     initImageErrorHandling();
+    initFacilityShowcase();
 }
 
 // ===================================
@@ -581,6 +582,188 @@ window.SMPITApp = {
     debounce,
     throttle
 };
+
+function initFacilityShowcase() {
+  const section = document.querySelector('.facility-section');
+  if (!section) return;
+
+  const dataURL = '/smpit-dti-web/assets/data/facilities.json';
+
+  const thumbsWrap  = document.getElementById('facilityThumbs');
+  const mainImg     = document.getElementById('facility-main-img');
+  const mainTitle   = document.getElementById('facility-main-title');
+  const mainDesc    = document.getElementById('facility-main-desc');
+  const tabs        = Array.from(document.querySelectorAll('.facility-tab'));
+  const searchEl    = document.getElementById('facilitySearch');
+  const loadMoreBtn = document.getElementById('thumbLoadMore');
+
+  const PAGE_SIZE = 12;
+  let allItems = [];
+  let currentFilter = 'all';
+  let searchTerm = '';
+  let page = 1;
+  let activeId = null;
+
+  function renderSkeletons() {
+    mainTitle.textContent = 'Memuat...';
+    mainDesc.textContent = 'Mohon tunggu sebentar.';
+    mainImg.removeAttribute('src');
+    thumbsWrap.innerHTML = Array.from({ length: 6 })
+      .map(() => '<div class="thumb-skeleton" aria-hidden="true"></div>')
+      .join('');
+  }
+
+  function preload(src) { const i = new Image(); i.src = src; }
+
+  function setActive(item) {
+    if (!item) return;
+    activeId = item.id;
+    mainImg.src = item.image;
+    mainImg.alt = item.title;
+    mainTitle.textContent = item.title;
+    mainDesc.textContent = item.desc || '';
+    thumbsWrap.querySelectorAll('.facility-thumb').forEach(el => {
+      const isActive = el.getAttribute('data-id') === activeId;
+      el.classList.toggle('active', isActive);
+      el.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    const idx = allItems.findIndex(i => i.id === activeId);
+    const next = allItems[idx + 1];
+    if (next) preload(next.image);
+  }
+
+  function matches(item) {
+    if (currentFilter !== 'all' && item.category !== currentFilter) return false;
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      return (item.title.toLowerCase().includes(q) || (item.desc || '').toLowerCase().includes(q));
+    }
+    return true;
+  }
+
+  function filtered() { return allItems.filter(matches); }
+
+  function renderThumbs() {
+    const list = filtered();
+    const visible = list.slice(0, page * PAGE_SIZE);
+
+    thumbsWrap.innerHTML = visible.map(item => (
+      `<button class="facility-thumb${item.id === activeId ? ' active' : ''}" data-id="${item.id}" role="option" aria-selected="${item.id === activeId}">
+         <img src="${item.thumb}" alt="" loading="lazy" decoding="async">
+         <span class="thumb-title">${item.title}</span>
+       </button>`
+    )).join('');
+
+    thumbsWrap.querySelectorAll('.facility-thumb').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const it = allItems.find(i => i.id === id);
+        setActive(it);
+      });
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); }
+      });
+    });
+
+    if (loadMoreBtn) {
+      const more = visible.length < list.length;
+      loadMoreBtn.style.display = more ? 'inline-flex' : 'none';
+      if (more) {
+        const sisa = list.length - visible.length;
+        loadMoreBtn.textContent = 'Muat ' + Math.min(PAGE_SIZE, sisa) + ' lagi';
+      }
+    }
+
+    ensureSentinel(visible.length < list.length);
+  }
+
+  // infinite load di dalam container thumbnail
+  let sentinel, io;
+  function ensureSentinel(need) {
+    if (!sentinel) {
+      sentinel = document.createElement('div');
+      sentinel.style.height = '1px';
+      sentinel.style.width = '100%';
+    }
+    if (need) {
+      thumbsWrap.appendChild(sentinel);
+      if (!io && 'IntersectionObserver' in window) {
+        io = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              page++;
+              renderThumbs();
+            }
+          });
+        }, { root: thumbsWrap, rootMargin: '200px 0px', threshold: 0 });
+      }
+      if (io) io.observe(sentinel);
+    } else {
+      if (io) io.unobserve(sentinel);
+      if (sentinel.parentNode) sentinel.parentNode.removeChild(sentinel);
+    }
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      currentFilter = tab.getAttribute('data-filter') || 'all';
+      page = 1;
+      renderThumbs();
+      const first = filtered()[0];
+      if (first) setActive(first);
+    });
+  });
+
+  if (searchEl) {
+    const onSearch = debounce(() => {
+      searchTerm = searchEl.value.trim();
+      page = 1;
+      renderThumbs();
+      const first = filtered()[0];
+      if (first) setActive(first);
+    }, 250);
+    searchEl.addEventListener('input', onSearch);
+  }
+
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', () => {
+      page++;
+      renderThumbs();
+    });
+  }
+
+  // Init: load data JSON, jika gagal pakai fallback dari data lama
+  renderSkeletons();
+  fetch(dataURL, { cache: 'force-cache' })
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(json => {
+      allItems = Array.isArray(json) ? json : [];
+      if (!allItems.length) throw new Error('Data kosong');
+      page = 1;
+      renderThumbs();
+      const first = filtered()[0] || allItems[0];
+      setActive(first);
+    })
+    .catch(err => {
+      console.warn('Fasilitas JSON gagal/missing. Pakai fallback.', err);
+      allItems = [
+        { id: 'classroom1',  title: 'Ruang Kelas Modern',  desc: 'Dilengkapi teknologi pembelajaran terkini', category: 'akademik', image: 'https://picsum.photos/seed/classroom1/1200/800',  thumb: 'https://picsum.photos/seed/classroom1/320/220' },
+        { id: 'library1',    title: 'Perpustakaan Digital', desc: 'Koleksi fisik dan digital yang lengkap',     category: 'akademik', image: 'https://picsum.photos/seed/library1/1200/800',    thumb: 'https://picsum.photos/seed/library1/320/220' },
+        { id: 'laboratory1', title: 'Laboratorium IPA',     desc: 'Fasilitas praktikum yang modern',            category: 'akademik', image: 'https://picsum.photos/seed/laboratory1/1200/800', thumb: 'https://picsum.photos/seed/laboratory1/320/220' },
+        { id: 'mosque1',     title: 'Masjid Sekolah',       desc: 'Sarana ibadah yang nyaman dan representatif',category: 'ibadah',   image: 'https://picsum.photos/seed/mosque1/1200/800',     thumb: 'https://picsum.photos/seed/mosque1/320/220' },
+        { id: 'sports1',     title: 'Lapangan Olahraga',    desc: 'Fasilitas berbagai cabang olahraga',         category: 'sarana',   image: 'https://picsum.photos/seed/sports1/1200/800',     thumb: 'https://picsum.photos/seed/sports1/320/220' }
+      ];
+      page = 1;
+      renderThumbs();
+      setActive(allItems[0]);
+    });
+}
 
 // ===================================
 // Console Welcome Message
