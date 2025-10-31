@@ -678,93 +678,81 @@ body {
     color: rgba(255, 255, 255, 1);
 }
 
-/* Responsive Design */
+/* ===================================
+       Responsive Design - Logo
+   =================================== */
+
 @media (max-width: 1024px) {
-    .logo-wrapper {
-        padding: 8px 16px 8px 8px;
-        gap: 14px;
-    }
-    
-    .logo-img {
-        height: 55px;
-        width: 55px;
-        padding: 7px;
-    }
-    
-    .logo-ring {
-        width: 65px;
-        height: 65px;
-    }
-    
-    .logo-title {
-        font-size: 18px;
-    }
-    
-    .logo-subtitle {
-        font-size: 10px;
-    }
+  .logo-wrapper {
+    padding: 8px 16px 8px 8px;
+    gap: 14px;
+  }
+  .logo-img { height: 55px; width: 55px; padding: 7px; }
+  .logo-ring { width: 65px; height: 65px; }
+  .logo-title { font-size: 18px; }
+  .logo-subtitle { font-size: 10px; }
 }
 
 @media (max-width: 768px) {
-    .logo-wrapper {
-        padding: 6px 12px 6px 6px;
-        gap: 12px;
-    }
-    
-    .logo-img {
-        height: 48px;
-        width: 48px;
-        padding: 6px;
-    }
-    
-    .logo-ring {
-        width: 58px;
-        height: 58px;
-    }
-    
-    .logo-title {
-        font-size: 16px;
-    }
-    
-    .logo-subtitle {
-        font-size: 9px;
-    }
+  .logo-wrapper {
+    padding: 6px 12px 6px 6px;
+    gap: 12px;
+  }
+  .logo-img { height: 48px; width: 48px; padding: 6px; }
+  .logo-ring { width: 58px; height: 58px; }
+  .logo-title { font-size: 16px; }
+  .logo-subtitle { font-size: 9px; }
 }
 
+/* 481px–768px: tampilkan teks (judul saja), tanpa efek kaca */
+@media (min-width: 481px) and (max-width: 768px) {
+  .logo-wrapper {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    padding: 6px 12px !important;
+    gap: 8px !important;
+    border-radius: 999px !important;            /* pill */
+    max-width: calc(100% - 64px) !important;    /* beri ruang untuk hamburger */
+  }
+  .logo-ring { display: none !important; }
+  .logo-text {
+    display: flex !important;
+    flex-direction: column;
+    line-height: 1.1;
+    min-width: 0;
+  }
+  .logo-title {
+    font-size: 15px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;                    /* cegah teks menabrak menu */
+  }
+  .logo-subtitle { display: none !important; }  /* sembunyikan subtitle */
+  .logo-img { height: 40px !important; width: 40px !important; padding: 5px !important; }
+}
+
+/* ≤480px: sembunyikan teks, tampilkan ikon bulat saja */
 @media (max-width: 480px) {
-.logo-wrapper {
-padding: 6px 12px; /* beri ruang untuk teks /
-gap: 8px;
-border-radius: 999px; / pill, bukan bulat penuh /
-}
-.logo-text {
-display: flex; / tampilkan kembali */
-flex-direction: column;
-line-height: 1.1;
-}
-.logo-title {
-font-size: 14px;
-font-weight: 700;
-}
-.logo-subtitle {
-font-size: 9px;
-opacity: 0.95;
-}
-.logo-img {
-height: 40px;
-width: 40px;
-padding: 5px;
-}
-.logo-ring {
-width: 48px;
-height: 48px;
-}
+  .logo-wrapper {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    padding: 6px !important;
+    gap: 0 !important;
+    border-radius: 50% !important;              /* ikon bulat */
+    max-width: 100% !important;
+  }
+  .logo-text { display: none !important; }
+  .logo-img  { height: 40px !important; width: 40px !important; padding: 5px !important; }
+  .logo-ring { display: none !important; }
 }
 
-Opsional layar sangat kecil:
+/* Opsional: layar sangat kecil */
 @media (max-width: 360px) {
-.logo-subtitle { display: none; }
-.logo-title { font-size: 16px; }
+  .logo-title { font-size: 13px !important; }
 }
 
 /* Accessibility: Fokus untuk keyboard navigation */
