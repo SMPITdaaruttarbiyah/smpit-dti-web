@@ -1,4 +1,4 @@
-// News Loader for SMPIT DTI Website
+// News Loader for SMPIT DTI Website - 2025 Edition
 (function() {
     'use strict';
     
@@ -25,9 +25,9 @@
             }
         }
         
-        // GANTI INI dengan username GitHub Anda yang sebenarnya
+        // Default - GANTI dengan username GitHub Anda
         return {
-            owner: 'YOUR_GITHUB_USERNAME', // ← GANTI INI!
+            owner: 'smpitdaaruttarbiyah',
             repo: 'smpit-dti-web'
         };
     }
@@ -145,7 +145,6 @@
                             cache.set(data);
                             console.log(`✅ Loaded ${data.news.length} news from ${url}`);
                             
-                            // Save as fallback
                             localStorage.setItem('news_fallback', JSON.stringify(data));
                             
                             return data;
@@ -191,12 +190,6 @@
                 return new Date().toLocaleDateString('id-ID', options);
             }
             
-            const today = new Date();
-            if (date > today) {
-                console.warn('⚠️ Future date detected, using today');
-                return today.toLocaleDateString('id-ID', options);
-            }
-            
             return date.toLocaleDateString('id-ID', options);
         } catch (error) {
             return new Date().toLocaleDateString('id-ID', options);
@@ -222,10 +215,9 @@
         
         const badgeClass = categoryColors[news.category] || 'badge-secondary';
         
-        // Handle image - check if it exists and is valid
+        // Handle image
         let imageHTML;
         if (news.image && news.image.trim() !== '') {
-            // Check if it's a base64 image or URL
             const imageSrc = news.image.startsWith('data:') || news.image.startsWith('http') 
                 ? news.image 
                 : news.image;
@@ -282,14 +274,11 @@
             return;
         }
         
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        
+        // PENTING: Tampilkan semua berita, jangan filter berdasarkan tanggal
         const validNews = data.news
             .filter(news => {
                 if (!news.title || !news.content) return false;
-                const newsDate = new Date(news.date);
-                return newsDate <= today;
+                return true; // Tampilkan semua berita termasuk tanggal masa depan
             })
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(0, CONFIG.maxNews);
@@ -338,14 +327,12 @@
         
         document.body.appendChild(modal);
         
-        // Close on backdrop click
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
                 window.closeNewsDetail();
             }
         });
         
-        // Close on ESC key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && modal.classList.contains('active')) {
                 window.closeNewsDetail();
@@ -373,14 +360,12 @@
         
         const badgeClass = categoryColors[news.category] || 'badge-secondary';
         
-        // Set content
         document.getElementById('newsModalTitle').textContent = news.title;
         document.getElementById('newsModalCategory').textContent = news.category || 'Umum';
         document.getElementById('newsModalCategory').className = `news-modal-category ${badgeClass}`;
         document.getElementById('newsModalDate').innerHTML = `📅 ${formatDate(news.date)}`;
         document.getElementById('newsModalContent').textContent = news.content;
         
-        // Handle image
         const modalImage = document.getElementById('newsModalImage');
         if (news.image && news.image.trim() !== '') {
             modalImage.src = news.image;
