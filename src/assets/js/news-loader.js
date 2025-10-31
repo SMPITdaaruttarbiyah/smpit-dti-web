@@ -1,10 +1,11 @@
-// News Loader v2.6 – normalize ImgBB URLs, smart proxy, GitHub-friendly
+// news-loader.js
+// News Loader v2.6.3 – prefer GitHub API, normalize ImgBB, smart proxy, show up to 12 items
 (function () {
   'use strict';
 
-  // =========================
-  // Config & Cache
-  // =========================
+  // --------------------------
+  // Config detection
+  // --------------------------
   function detectGitHubConfig() {
     const url = window.location.href;
     if (url.includes('.github.io')) {
@@ -32,14 +33,17 @@
     repo: auto.repo,
     branch: 'main',
     newsPath: 'data/news.json',
-    maxNews: 6,
+    maxNews: 12,
     cacheTime: 2 * 60 * 1000, // 2 menit
-    version: '2.6',
+    version: '2.6.3',
     basePath: detectBasePath()
   };
 
   console.log('📋 News Loader v' + CONFIG.version, CONFIG);
 
+  // --------------------------
+  // Cache
+  // --------------------------
   const cache = {
     data: null,
     timestamp: null,
@@ -84,9 +88,9 @@
     }
   };
 
-  // =========================
+  // --------------------------
   // Helpers
-  // =========================
+  // --------------------------
   function isHttpUrl(u) {
     if (!u || typeof u !== 'string') return false;
     try { const x = new URL(u); return x.protocol === 'http:' || x.protocol === 'https:'; } catch { return false; }
@@ -108,12 +112,12 @@
   }
   function shouldStartWithProxy(u) {
     const h = getHost(u);
-    return h === 'i.ibb.co' || h === 'ibb.co'; // CDN/Viewer sering diblok
+    return h === 'i.ibb.co' || h === 'ibb.co';
   }
 
-  // =========================
+  // --------------------------
   // Image proxy fallbacks
-  // =========================
+  // --------------------------
   function getProxyUrl(url) {
     try {
       const u = new URL(url);
@@ -157,7 +161,6 @@
       img.src = getProxyUrl3(orig);
       return;
     }
-    // Gagal semua -> placeholder
     const wrap = img.parentElement;
     if (wrap) {
       wrap.innerHTML = `<div class="news-placeholder-image"><span>📰</span></div>`;
@@ -184,32 +187,13 @@
     return s.length <= max ? s : s.substring(0, max).trim() + '...';
   }
 
-  // =========================
-  // Fetchers (GitHub-friendly)
-  // =========================
+  // --------------------------
+  // Fetchers (prioritize GitHub API for fresh data)
+  // --------------------------
   async function fetchJson(url) {
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     return res.json();
-  }
-
-  async function fetchSameOrigin() {
-    // Di GitHub Pages, folder "data" bisa 404 (Jekyll) → normal, akan fallback
-    const url = new URL(`${CONFIG.basePath}/${CONFIG.newsPath}?t=${Date.now()}`, location.origin).href;
-    console.log('📡 Trying (same-origin):', url);
-    return fetchJson(url);
-  }
-
-  async function fetchRaw() {
-    const url = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.newsPath}?t=${Date.now()}`;
-    console.log('📡 Trying (raw.githubusercontent):', url);
-    return fetchJson(url);
-  }
-
-  async function fetchJsDelivr() {
-    const url = `https://cdn.jsdelivr.net/gh/${CONFIG.owner}/${CONFIG.repo}@${CONFIG.branch}/${CONFIG.newsPath}?nocache=${Date.now()}`;
-    console.log('📡 Trying (jsDelivr):', url);
-    return fetchJson(url);
   }
 
   async function fetchGitHubAPI() {
@@ -225,6 +209,24 @@
     return JSON.parse(str);
   }
 
+  async function fetchRaw() {
+    const url = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.newsPath}?t=${Date.now()}`;
+    console.log('📡 Trying (raw.githubusercontent):', url);
+    return fetchJson(url);
+  }
+
+  async function fetchJsDelivr() {
+    const url = `https://cdn.jsdelivr.net/gh/${CONFIG.owner}/${CONFIG.repo}@${CONFIG.branch}/${CONFIG.newsPath}?nocache=${Date.now()}`;
+    console.log('📡 Trying (jsDelivr):', url);
+    return fetchJson(url);
+  }
+
+  async function fetchSameOrigin() {
+    const url = new URL(`${CONFIG.basePath}/${CONFIG.newsPath}?t=${Date.now()}`, location.origin).href;
+    console.log('📡 Trying (same-origin):', url);
+    return fetchJson(url);
+  }
+
   function normalizeData(json) {
     if (Array.isArray(json)) return { news: json, totalNews: json.length };
     if (json && Array.isArray(json.news)) return { news: json.news, totalNews: json.totalNews || json.news.length };
@@ -235,24 +237,32 @@
     if (!u) return '';
     const url = normalizeImgbbUrl(String(u).trim());
     const host = getHost(url);
-    // Viewer page (ibb.co/<id>) bukan direct image → kosongkan
+    // Viewer page ibb.co/<id> bukan direct image → jangan dipakai
     if (host === 'ibb.co' && !looksLikeDirectImage(url)) return '';
     return url;
   }
 
   async function fetchNews() {
-    const tries = [fetchSameOrigin, fetchRaw, fetchJsDelivr, fetchGitHubAPI];
+    // Urutan: GitHub API -> raw -> jsDelivr -> same-origin
+    const tries = [fetchGitHubAPI, fetchRaw, fetchJsDelivr, fetchSameOrigin];
     let lastErr;
     for (const fn of tries) {
       try {
         const json = await fn();
         const data = normalizeData(json);
-        data.news = data.news.map(n => {
+
+        // Normalisasi + validasi
+        const filtered = [];
+        data.news = (data.news || []).map(n => {
           if (!n) return n;
           const fixed = fixImageUrl(n.image);
           n.image = fixed && isHttpUrl(fixed) ? fixed : '';
+          const ok = n.title && n.content && (n.published !== false);
+          if (!ok) filtered.push({ id: n.id, title: n.title, reason: `title=${!!n.title} content=${!!n.content} published=${n.published}` });
           return n;
         });
+        if (filtered.length) console.warn('⚠️ Filtered items:', filtered);
+
         cache.set(data);
         localStorage.setItem('news_fallback', JSON.stringify(data));
         console.log(`✅ Loaded ${data.news.length} news`);
@@ -265,9 +275,9 @@
     throw lastErr || new Error('All attempts failed');
   }
 
-  // =========================
-  // Render list & modal
-  // =========================
+  // --------------------------
+  // Render list & cards
+  // --------------------------
   function createNewsCard(n) {
     const catColors = { Pengumuman: 'badge-primary', Kegiatan: 'badge-success', Prestasi: 'badge-warning', Umum: 'badge-info' };
     const badgeClass = catColors[n.category] || 'badge-secondary';
@@ -326,6 +336,8 @@
       .sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt))
       .slice(0, CONFIG.maxNews);
 
+    console.log('🧮 Rendering items:', valid.map(v => ({ id: v.id, title: v.title })));
+
     if (!valid.length) {
       container.innerHTML = `
         <div class="no-news">
@@ -339,6 +351,9 @@
     if (typeof AOS !== 'undefined' && AOS.refresh) AOS.refresh();
   }
 
+  // --------------------------
+  // Modal
+  // --------------------------
   function createModal() {
     if (document.getElementById('newsModal')) return;
     const modal = document.createElement('div');
@@ -393,7 +408,6 @@
       img.setAttribute('data-step', startWithProxy ? '1' : '0');
       img.onerror = function () {
         window.newsImgError(img);
-        // Jika sudah 3x fallback masih gagal, sembunyikan
         if (img.getAttribute('data-step') === '3') {
           img.style.display = 'none';
         }
@@ -416,9 +430,9 @@
     }
   };
 
-  // =========================
+  // --------------------------
   // Init & Auto-refresh
-  // =========================
+  // --------------------------
   async function init() {
     console.log('🚀 Init news loader v' + CONFIG.version);
     try {
@@ -455,10 +469,11 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  // Ekspos untuk debug
+  // Expose for debug
   window.newsLoader = {
     CONFIG, cache,
     reload: async function () { cache.clear(); const d = await fetchNews(); renderNews(d); return d; },
-    clearCache: function () { cache.clear(); }
+    clearCache: function () { cache.clear(); },
+    status: () => ({ version: CONFIG.version, maxNews: CONFIG.maxNews })
   };
 })();
