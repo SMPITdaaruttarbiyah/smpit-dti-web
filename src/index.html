@@ -303,96 +303,78 @@
         </section>
 
         <!-- Facilities & Gallery Section -->
-        <section id="facilities" class="section section--white">
-            <div class="container">
-                <h2 class="section-title" data-aos="fade-up">Fasilitas & Galeri</h2>
-                
-                <div class="gallery-section" data-aos="fade-up">
-                    <!-- Swiper Gallery -->
-                    <div class="swiper gallerySwiper">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <div class="gallery-item">
-                                    <img src="https://picsum.photos/seed/classroom1/800/600" alt="Ruang Kelas Modern" loading="lazy">
-                                    <div class="gallery-overlay">
-                                        <h3>Ruang Kelas Modern</h3>
-                                        <p>Dilengkapi dengan teknologi pembelajaran terkini</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="gallery-item">
-                                    <img src="https://picsum.photos/seed/library1/800/600" alt="Perpustakaan Digital" loading="lazy">
-                                    <div class="gallery-overlay">
-                                        <h3>Perpustakaan Digital</h3>
-                                        <p>Koleksi buku fisik dan digital yang lengkap</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="gallery-item">
-                                    <img src="https://picsum.photos/seed/laboratory1/800/600" alt="Laboratorium IPA" loading="lazy">
-                                    <div class="gallery-overlay">
-                                        <h3>Laboratorium IPA</h3>
-                                        <p>Fasilitas praktikum yang lengkap dan modern</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="gallery-item">
-                                    <img src="https://picsum.photos/seed/mosque1/800/600" alt="Masjid Sekolah" loading="lazy">
-                                    <div class="gallery-overlay">
-                                        <h3>Masjid Sekolah</h3>
-                                        <p>Sarana ibadah yang nyaman dan representatif</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="gallery-item">
-                                    <img src="https://picsum.photos/seed/sports1/800/600" alt="Lapangan Olahraga" loading="lazy">
-                                    <div class="gallery-overlay">
-                                        <h3>Lapangan Olahraga</h3>
-                                        <p>Fasilitas olahraga untuk berbagai cabang</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="swiper-pagination"></div>
-                        <div class="swiper-button-next"></div>
-                        <div class="swiper-button-prev"></div>
-                    </div>
-                </div>
-                
-                <!-- Facilities Grid -->
-                <div class="facilities-grid">
-                    <div class="facility-card" data-aos="zoom-in" data-aos-delay="100">
-                        <div class="facility-icon">🕌</div>
-                        <h3>Masjid</h3>
-                        <p>Tempat yang menjiwai setiap aktivitas murid/santri</p>
-                    </div>
-                    <div class="facility-card" data-aos="zoom-in" data-aos-delay="200">
-                        <div class="facility-icon">🏫</div>
-                        <h3>Ruang Kelas</h3>
-                        <p>Untuk melaksanakan kegiatan belajar mengajar</p>
-                    </div>
-                    <div class="facility-card" data-aos="zoom-in" data-aos-delay="300">
-                        <div class="facility-icon">📚</div>
-                        <h3>Perpustakaan</h3>
-                        <p>Untuk menambah literasi & wawasan para murid/santri</p>
-                    </div>
-                    <div class="facility-card" data-aos="zoom-in" data-aos-delay="400">
-                        <div class="facility-icon">💻</div>
-                        <h3>Ruang Komputer</h3>
-                        <p>Untuk mempelajari hal-hal baru yang tidak bisa dijumpai pada buku</p>
-                    </div>
-                    <div class="facility-card" data-aos="zoom-in" data-aos-delay="500">
-                        <div class="facility-icon">🏟️</div>
-                        <h3>Lapangan</h3>
-                        <p>Untuk membantu melaksanakan serangkaian upacara & kegiatan luar kelas lainnya</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+<section id="facilities" class="facility-section section">
+  <div class="container">
+
+    <div class="facility-header" data-aos="fade-up">
+      <h2 class="section-title">Fasilitas & Galeri</h2>
+
+      <div class="facility-controls">
+        <div class="facility-tabs" role="tablist" aria-label="Kategori Fasilitas">
+          <button class="facility-tab active" data-filter="all" role="tab" aria-selected="true">Semua</button>
+          <button class="facility-tab" data-filter="akademik" role="tab" aria-selected="false">Akademik</button>
+          <button class="facility-tab" data-filter="ibadah" role="tab" aria-selected="false">Ibadah</button>
+          <button class="facility-tab" data-filter="sarana" role="tab" aria-selected="false">Sarana</button>
+        </div>
+
+        <div class="facility-search">
+          <input type="search" id="facilitySearch" placeholder="Cari fasilitas..." aria-label="Cari fasilitas">
+        </div>
+      </div>
+    </div>
+
+    <div class="facility-showcase" data-aos="fade-up">
+      <!-- Kiri: preview besar -->
+      <div class="facility-main" role="group" aria-label="Galeri Fasilitas">
+        <div class="facility-main-media">
+          <img id="facility-main-img" src="" alt="Fasilitas" loading="lazy" decoding="async">
+        </div>
+        <div class="facility-main-caption" aria-live="polite">
+          <h3 id="facility-main-title"></h3>
+          <p id="facility-main-desc"></p>
+        </div>
+      </div>
+
+      <!-- Kanan: daftar thumbnail (dinamis) -->
+      <aside class="facility-thumbs" id="facilityThumbs" role="listbox" aria-label="Pilih fasilitas"></aside>
+    </div>
+
+    <!-- Tombol fallback load more (infinite scroll juga aktif) -->
+    <div class="thumb-actions">
+      <button id="thumbLoadMore" class="thumb-load-more" type="button">Muat lebih banyak</button>
+    </div>
+
+    <!-- Tetap tampilkan grid fasilitas ringkas (punyamu) -->
+    <div class="facilities-grid">
+      <div class="facility-card" data-aos="zoom-in" data-aos-delay="100">
+        <div class="facility-icon">🕌</div>
+        <h3>Masjid</h3>
+        <p>Tempat yang menjiwai setiap aktivitas murid/santri</p>
+      </div>
+      <div class="facility-card" data-aos="zoom-in" data-aos-delay="200">
+        <div class="facility-icon">🏫</div>
+        <h3>Ruang Kelas</h3>
+        <p>Untuk melaksanakan kegiatan belajar mengajar</p>
+      </div>
+      <div class="facility-card" data-aos="zoom-in" data-aos-delay="300">
+        <div class="facility-icon">📚</div>
+        <h3>Perpustakaan</h3>
+        <p>Untuk menambah literasi & wawasan para murid/santri</p>
+      </div>
+      <div class="facility-card" data-aos="zoom-in" data-aos-delay="400">
+        <div class="facility-icon">💻</div>
+        <h3>Ruang Komputer</h3>
+        <p>Untuk mempelajari hal-hal baru yang tidak bisa dijumpai pada buku</p>
+      </div>
+      <div class="facility-card" data-aos="zoom-in" data-aos-delay="500">
+        <div class="facility-icon">🏟️</div>
+        <h3>Lapangan</h3>
+        <p>Untuk membantu melaksanakan serangkaian upacara & kegiatan luar kelas lainnya</p>
+      </div>
+    </div>
+
+  </div>
+</section>
 
         <!-- News Section -->
         <section id="news" class="section section--gray">
