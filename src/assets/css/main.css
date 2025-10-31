@@ -794,6 +794,10 @@ body {
               NEWS SECTION
    ========================================== */
 
+/* ==========================================
+   NEWS SECTION - PROFESSIONAL DESIGN
+   ========================================== */
+
 #news {
     background: #f8f9fa;
 }
@@ -973,7 +977,6 @@ body {
 .no-news > div:first-child {
     font-size: 4rem;
     margin-bottom: 1.5rem;
-    filter: grayscale(0.3);
 }
 
 .no-news p:first-of-type {
@@ -988,7 +991,7 @@ body {
     font-size: 0.95rem;
 }
 
-/* News Detail Modal */
+/* News Modal */
 .news-modal {
     display: none;
     position: fixed;
@@ -1015,10 +1018,10 @@ body {
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
-    animation: newsModalSlideUp 0.4s ease;
+    animation: modalSlideUp 0.4s ease;
 }
 
-@keyframes newsModalSlideUp {
+@keyframes modalSlideUp {
     from {
         opacity: 0;
         transform: translateY(50px);
@@ -1102,7 +1105,7 @@ body {
     white-space: pre-wrap;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 1200px) {
     .news-grid {
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
