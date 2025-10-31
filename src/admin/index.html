@@ -1374,15 +1374,30 @@
     // ==========================================
     
     let publishCallback = null;
+
+    // Validasi tanggal sebelum publish
+function validateNewsDate() {
+    const dateInput = document.getElementById('newsDate');
+    const selectedDate = new Date(dateInput.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    function publishNews() {
-      const title = document.getElementById('newsTitle').value.trim();
-      const content = document.getElementById('newsContent').value.trim();
-      
-      if (!title || !content) {
+    if (selectedDate > today) {
+        showToast('⚠️ Tanggal tidak boleh di masa depan! Menggunakan tanggal hari ini.', 'warning');
+        dateInput.value = today.toISOString().split('T')[0];
+        return false;
+    }
+    return true;
+}
+    
+function publishNews() {
+    const title = document.getElementById('newsTitle').value.trim();
+    const content = document.getElementById('newsContent').value.trim();
+    
+    if (!title || !content) {
         showToast('Judul dan konten harus diisi!', 'error');
         return;
-      }
+    }
       
       if (!StorageManager.hasConfig()) {
         showToast('Setup belum dilakukan! Silakan refresh dan setup terlebih dahulu.', 'error');
