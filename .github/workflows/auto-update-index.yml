@@ -16,51 +16,24 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        
-    - name: Generate updated index.html
+    - name: Update index.html
       run: |
-        node -e "
-        const fs = require('fs');
+        # Read current news data
+        NEWS_DATA=$(cat data/news.json)
         
-        // Read news data
-        const newsData = JSON.parse(fs.readFileSync('data/news.json', 'utf8'));
-        const news = newsData.news || [];
+        # Extract first news item
+        TITLE=$(echo "$NEWS_DATA" | jq -r '.news[0].title // "Tidak ada berita"')
+        CATEGORY=$(echo "$NEWS_DATA" | jq -r '.news[0].category // "Umum"')
+        DATE=$(echo "$NEWS_DATA" | jq -r '.news[0].date // "2025-10-31"')
+        CONTENT=$(echo "$NEWS_DATA" | jq -r '.news[0].content // "Tidak ada konten"')
+        NEWS_COUNT=$(echo "$NEWS_DATA" | jq -r '.news | length // 0')
         
-        // Generate news HTML
-        const newsHTML = news.map(item => \`
-                <div class="news-card bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div class="h-48 bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center">
-                        <i class="fas fa-newspaper text-white text-4xl"></i>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center text-sm text-gray-500 mb-2">
-                            <i class="fas fa-calendar mr-2"></i>
-                            \${new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                        </div>
-                        <span class="inline-block bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full mb-3">
-                            \${item.category}
-                        </span>
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">\${item.title}</h3>
-                        <p class="text-gray-600 mb-4">\${item.content}</p>
-                        \${item.tags ? \`
-                            <div class="flex flex-wrap gap-2">
-                                \${item.tags.split(',').map(tag => \`
-                                    <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
-                                        \${tag.trim()}
-                                    </span>
-                                \`).join('')}
-                            </div>
-                        \` : ''}
-                    </div>
-                </div>
-        \`).join('');
+        # Format date
+        FORMATTED_DATE=$(date -d "$DATE" "+%d %B %Y" 2>/dev/null || echo "31 Oktober 2025")
         
-        // Generate complete index.html
-        const indexHTML = \`<!DOCTYPE html>
+        # Create index.html with hardcoded news
+        cat > index.html << 'EOF'
+        <!DOCTYPE html>
         <html lang="id">
         <head>
             <meta charset="UTF-8">
@@ -129,28 +102,62 @@ jobs:
                         </p>
                         <div class="mt-4">
                             <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm">
-                                <i class="fas fa-sync-alt mr-1"></i>Update: \${new Date().toLocaleString('id-ID')}
+                                <i class="fas fa-sync-alt mr-1"></i>Update: $(date '+%d %B %Y %H:%M')
                             </span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        \${newsHTML || \`
-                            <div class="text-center col-span-full py-12">
-                                <i class="fas fa-newspaper text-4xl text-gray-400 mb-4"></i>
-                                <p class="text-gray-600">Belum ada berita tersedia</p>
+                        <div class="news-card bg-white rounded-lg shadow-lg overflow-hidden">
+                            <div class="h-48 bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center">
+                                <i class="fas fa-newspaper text-white text-4xl"></i>
                             </div>
-                        \`}
+                            <div class="p-6">
+                                <div class="flex items-center text-sm text-gray-500 mb-2">
+                                    <i class="fas fa-calendar mr-2"></i>
+        EOF
+        
+        # Add the dynamic news content
+        echo "                                $FORMATTED_DATE" >> index.html
+        echo "                            </div>" >> index.html
+        echo "                            <span class=\"inline-block bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full mb-3\">" >> index.html
+        echo "                                $CATEGORY" >> index.html
+        echo "                            </span>" >> index.html
+        echo "                            <h3 class=\"text-xl font-bold text-gray-800 mb-3\">$TITLE</h3>" >> index.html
+        echo "                            <p class=\"text-gray-600 mb-4\">$CONTENT</p>" >> index.html
+        
+        # Close the news card
+        cat >> index.html << 'EOF'
+                            </div>
+                        </div>
+                        
+                        <!-- Stats Card -->
+                        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
+                            <div class="text-center">
+                                <i class="fas fa-chart-line text-5xl mb-4"></i>
+                                <h3 class="text-2xl font-bold mb-2">Statistik Berita</h3>
+                                <div class="space-y-2">
+        EOF
+        
+        echo "                                    <p class=\"text-lg\">📰 Total Berita: $NEWS_COUNT</p>" >> index.html
+        echo "                                    <p class=\"text-lg\">📅 Update Terbaru: Hari ini</p>" >> index.html
+        echo "                                    <p class=\"text-lg\">✅ Status: Published</p>" >> index.html
+        
+        cat >> index.html << 'EOF'
+                                </div>
+                                <div class="mt-6 p-4 bg-white bg-opacity-20 rounded-lg">
+                                    <p class="text-sm">Website updated automatically!</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mt-12 bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-center">
                         <div class="flex items-center justify-center gap-2 text-emerald-700 mb-2">
-                            <i class="fas fa-chart-bar text-2xl"></i>
-                            <span class="font-semibold text-lg">Statistik Berita</span>
+                            <i class="fas fa-check-circle text-2xl"></i>
+                            <span class="font-semibold text-lg">Berhasil! Berita Terbaru Tampil</span>
                         </div>
-                        <p class="text-gray-600">
-                            Total \${news.length} berita tersedia
-                        </p>
+                        <p class="text-gray-600">Berita telah diperbarui secara otomatis dari news.json</p>
                     </div>
                 </div>
             </section>
@@ -193,7 +200,7 @@ jobs:
                             &copy; 2025 SMPIT DAARUT TARBIYAH INDONESIA. All rights reserved.
                         </p>
                         <p class="text-emerald-200 text-sm mt-2">
-                            <i class="fas fa-robot mr-1"></i>Auto-generated from news.json
+                            <i class="fas fa-robot mr-1"></i>Auto-generated from news.json | Last update: $(date)
                         </p>
                     </div>
                 </div>
@@ -210,25 +217,27 @@ jobs:
                         }
                     });
                 });
+                
+                console.log('✅ SMPIT DTI Website - Auto-updated');
+                console.log('📰 News loaded:', '$TITLE');
+                console.log('🤖 Generated by GitHub Actions');
             </script>
         </body>
-        </html>\`;
+        </html>
+        EOF
         
-        // Write updated index.html
-        fs.writeFileSync('index.html', indexHTML);
-        console.log('✅ index.html updated with latest news');
-        "
+        echo "✅ index.html updated with news: $TITLE"
         
     - name: Commit and push changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add index.html
-        git diff --staged --quiet || git commit -m "🤖 Auto-update index.html with latest news
+        git diff --staged --quiet || git commit -m "🤖 Auto-update index.html
         
-        📰 Updated automatically from news.json
-        🔄 Generated on: $(date)
-        📊 News count: $(node -e "console.log(JSON.parse(require('fs').readFileSync('data/news.json', 'utf8')).news.length)")
+        📰 News: $TITLE
+        📅 Date: $FORMATTED_DATE
+        🔄 Auto-generated on: $(date)
         
         🚀 This commit was triggered by news.json update"
         git push
