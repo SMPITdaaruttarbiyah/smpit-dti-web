@@ -682,7 +682,10 @@
   }
   
   .quote-text {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
+  }
+    .quote-author {
+    font-size: 1rem;
   }
 }
 
