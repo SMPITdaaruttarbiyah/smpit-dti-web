@@ -400,13 +400,22 @@
   padding: 3rem 0 1rem;
 }
 
-.footer-content {
+/* Pindahkan grid ke .footer .container agar
+   kolom kiri (profil+Ikuti Kami), Link Cepat, Program Unggulan
+   tersusun sejajar di desktop */
+.footer .container {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   gap: 3rem;
-  margin-bottom: 2rem;
+  align-items: start;
 }
 
+/* .footer-content cukup sebagai wrapper kolom kiri */
+.footer-content {
+  margin: 0;         /* hilangkan margin bawah agar pakai gap grid */
+}
+
+/* Judul section */
 .footer-section h4 {
   font-size: 1.1rem;
   font-weight: 600;
@@ -438,6 +447,7 @@
 .footer-section ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .footer-section ul li {
@@ -481,16 +491,39 @@
   box-shadow: 0 8px 16px rgba(30, 158, 68, 0.3);
 }
 
+/* Footer-bottom full width di bawah grid */
 .footer-bottom {
+  grid-column: 1 / -1;          /* bentang seluruh kolom */
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 1.5rem;
   text-align: center;
+  margin-top: 0.5rem;
 }
 
 .footer-bottom p {
   color: rgba(255, 255, 255, 0.6);
   margin: 0;
   font-size: 0.9rem;
+}
+
+/* Responsif */
+@media (max-width: 992px) {
+  /* 2 kolom di tablet */
+  .footer .container {
+    grid-template-columns: 1.5fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  /* 1 kolom di mobile */
+  .footer .container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .footer-bottom {
+    grid-column: 1;
+  }
 }
 
 /* ===================================
