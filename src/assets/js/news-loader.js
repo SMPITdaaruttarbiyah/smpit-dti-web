@@ -1,153 +1,241 @@
-// Dynamic News Loader for SMPIT DTI
-class NewsLoader {
-    constructor() {
-        this.newsContainer = document.querySelector('.news-grid');
-        this.loadingIndicator = this.createLoadingIndicator();
-        this.errorIndicator = this.createErrorIndicator();
-        this.init();
-    }
-
-    init() {
-        this.loadNews();
-        // Auto refresh every 5 minutes
-        setInterval(() => this.loadNews(), 5 * 60 * 1000);
-    }
-
-    createLoadingIndicator() {
-        const loader = document.createElement('div');
-        loader.className = 'news-loading';
-        loader.innerHTML = `
-            <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
-                <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #10b981; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                <p style="margin-top: 16px; color: #6b7280;">Memuat berita terbaru...</p>
-            </div>
-            <style>
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            </style>
-        `;
-        return loader;
-    }
-
-    createErrorIndicator() {
-        const error = document.createElement('div');
-        error.className = 'news-error';
-        error.innerHTML = `
-            <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
-                <div style="color: #ef4444; font-size: 48px; margin-bottom: 16px;">⚠️</div>
-                <h3 style="color: #dc2626; margin-bottom: 8px;">Gagal Memuat Berita</h3>
-                <p style="color: #6b7280; margin-bottom: 16px;">Terjadi kesalahan saat mengambil data berita.</p>
-                <button onclick="location.reload()" style="background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Coba Lagi</button>
-            </div>
-        `;
-        return error;
-    }
-
-    async loadNews() {
-        if (!this.newsContainer) return;
-
-        // Show loading
-        this.newsContainer.innerHTML = '';
-        this.newsContainer.appendChild(this.loadingIndicator);
-
+// News Loader for SMPIT DTI Website
+(function() {
+    'use strict';
+    
+    // Configuration
+    const CONFIG = {
+        owner: 'YOUR_GITHUB_USERNAME', // Ganti dengan username GitHub Anda
+        repo: 'smpit-dti-web',
+        branch: 'main',
+        newsPath: 'data/news.json',
+        maxNews: 6, // Maksimal berita yang ditampilkan
+        cacheTime: 5 * 60 * 1000 // Cache 5 menit
+    };
+    
+    // Cache management
+    const cache = {
+        data: null,
+        timestamp: null,
+        
+        isValid() {
+            return this.data && this.timestamp && 
+                   (Date.now() - this.timestamp < CONFIG.cacheTime);
+        },
+        
+        set(data) {
+            this.data = data;
+            this.timestamp = Date.now();
+        },
+        
+        get() {
+            return this.isValid() ? this.data : null;
+        }
+    };
+    
+    // Fetch news from GitHub
+    async function fetchNews() {
         try {
-            const response = await fetch('https://raw.githubusercontent.com/SMPITdaaruttarbiyah/smpit-dti-web/main/assets/data/news.json');
+            // Check cache first
+            const cached = cache.get();
+            if (cached) {
+                console.log('📦 Using cached news data');
+                return cached;
+            }
+            
+            console.log('🔄 Fetching news from GitHub...');
+            
+            // Use raw GitHub content URL (no authentication needed for public repos)
+            const url = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.newsPath}`;
+            
+            const response = await fetch(url, {
+                cache: 'no-cache', // Bypass browser cache
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
             
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-
+            
             const data = await response.json();
             
-            if (data.news && data.news.length > 0) {
-                this.displayNews(data.news);
-            } else {
-                this.displayEmpty();
-            }
+            // Cache the data
+            cache.set(data);
+            
+            console.log(`✅ Fetched ${data.news?.length || 0} news items`);
+            return data;
+            
         } catch (error) {
-            console.error('Error loading news:', error);
-            this.newsContainer.innerHTML = '';
-            this.newsContainer.appendChild(this.errorIndicator);
+            console.error('❌ Error fetching news:', error);
+            
+            // Try to load from localStorage as fallback
+            const fallback = localStorage.getItem('news_fallback');
+            if (fallback) {
+                console.log('📱 Using localStorage fallback');
+                return JSON.parse(fallback);
+            }
+            
+            return null;
         }
     }
-
-    displayNews(newsItems) {
-        this.newsContainer.innerHTML = '';
+    
+    // Format date to Indonesian format
+    function formatDate(dateString) {
+        const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        };
         
-        newsItems.slice(0, 6).forEach((item, index) => {
-            const newsCard = this.createNewsCard(item, index);
-            this.newsContainer.appendChild(newsCard);
-        });
+        try {
+            const date = new Date(dateString);
+            // Check if date is valid and not in the future
+            if (isNaN(date.getTime()) || date > new Date()) {
+                return new Date().toLocaleDateString('id-ID', options);
+            }
+            return date.toLocaleDateString('id-ID', options);
+        } catch (error) {
+            return new Date().toLocaleDateString('id-ID', options);
+        }
     }
-
-    displayEmpty() {
-        this.newsContainer.innerHTML = `
-            <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
-                <div style="color: #9ca3af; font-size: 48px; margin-bottom: 16px;">📰</div>
-                <h3 style="color: #6b7280; margin-bottom: 8px;">Belum Ada Berita</h3>
-                <p style="color: #9ca3af;">Belum ada berita tersedia saat ini.</p>
-            </div>
-        `;
+    
+    // Truncate text
+    function truncateText(text, maxLength = 150) {
+        if (!text) return '';
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength).trim() + '...';
     }
-
-    createNewsCard(item, index) {
-        const article = document.createElement('article');
-        article.className = 'news-card';
-        article.setAttribute('data-aos', 'fade-up');
-        article.setAttribute('data-aos-delay', (index + 1) * 100);
-
-        const formattedDate = this.formatDate(item.date);
-        const tags = item.tags ? this.createTags(item.tags) : '';
-
-        article.innerHTML = `
-            <div class="news-image">
-                ${item.image ? 
-                    `<img src="${item.image}" alt="${item.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/smpitdti${item.id}/400/250'">` :
-                    `<img src="https://picsum.photos/seed/smpitdti${item.id}/400/250" alt="${item.title}" loading="lazy">`
-                }
-                <div class="news-date">${formattedDate}</div>
-                ${item.category ? `<div class="news-category">${item.category}</div>` : ''}
-            </div>
-            <div class="news-content">
-                <h3>${item.title}</h3>
-                <p>${item.content}</p>
-                ${tags}
-                <a href="#" class="news-link" onclick="event.preventDefault(); alert('Berita: ${item.title.replace(/'/g, "\\'")}');">Baca Selengkapnya →</a>
-            </div>
-        `;
-
-        return article;
-    }
-
-    formatDate(dateString) {
-        const date = new Date(dateString);
-        const options = { day: 'numeric', month: 'short', year: 'numeric' };
-        return date.toLocaleDateString('id-ID', options);
-    }
-
-    createTags(tagsString) {
-        if (!tagsString) return '';
+    
+    // Create news card HTML
+    function createNewsCard(news) {
+        const imageHTML = news.image 
+            ? `<img src="${news.image}" alt="${news.title}" class="news-image" loading="lazy">`
+            : `<div class="news-placeholder-image">
+                 <span>📰</span>
+               </div>`;
         
-        const tags = tagsString.split(',').slice(0, 3); // Max 3 tags
+        // Category badge colors
+        const categoryColors = {
+            'Pengumuman': 'badge-primary',
+            'Kegiatan': 'badge-success',
+            'Prestasi': 'badge-warning',
+            'Umum': 'badge-info'
+        };
+        
+        const badgeClass = categoryColors[news.category] || 'badge-secondary';
+        
         return `
-            <div class="news-tags">
-                ${tags.map(tag => `<span class="news-tag">${tag.trim()}</span>`).join('')}
+            <div class="news-card" data-aos="fade-up">
+                <div class="news-card-image">
+                    ${imageHTML}
+                    <span class="news-category ${badgeClass}">${news.category || 'Umum'}</span>
+                </div>
+                <div class="news-card-content">
+                    <div class="news-date">
+                        <i>📅</i> ${formatDate(news.date)}
+                    </div>
+                    <h3 class="news-title">${news.title}</h3>
+                    <p class="news-excerpt">${truncateText(news.content)}</p>
+                    <a href="#" class="news-read-more" onclick="readMore('${news.id}'); return false;">
+                        Baca Selengkapnya →
+                    </a>
+                </div>
             </div>
         `;
     }
-}
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Check if we're on the news section
-    if (document.querySelector('#news')) {
-        new NewsLoader();
+    
+    // Render news to the page
+    function renderNews(data) {
+        const container = document.querySelector('#news .news-grid');
+        
+        if (!container) {
+            console.error('❌ News container not found');
+            return;
+        }
+        
+        if (!data || !data.news || data.news.length === 0) {
+            container.innerHTML = `
+                <div class="no-news">
+                    <p>📰 Belum ada berita tersedia.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Filter out future dates and sort by date (newest first)
+        const today = new Date();
+        const validNews = data.news
+            .filter(news => {
+                const newsDate = new Date(news.date);
+                return newsDate <= today;
+            })
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, CONFIG.maxNews);
+        
+        if (validNews.length === 0) {
+            container.innerHTML = `
+                <div class="no-news">
+                    <p>📰 Belum ada berita tersedia.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Create news cards
+        const newsHTML = validNews.map(news => createNewsCard(news)).join('');
+        container.innerHTML = newsHTML;
+        
+        // Store in localStorage as fallback
+        localStorage.setItem('news_fallback', JSON.stringify(data));
+        
+        // Re-initialize AOS for new elements
+        if (typeof AOS !== 'undefined') {
+            AOS.refresh();
+        }
     }
-});
-
-// Also initialize when AOS is ready (for dynamic content)
-if (window.AOS) {
-    AOS.refresh();
-}
+    
+    // Read more function (can be expanded to show modal or navigate)
+    window.readMore = function(newsId) {
+        console.log('Read more:', newsId);
+        // You can implement modal or navigation here
+        alert('Fitur baca selengkapnya akan segera tersedia!');
+    };
+    
+    // Initialize
+    async function init() {
+        console.log('🚀 Initializing news loader...');
+        
+        const newsData = await fetchNews();
+        
+        if (newsData) {
+            renderNews(newsData);
+        } else {
+            console.error('❌ Failed to load news');
+            const container = document.querySelector('#news .news-grid');
+            if (container) {
+                container.innerHTML = `
+                    <div class="no-news">
+                        <p>⚠️ Gagal memuat berita. Silakan coba lagi nanti.</p>
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    // Auto-refresh news every 5 minutes
+    setInterval(async () => {
+        console.log('🔄 Auto-refreshing news...');
+        const newsData = await fetchNews();
+        if (newsData) {
+            renderNews(newsData);
+        }
+    }, 5 * 60 * 1000);
+    
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
