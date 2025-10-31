@@ -1,7 +1,19 @@
 {
   "version": "2.0.0",
-  "lastUpdated": "2025-10-31T08:55:20.169Z",
+  "lastUpdated": "2025-10-31T08:57:14.805Z",
   "website": "SMPIT DAARUT TARBIYAH INDONESIA",
-  "totalNews": 0,
-  "news": []
+  "totalNews": 1,
+  "news": [
+    {
+      "id": "1761901034087",
+      "title": "SASA",
+      "category": "Pengumuman",
+      "date": "2025-10-31",
+      "content": "SASAS",
+      "image": "",
+      "published": true,
+      "createdAt": "2025-10-31T08:57:14.087Z",
+      "updatedAt": "2025-10-31T08:57:14.087Z"
+    }
+  ]
 }
