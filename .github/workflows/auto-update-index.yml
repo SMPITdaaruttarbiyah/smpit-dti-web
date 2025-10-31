@@ -4,7 +4,12 @@ on:
   push:
     paths:
       - 'data/news.json'
+    branches:
+      - main
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   update-index:
@@ -12,26 +17,23 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
         
     - name: Update index.html
       run: |
-        # Read current news data
         NEWS_DATA=$(cat data/news.json)
         
-        # Extract first news item
         TITLE=$(echo "$NEWS_DATA" | jq -r '.news[0].title // "Tidak ada berita"')
         CATEGORY=$(echo "$NEWS_DATA" | jq -r '.news[0].category // "Umum"')
         DATE=$(echo "$NEWS_DATA" | jq -r '.news[0].date // "2025-10-31"')
         CONTENT=$(echo "$NEWS_DATA" | jq -r '.news[0].content // "Tidak ada konten"')
         NEWS_COUNT=$(echo "$NEWS_DATA" | jq -r '.news | length // 0')
         
-        # Format date
         FORMATTED_DATE=$(date -d "$DATE" "+%d %B %Y" 2>/dev/null || echo "31 Oktober 2025")
         
-        # Create index.html with hardcoded news
         cat > index.html << 'EOF'
         <!DOCTYPE html>
         <html lang="id">
@@ -48,7 +50,6 @@ jobs:
             </style>
         </head>
         <body class="bg-gray-50">
-            <!-- Header -->
             <header class="bg-white shadow-md sticky top-0 z-50">
                 <nav class="container mx-auto px-4 py-4">
                     <div class="flex items-center justify-between">
@@ -71,7 +72,6 @@ jobs:
                 </nav>
             </header>
 
-            <!-- Hero Section -->
             <section id="home" class="hero-gradient text-white py-20">
                 <div class="container mx-auto px-4 text-center">
                     <div class="w-32 h-32 bg-white rounded-full mx-auto mb-8 flex items-center justify-center">
@@ -92,7 +92,6 @@ jobs:
                 </div>
             </section>
 
-            <!-- News Section -->
             <section id="news" class="py-16 bg-gray-50">
                 <div class="container mx-auto px-4">
                     <div class="text-center mb-12">
@@ -117,7 +116,6 @@ jobs:
                                     <i class="fas fa-calendar mr-2"></i>
         EOF
         
-        # Add the dynamic news content
         echo "                                $FORMATTED_DATE" >> index.html
         echo "                            </div>" >> index.html
         echo "                            <span class=\"inline-block bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full mb-3\">" >> index.html
@@ -126,12 +124,10 @@ jobs:
         echo "                            <h3 class=\"text-xl font-bold text-gray-800 mb-3\">$TITLE</h3>" >> index.html
         echo "                            <p class=\"text-gray-600 mb-4\">$CONTENT</p>" >> index.html
         
-        # Close the news card
         cat >> index.html << 'EOF'
                             </div>
                         </div>
                         
-                        <!-- Stats Card -->
                         <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
                             <div class="text-center">
                                 <i class="fas fa-chart-line text-5xl mb-4"></i>
@@ -140,13 +136,13 @@ jobs:
         EOF
         
         echo "                                    <p class=\"text-lg\">📰 Total Berita: $NEWS_COUNT</p>" >> index.html
-        echo "                                    <p class=\"text-lg\">📅 Update Terbaru: Hari ini</p>" >> index.html
+        echo "                                    <p class=\"text-lg\">📅 Update: Hari ini</p>" >> index.html
         echo "                                    <p class=\"text-lg\">✅ Status: Published</p>" >> index.html
         
         cat >> index.html << 'EOF'
                                 </div>
                                 <div class="mt-6 p-4 bg-white bg-opacity-20 rounded-lg">
-                                    <p class="text-sm">Website updated automatically!</p>
+                                    <p class="text-sm">Auto-updated!</p>
                                 </div>
                             </div>
                         </div>
@@ -155,14 +151,13 @@ jobs:
                     <div class="mt-12 bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-center">
                         <div class="flex items-center justify-center gap-2 text-emerald-700 mb-2">
                             <i class="fas fa-check-circle text-2xl"></i>
-                            <span class="font-semibold text-lg">Berhasil! Berita Terbaru Tampil</span>
+                            <span class="font-semibold text-lg">Berita Terbaru</span>
                         </div>
-                        <p class="text-gray-600">Berita telah diperbarui secara otomatis dari news.json</p>
+                        <p class="text-gray-600">Diperbarui otomatis dari news.json</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Footer -->
             <footer class="bg-emerald-800 text-white py-12">
                 <div class="container mx-auto px-4">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -200,14 +195,13 @@ jobs:
                             &copy; 2025 SMPIT DAARUT TARBIYAH INDONESIA. All rights reserved.
                         </p>
                         <p class="text-emerald-200 text-sm mt-2">
-                            <i class="fas fa-robot mr-1"></i>Auto-generated from news.json | Last update: $(date)
+                            <i class="fas fa-robot mr-1"></i>Auto-generated | Last update: $(date)
                         </p>
                     </div>
                 </div>
             </footer>
 
             <script>
-                // Smooth scrolling
                 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                     anchor.addEventListener('click', function (e) {
                         e.preventDefault();
@@ -219,7 +213,7 @@ jobs:
                 });
                 
                 console.log('✅ SMPIT DTI Website - Auto-updated');
-                console.log('📰 News loaded:', '$TITLE');
+                console.log('📰 News loaded');
                 console.log('🤖 Generated by GitHub Actions');
             </script>
         </body>
@@ -228,16 +222,27 @@ jobs:
         
         echo "✅ index.html updated with news: $TITLE"
         
-    - name: Commit and push changes
+    - name: Configure Git
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add index.html
-        git diff --staged --quiet || git commit -m "🤖 Auto-update index.html
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        📰 News: $TITLE
-        📅 Date: $FORMATTED_DATE
+    - name: Commit and Push
+      run: |
+        git add index.html
+        
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+          exit 0
+        fi
+        
+        git commit -m "🤖 Auto-update index.html
+
+        📰 News: Latest update
         🔄 Auto-generated on: $(date)
         
-        🚀 This commit was triggered by news.json update"
-        git push
+        🚀 Triggered by news.json update"
+        
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
