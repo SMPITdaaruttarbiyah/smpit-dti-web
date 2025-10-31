@@ -791,7 +791,7 @@ body {
 }
 
 /* ==========================================
-   NEWS SECTION - PROFESSIONAL DESIGN
+              NEWS SECTION
    ========================================== */
 
 #news {
@@ -988,29 +988,6 @@ body {
     font-size: 0.95rem;
 }
 
-/* Loading Animation */
-.news-loading {
-    grid-column: 1 / -1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 5rem 2rem;
-}
-
-.news-spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #0A3D73;
-    border-radius: 50%;
-    animation: newsSpinAnimation 1s linear infinite;
-}
-
-@keyframes newsSpinAnimation {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 /* News Detail Modal */
 .news-modal {
     display: none;
@@ -1172,17 +1149,5 @@ body {
     
     .news-card-image {
         height: 180px;
-    }
-}
-
-/* Print Styles */
-@media print {
-    .news-card {
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
-    
-    .news-read-more {
-        display: none;
     }
 }
