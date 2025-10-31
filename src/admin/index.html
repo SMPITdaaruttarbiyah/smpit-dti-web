@@ -278,12 +278,6 @@
       color: #856404;
     }
     
-    .alert-danger {
-      background: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-    }
-    
     .guide-box {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -455,7 +449,7 @@
     .modal {
       display: none;
       position: fixed;
-      top: 0;
+      top: 0,
       left: 0;
       right: 0;
       bottom: 0;
@@ -639,35 +633,35 @@
           </div>
         </div>
 
-       <!-- Step 1: GitHub Token -->
-<div class="wizard-content" id="stepContent1">
-  <div class="guide-box">
-    <h3>📝 Cara Buat GitHub Token:</h3>
-    <ol>
-      <li>Buka <a href="https://github.com/settings/tokens/new" target="_blank">link ini</a></li>
-      <li>Login ke GitHub</li>
-      <li><strong>Note:</strong> <code>SMPIT DTI Admin</code></li>
-      <li><strong>Expiration:</strong> <code>No expiration</code></li>
-      <li><strong>Select scopes:</strong> Centang <code>repo</code></li>
-      <li>Klik <strong>"Generate token"</strong></li>
-      <li>Copy token (ghp_...)</li>
-    </ol>
-  </div>
+        <!-- Step 1: GitHub Token -->
+        <div class="wizard-content" id="stepContent1">
+          <div class="guide-box">
+            <h3>📝 Cara Buat GitHub Token:</h3>
+            <ol>
+              <li>Buka <a href="https://github.com/settings/tokens/new" target="_blank">link ini</a></li>
+              <li>Login ke GitHub</li>
+              <li><strong>Note:</strong> <code>SMPIT DTI Admin</code></li>
+              <li><strong>Expiration:</strong> <code>No expiration</code></li>
+              <li><strong>Select scopes:</strong> Centang <code>repo</code></li>
+              <li>Klik <strong>"Generate token"</strong></li>
+              <li>Copy token (ghp_... atau github_pat_...)</li>
+            </ol>
+          </div>
 
-  <form autocomplete="off">
-    <div class="form-group">
-      <label>GitHub Personal Access Token *</label>
-      <div class="password-input-group">
-        <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-        <button class="toggle-password" type="button" onclick="togglePasswordVisibility('githubToken')">👁️</button>
-      </div>
-    </div>
-  </form>
+          <form autocomplete="off">
+            <div class="form-group">
+              <label>GitHub Personal Access Token *</label>
+              <div class="password-input-group">
+                <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx / github_pat_xxx" autocomplete="off">
+                <button class="toggle-password" type="button" onclick="togglePasswordVisibility('githubToken')">👁️</button>
+              </div>
+            </div>
+          </form>
 
-  <button class="btn btn-primary" type="button" onclick="nextStep(2)">
-    Lanjut →
-  </button>
-</div>
+          <button class="btn btn-primary" type="button" onclick="nextStep(2)">
+            Lanjut →
+          </button>
+        </div>
 
         <div class="wizard-content" id="stepContent2" style="display:none;">
           <div class="form-group">
@@ -691,35 +685,35 @@
           </div>
         </div>
 
-     <div class="wizard-content" id="stepContent3" style="display:none;">
-  <div class="alert alert-warning">
-    <span>🔐</span>
-    <span><strong>Penting:</strong> Jangan lupa password ini!</span>
-  </div>
+        <div class="wizard-content" id="stepContent3" style="display:none;">
+          <div class="alert alert-warning">
+            <span>🔐</span>
+            <span><strong>Penting:</strong> Jangan lupa password ini!</span>
+          </div>
 
-  <form autocomplete="off">
-    <div class="form-group">
-      <label>Buat Password Master *</label>
-      <div class="password-input-group">
-        <input type="password" id="masterPassword" placeholder="Minimal 8 karakter" autocomplete="new-password">
-        <button class="toggle-password" type="button" onclick="togglePasswordVisibility('masterPassword')">👁️</button>
-      </div>
-    </div>
+          <form autocomplete="off">
+            <div class="form-group">
+              <label>Buat Password Master *</label>
+              <div class="password-input-group">
+                <input type="password" id="masterPassword" placeholder="Minimal 8 karakter" autocomplete="new-password">
+                <button class="toggle-password" type="button" onclick="togglePasswordVisibility('masterPassword')">👁️</button>
+              </div>
+            </div>
 
-    <div class="form-group">
-      <label>Ulangi Password *</label>
-      <div class="password-input-group">
-        <input type="password" id="confirmPassword" placeholder="Ketik ulang password" autocomplete="new-password">
-        <button class="toggle-password" type="button" onclick="togglePasswordVisibility('confirmPassword')">👁️</button>
-      </div>
-    </div>
-  </form>
+            <div class="form-group">
+              <label>Ulangi Password *</label>
+              <div class="password-input-group">
+                <input type="password" id="confirmPassword" placeholder="Ketik ulang password" autocomplete="new-password">
+                <button class="toggle-password" type="button" onclick="togglePasswordVisibility('confirmPassword')">👁️</button>
+              </div>
+            </div>
+          </form>
 
-  <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-    <button class="btn btn-secondary" type="button" onclick="prevStep(2)">← Kembali</button>
-    <button class="btn btn-success" type="button" onclick="completeSetup()">🚀 Selesai</button>
-  </div>
-</div>
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button class="btn btn-secondary" type="button" onclick="prevStep(2)">← Kembali</button>
+            <button class="btn btn-success" type="button" onclick="completeSetup(this)">🚀 Selesai</button>
+          </div>
+        </div>
 
         <div class="wizard-content" id="stepContent4" style="display:none;">
           <div style="text-align: center; padding: 2rem;">
@@ -858,44 +852,39 @@
   </div>
 
   <script>
+    // Ganti ini dengan key kamu (disediakan)
     const IMGBB_API_KEY = '4be44fd89ad788278546f7ca615f7fdd';
     
+    // Helper Base64 aman UTF-8
     const Base64 = {
       encode(str) {
         const utf8Bytes = new TextEncoder().encode(str);
         let binaryString = '';
-        utf8Bytes.forEach(byte => {
-          binaryString += String.fromCharCode(byte);
-        });
+        utf8Bytes.forEach(byte => { binaryString += String.fromCharCode(byte); });
         return btoa(binaryString);
       },
-      
       decode(base64) {
         const binaryString = atob(base64);
         const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
+        for (let i = 0; i < binaryString.length; i++) { bytes[i] = binaryString.charCodeAt(i); }
         return new TextDecoder().decode(bytes);
       }
     };
 
+    // Crypto sederhana untuk localStorage (bukan keamanan tingkat tinggi)
     const CryptoManager = {
       encrypt(text, password) {
         const key = this.deriveKey(password);
         const salt = this.generateSalt();
         let encrypted = salt + '|';
-        
         for (let i = 0; i < text.length; i++) {
           const charCode = text.charCodeAt(i);
           const keyCode = key.charCodeAt(i % key.length);
           const saltCode = salt.charCodeAt(i % salt.length);
           encrypted += String.fromCharCode((charCode ^ keyCode ^ saltCode) % 65536);
         }
-        
         return Base64.encode(encrypted);
       },
-      
       decrypt(encrypted, password) {
         try {
           const key = this.deriveKey(password);
@@ -903,20 +892,17 @@
           const [salt, ...rest] = decoded.split('|');
           const cipher = rest.join('|');
           let decrypted = '';
-          
           for (let i = 0; i < cipher.length; i++) {
             const charCode = cipher.charCodeAt(i);
             const keyCode = key.charCodeAt(i % key.length);
             const saltCode = salt.charCodeAt(i % salt.length);
             decrypted += String.fromCharCode(charCode ^ keyCode ^ saltCode);
           }
-          
           return decrypted;
         } catch (error) {
           return null;
         }
       },
-      
       deriveKey(password) {
         let key = '';
         for (let i = 0; i < password.length; i++) {
@@ -924,7 +910,6 @@
         }
         return key + 'SMPIT-DTI-2025';
       },
-      
       generateSalt() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let salt = '';
@@ -933,7 +918,6 @@
         }
         return salt;
       },
-      
       hash(text) {
         let hash = 0;
         for (let i = 0; i < text.length; i++) {
@@ -945,56 +929,70 @@
       }
     };
 
-   async function uploadToImgBB(file) {
-  try {
-    console.log('📤 Uploading to ImgBB...');
-    console.log('File:', file.name, '-', (file.size / 1024).toFixed(2), 'KB');
-    
-    const base64 = await fileToBase64(file);
-    const base64Data = base64.split(',')[1];
-    
-    const formData = new FormData();
-    formData.append('key', IMGBB_API_KEY);
-    formData.append('image', base64Data);
-    
-    const response = await fetch('https://api.imgbb.com/1/upload', {
-      method: 'POST',
-      body: formData
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('ImgBB error:', errorText);
-      throw new Error(`Upload failed: ${response.status}`);
+    // Util kecil
+    const isHttpUrl = (u) => {
+      if (typeof u !== 'string') return false;
+      try { const x = new URL(u); return x.protocol === 'http:' || x.protocol === 'https:'; } catch { return false; }
+    };
+
+    function testImage(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = reject;
+        img.src = url;
+      });
     }
-    
-    const data = await response.json();
-    console.log('ImgBB response:', data);
-    
-    if (data.success && data.data && data.data.url) {
-      const imageUrl = data.data.url; // URL utama yang valid
-      
-      // VALIDASI URL
-      if (!imageUrl.startsWith('https://i.ibb.co/')) {
-        console.error('Invalid ImgBB URL format:', imageUrl);
-        throw new Error('Invalid ImgBB URL format');
+
+    // Upload ke ImgBB sesuai API v1 (display_url / image.url)
+    async function uploadToImgBB(file) {
+      try {
+        console.log('📤 Uploading to ImgBB...');
+        console.log('File:', file.name, '-', (file.size / 1024).toFixed(2), 'KB');
+        
+        const base64 = await fileToBase64(file);
+        const base64Data = base64.split(',')[1];
+        
+        const formData = new FormData();
+        formData.append('key', IMGBB_API_KEY);
+        formData.append('image', base64Data);
+        // Optional: formData.append('name', file.name);
+        // Optional: formData.append('expiration', '0');
+
+        const response = await fetch('https://api.imgbb.com/1/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('ImgBB error:', errorText);
+          throw new Error(`Upload failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('ImgBB response:', data);
+
+        if (!data.success) {
+          throw new Error(data.error?.message || 'Upload failed');
+        }
+
+        // Sesuai contoh respons: gunakan display_url atau image.url
+        const directUrl = data.data.display_url || data.data.image?.url || data.data.url;
+        if (!isHttpUrl(directUrl)) throw new Error('URL ImgBB tidak valid');
+
+        console.log('✅ Upload success:', directUrl);
+        return {
+          url: directUrl,
+          displayUrl: data.data.display_url || null,
+          deleteUrl: data.data.delete_url || null
+        };
+      } catch (error) {
+        console.error('❌ ImgBB upload error:', error);
+        throw error;
       }
-      
-      console.log('✅ Upload success:', imageUrl);
-      
-      return {
-        url: imageUrl,
-        displayUrl: imageUrl, // Gunakan URL yang sama
-        deleteUrl: data.data.delete_url
-      };
-    } else {
-      throw new Error(data.error?.message || 'Upload failed');
     }
-  } catch (error) {
-    console.error('❌ ImgBB upload error:', error);
-    throw error;
-  }
-}    
+
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1004,167 +1002,168 @@
       });
     }
 
-   const GitHubAPI = {
-  config: null,
-  
-  async initialize(token, username, repo, branch) {
-    this.config = {
-      token: token,
-      owner: username,
-      repo: repo,
-      branch: branch,
-      filePath: 'data/news.json'
-    };
-    
-    console.log('🔧 GitHub API initialized:', {
-      owner: username,
-      repo: repo,
-      branch: branch
-    });
-    
-    return await this.testConnection();
-  },
-  
-  async testConnection() {
-    try {
-      const response = await fetch(
-        `https://api.github.com/repos/${this.config.owner}/${this.config.repo}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.config.token}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        }
-      );
+    const GitHubAPI = {
+      config: null,
       
-      if (response.ok) {
-        console.log('✅ GitHub connection OK');
-        return true;
-      } else {
-        console.error('❌ GitHub connection failed:', response.status);
-        return false;
-      }
-    } catch (error) {
-      console.error('❌ Connection error:', error);
-      return false;
-    }
-  },
-  
-  async getFile() {
-    try {
-      console.log('📥 Getting file from GitHub...');
-      
-      // PENTING: Tambahkan timestamp untuk bypass cache
-      const timestamp = Date.now();
-      const response = await fetch(
-        `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}?ref=${this.config.branch}&t=${timestamp}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.config.token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Cache-Control': 'no-cache'
-          }
-        }
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        const content = Base64.decode(data.content.replace(/\s/g, ''));
-        
-        console.log('✅ File retrieved, SHA:', data.sha.substring(0, 7));
-        
-        return {
-          content: JSON.parse(content),
-          sha: data.sha
+      async initialize(token, username, repo, branch) {
+        this.config = {
+          token: token,
+          owner: username,
+          repo: repo,
+          branch: branch,
+          filePath: 'data/news.json'
         };
-      } else if (response.status === 404) {
-        console.log('ℹ️ File not found, will create new');
-        return null;
-      } else {
-        const error = await response.json();
-        console.error('❌ Get file error:', error);
-        throw new Error(error.message || 'Failed to get file');
-      }
-    } catch (error) {
-      console.error('❌ Get file error:', error);
-      throw error;
-    }
-  },
-  
-  async updateFile(newsData, message = 'Update berita', retryCount = 0) {
-    const MAX_RETRIES = 3;
-    
-    try {
-      console.log('🔄 Starting GitHub update... (attempt ' + (retryCount + 1) + ')');
-      console.log('📊 News count:', newsData.length);
-      
-      // PENTING: Selalu ambil SHA terbaru sebelum update
-      const currentFile = await this.getFile();
-      
-      const dataToSave = {
-        version: '2.0.0',
-        lastUpdated: new Date().toISOString(),
-        website: 'SMPIT DAARUT TARBIYAH INDONESIA',
-        totalNews: newsData.length,
-        news: newsData
-      };
-      
-      const jsonString = JSON.stringify(dataToSave, null, 2);
-      const content = Base64.encode(jsonString);
-      
-      const body = {
-        message: message,
-        content: content,
-        branch: this.config.branch
-      };
-      
-      // PENTING: Gunakan SHA yang baru saja diambil
-      if (currentFile && currentFile.sha) {
-        body.sha = currentFile.sha;
-        console.log('🔄 Updating with SHA:', currentFile.sha.substring(0, 7));
-      } else {
-        console.log('➕ Creating new file');
-      }
-      
-      console.log('🚀 Uploading to GitHub...');
-      const response = await fetch(
-        `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${this.config.token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        }
-      );
-      
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('❌ GitHub API error:', error);
         
-        // RETRY jika 409 Conflict
-        if (response.status === 409 && retryCount < MAX_RETRIES) {
-          console.log('⚠️ Conflict detected, retrying in 2 seconds...');
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          return await this.updateFile(newsData, message, retryCount + 1);
-        }
+        console.log('🔧 GitHub API initialized:', {
+          owner: username,
+          repo: repo,
+          branch: branch
+        });
         
-        throw new Error(error.message || 'Failed to update file');
+        return await this.testConnection();
+      },
+      
+      async testConnection() {
+        try {
+          const response = await fetch(
+            `https://api.github.com/repos/${this.config.owner}/${this.config.repo}`,
+            {
+              headers: {
+                'Accept': 'application/vnd.github+json',
+                'Authorization': `Bearer ${this.config.token}`,
+                'X-GitHub-Api-Version': '2022-11-28'
+              },
+              cache: 'no-store',
+              mode: 'cors'
+            }
+          );
+          
+          if (response.ok) {
+            console.log('✅ GitHub connection OK');
+            return true;
+          } else {
+            console.error('❌ GitHub connection failed:', response.status);
+            return false;
+          }
+        } catch (error) {
+          console.error('❌ Connection error:', error);
+          return false;
+        }
+      },
+      
+      async getFile() {
+        try {
+          console.log('📥 Getting file from GitHub...');
+          const timestamp = Date.now();
+          const response = await fetch(
+            `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}?ref=${this.config.branch}&t=${timestamp}`,
+            {
+              headers: {
+                'Accept': 'application/vnd.github+json',
+                'Authorization': `Bearer ${this.config.token}`,
+                'X-GitHub-Api-Version': '2022-11-28'
+              },
+              cache: 'no-store',
+              mode: 'cors'
+            }
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            const content = Base64.decode((data.content || '').replace(/\s/g, ''));
+            console.log('✅ File retrieved, SHA:', data.sha.substring(0, 7));
+            return {
+              content: JSON.parse(content),
+              sha: data.sha
+            };
+          } else if (response.status === 404) {
+            console.log('ℹ️ File not found, will create new');
+            return null;
+          } else {
+            const error = await response.json().catch(() => ({}));
+            console.error('❌ Get file error:', error);
+            throw new Error(error.message || `Failed to get file (${response.status})`);
+          }
+        } catch (error) {
+          console.error('❌ Get file error:', error);
+          throw error;
+        }
+      },
+      
+      async updateFile(newsData, message = 'Update berita', retryCount = 0) {
+        const MAX_RETRIES = 3;
+        
+        try {
+          console.log('🔄 Starting GitHub update... (attempt ' + (retryCount + 1) + ')');
+          console.log('📊 News count:', newsData.length);
+          
+          const currentFile = await this.getFile();
+          
+          const dataToSave = {
+            version: '2.0.0',
+            lastUpdated: new Date().toISOString(),
+            website: 'SMPIT DAARUT TARBIYAH INDONESIA',
+            totalNews: newsData.length,
+            news: newsData
+          };
+          
+          const jsonString = JSON.stringify(dataToSave, null, 2);
+          const content = Base64.encode(jsonString);
+          
+          const body = {
+            message: message,
+            content: content,
+            branch: this.config.branch
+          };
+          
+          if (currentFile && currentFile.sha) {
+            body.sha = currentFile.sha;
+            console.log('🔄 Updating with SHA:', currentFile.sha.substring(0, 7));
+          } else {
+            console.log('➕ Creating new file');
+          }
+          
+          console.log('🚀 Uploading to GitHub...');
+          const response = await fetch(
+            `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Accept': 'application/vnd.github+json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.config.token}`,
+                'X-GitHub-Api-Version': '2022-11-28'
+              },
+              body: JSON.stringify(body),
+              cache: 'no-store',
+              mode: 'cors'
+            }
+          );
+          
+          if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            console.error('❌ GitHub API error:', error);
+            
+            if (response.status === 409 && retryCount < MAX_RETRIES) {
+              console.log('⚠️ Conflict detected, retrying in 2 seconds...');
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              return await this.updateFile(newsData, message, retryCount + 1);
+            }
+            
+            throw new Error(error.message || 'Failed to update file');
+          }
+          
+          const result = await response.json();
+          console.log('✅ Upload successful!');
+          console.log('🔗 New SHA:', result.content.sha.substring(0, 7));
+          
+          return result;
+        } catch (error) {
+          console.error('❌ Update file error:', error);
+          throw error;
+        }
       }
-      
-      const result = await response.json();
-      console.log('✅ Upload successful!');
-      console.log('🔗 New SHA:', result.content.sha.substring(0, 7));
-      
-      return result;
-    } catch (error) {
-      console.error('❌ Update file error:', error);
-      throw error;
-    }
-  }
-};
+    };
 
     const StorageManager = {
       KEYS: {
@@ -1268,10 +1267,10 @@
         showToast('📤 Uploading...', 'info');
         
         const result = await uploadToImgBB(compressedFile);
-        
-        if (!result.url || !result.url.startsWith('https://i.ibb.co/')) {
-          throw new Error('Invalid URL');
-        }
+        if (!result.url) throw new Error('URL kosong dari ImgBB');
+
+        // Pastikan gambar dapat dimuat
+        await testImage(result.url).catch(() => { throw new Error('Gambar tidak bisa dimuat (mungkin diblokir jaringan)'); });
         
         document.getElementById('newsImage').value = result.url;
         document.getElementById('previewImg').src = result.url;
@@ -1326,7 +1325,7 @@
             
             canvas.toBlob(
               (blob) => {
-                const compressedFile = new File([blob], file.name, {
+                const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
                   type: 'image/jpeg',
                   lastModified: Date.now()
                 });
@@ -1337,11 +1336,11 @@
             );
           };
           
-          img.onerror = () => reject(new Error('Failed'));
+          img.onerror = () => reject(new Error('Failed memuat gambar'));
           img.src = e.target.result;
         };
         
-        reader.onerror = () => reject(new Error('Failed'));
+        reader.onerror = () => reject(new Error('Failed membaca file'));
         reader.readAsDataURL(file);
       });
     }
@@ -1422,8 +1421,9 @@
     function nextStep(stepNum) {
       if (stepNum === 2) {
         const token = document.getElementById('githubToken').value.trim();
-        if (!token || !token.startsWith('ghp_')) {
-          showToast('Token tidak valid!', 'error');
+        const isValidToken = /^ghp_/.test(token) || /^github_pat_/.test(token);
+        if (!isValidToken) {
+          showToast('Token tidak valid! (dukung ghp_ dan github_pat_)', 'error');
           return;
         }
       }
@@ -1454,7 +1454,7 @@
       nextStep(stepNum);
     }
     
-    async function completeSetup() {
+    async function completeSetup(btn) {
       const password = document.getElementById('masterPassword').value;
       const confirm = document.getElementById('confirmPassword').value;
       
@@ -1468,7 +1468,6 @@
         return;
       }
       
-      const btn = event.target;
       btn.disabled = true;
       btn.innerHTML = '<span class="loading"></span> Saving...';
       
@@ -1511,7 +1510,7 @@
       updateStats();
       updateConnectionStatus(true);
       
-      showToast('Selamat datang!', 'info');
+      showToast('Selamat datang kembali!', 'info');
     }
 
     let publishCallback = null;
@@ -1537,10 +1536,7 @@
         
         try {
           const config = StorageManager.loadConfig(password);
-          
-          if (!config) {
-            throw new Error('Gagal load config');
-          }
+          if (!config) throw new Error('Gagal load config');
           
           await GitHubAPI.initialize(
             config.token,
@@ -1551,9 +1547,9 @@
           
           const newsId = document.getElementById('newsId').value;
           const imageUrl = document.getElementById('newsImage').value;
-          
-          if (imageUrl && !imageUrl.startsWith('https://i.ibb.co/')) {
-            throw new Error('Invalid image URL');
+
+          if (imageUrl && !isHttpUrl(imageUrl)) {
+            throw new Error('URL gambar tidak valid');
           }
           
           const newsData = {
@@ -1682,13 +1678,13 @@
       
       container.innerHTML = allNews.map(news => `
         <div class="news-item">
-          ${news.image && news.image.startsWith('https://i.ibb.co/') ? 
-            `<img src="${news.image}" class="news-thumbnail" alt="">` : 
+          ${isHttpUrl(news.image) ? 
+            `<img src="${news.image}" class="news-thumbnail" alt="" onerror="this.outerHTML='<div class=&quot;news-thumbnail&quot; style=&quot;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#0A3D73;color:white;&quot;>📰</div>'">` : 
             '<div class="news-thumbnail" style="display:flex;align-items:center;justify-content:center;font-size:2rem;background:#0A3D73;color:white;">📰</div>'
           }
           <div class="news-content">
             <h3>${news.title}</h3>
-            <p style="color:#666;margin-top:0.5rem;">${news.content.substring(0, 100)}...</p>
+            <p style="color:#666;margin-top:0.5rem;">${(news.content || '').substring(0, 100)}...</p>
             <div class="news-meta">
               📁 ${news.category} | 📅 ${new Date(news.date).toLocaleDateString('id-ID')}
             </div>
@@ -1713,11 +1709,14 @@
       document.getElementById('newsDate').value = news.date;
       document.getElementById('newsContent').value = news.content;
       
-      if (news.image && news.image.startsWith('https://i.ibb.co/')) {
+      if (isHttpUrl(news.image)) {
         document.getElementById('newsImage').value = news.image;
         document.getElementById('previewImg').src = news.image;
         document.getElementById('imagePreview').style.display = 'block';
         document.getElementById('uploadText').style.display = 'none';
+      } else {
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('uploadText').style.display = 'block';
       }
       
       updateContentCounter();
@@ -1745,10 +1744,7 @@
         
         try {
           const config = StorageManager.loadConfig(password);
-          
-          if (!config) {
-            throw new Error('Gagal load config');
-          }
+          if (!config) throw new Error('Gagal load config');
           
           await GitHubAPI.initialize(
             config.token,
@@ -1787,7 +1783,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 SMPIT DTI Admin Panel v2.1');
+      console.log('🚀 SMPIT DTI Admin Panel v2.2');
       
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('newsDate').value = today;
@@ -1809,7 +1805,7 @@
         updateStats();
         updateConnectionStatus(true);
         
-        showToast('Welcome back!', 'info');
+        showToast('Selamat datang kembali!', 'info');
       } else {
         document.getElementById('setupWizard').classList.add('active');
         updateConnectionStatus(false);
