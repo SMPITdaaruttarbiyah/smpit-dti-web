@@ -238,7 +238,7 @@
     
     .btn-secondary {
       background: #6c757d;
-      color: white;
+      color: white.
     }
     
     .btn-info {
@@ -449,7 +449,7 @@
     .modal {
       display: none;
       position: fixed;
-      top: 0,
+      top: 0;
       left: 0;
       right: 0;
       bottom: 0;
@@ -930,10 +930,10 @@
     };
 
     // Util kecil
-    const isHttpUrl = (u) => {
+    function isHttpUrl(u) {
       if (typeof u !== 'string') return false;
       try { const x = new URL(u); return x.protocol === 'http:' || x.protocol === 'https:'; } catch { return false; }
-    };
+    }
 
     function testImage(url) {
       return new Promise((resolve, reject) => {
@@ -942,6 +942,36 @@
         img.onerror = reject;
         img.src = url;
       });
+    }
+
+    // Normalisasi domain ImgBB (perbaiki .com ganda)
+    function normalizeImgbbUrl(u) {
+      if (!u || typeof u !== 'string') return u;
+      return u
+        .replace(/i\.ibb\.co\.com/gi, 'i.ibb.co')
+        .replace(/ibb\.co\.com/gi, 'ibb.co');
+    }
+
+    // Proxy fallback jika CDN diblokir/SSL error
+    function proxyUrl(u) {
+      try {
+        const clean = normalizeImgbbUrl(u).replace(/^https?:\/\//, '');
+        return `https://images.weserv.nl/?url=${encodeURIComponent(clean)}`;
+      } catch {
+        return u;
+      }
+    }
+
+    // Handler error thumbnail: coba proxy sekali, lalu placeholder
+    function handleThumbError(imgEl) {
+      const triedProxy = imgEl.dataset.fallback === 'proxy';
+      if (!triedProxy) {
+        imgEl.dataset.fallback = 'proxy';
+        imgEl.src = proxyUrl(imgEl.src);
+      } else {
+        imgEl.onerror = null;
+        imgEl.outerHTML = '<div class="news-thumbnail" style="display:flex;align-items:center;justify-content:center;font-size:2rem;background:#0A3D73;color:white;">📰</div>';
+      }
     }
 
     // Upload ke ImgBB sesuai API v1 (display_url / image.url)
@@ -956,8 +986,6 @@
         const formData = new FormData();
         formData.append('key', IMGBB_API_KEY);
         formData.append('image', base64Data);
-        // Optional: formData.append('name', file.name);
-        // Optional: formData.append('expiration', '0');
 
         const response = await fetch('https://api.imgbb.com/1/upload', {
           method: 'POST',
@@ -977,8 +1005,9 @@
           throw new Error(data.error?.message || 'Upload failed');
         }
 
-        // Sesuai contoh respons: gunakan display_url atau image.url
-        const directUrl = data.data.display_url || data.data.image?.url || data.data.url;
+        // Ambil direct URL dan normalisasi domain
+        let directUrl = data.data.display_url || data.data.image?.url || data.data.url;
+        directUrl = normalizeImgbbUrl(directUrl);
         if (!isHttpUrl(directUrl)) throw new Error('URL ImgBB tidak valid');
 
         console.log('✅ Upload success:', directUrl);
@@ -1257,30 +1286,52 @@
       const uploadArea = document.getElementById('imageUploadArea');
       const progressEl = document.getElementById('uploadProgress');
       const uploadText = document.getElementById('uploadText');
+      const previewWrap = document.getElementById('imagePreview');
+      const previewImg = document.getElementById('previewImg');
       
       uploadArea.classList.add('uploading');
       uploadText.style.display = 'none';
       progressEl.classList.add('active');
       
+      let localUrl = '';
       try {
         const compressedFile = await compressImage(file);
+
+        // 1) Preview lokal dulu
+        localUrl = URL.createObjectURL(compressedFile);
+        previewWrap.style.display = 'block';
+        previewImg.src = localUrl;
+
         showToast('📤 Uploading...', 'info');
         
+        // 2) Upload ke ImgBB
         const result = await uploadToImgBB(compressedFile);
         if (!result.url) throw new Error('URL kosong dari ImgBB');
 
-        // Pastikan gambar dapat dimuat
-        await testImage(result.url).catch(() => { throw new Error('Gambar tidak bisa dimuat (mungkin diblokir jaringan)'); });
-        
-        document.getElementById('newsImage').value = result.url;
-        document.getElementById('previewImg').src = result.url;
-        document.getElementById('imagePreview').style.display = 'block';
-        
+        const remoteUrl = normalizeImgbbUrl(result.url);
+        document.getElementById('newsImage').value = remoteUrl;
+
+        // 3) Coba ganti ke CDN; kalau gagal, fallback ke proxy; kalau masih gagal, balik ke lokal
+        previewImg.onerror = function () {
+          previewImg.onerror = function () {
+            previewImg.onerror = null;
+            previewImg.src = localUrl;
+            showToast('⚠️ CDN diblokir, tampilkan preview lokal.', 'warning');
+          };
+          previewImg.src = proxyUrl(remoteUrl);
+          showToast('⚠️ Gagal load direct, pakai fallback proxy.', 'warning');
+        };
+
+        previewImg.src = remoteUrl; // swap ke URL ImgBB
         showToast('✅ Upload berhasil!', 'success');
-        
+
+        // Revoke object URL setelah beberapa saat
+        setTimeout(() => { if (localUrl) URL.revokeObjectURL(localUrl); }, 30000);
+
       } catch (error) {
         showToast('❌ Upload gagal: ' + error.message, 'error');
         event.target.value = '';
+        previewWrap.style.display = 'none';
         uploadText.style.display = 'block';
       } finally {
         uploadArea.classList.remove('uploading');
@@ -1509,7 +1560,10 @@
       loadNewsList();
       updateStats();
       updateConnectionStatus(true);
-      
+
+      // Cek & tawarkan migrasi URL gambar lama
+      scheduleUrlMigration();
+
       showToast('Selamat datang kembali!', 'info');
     }
 
@@ -1546,7 +1600,8 @@
           );
           
           const newsId = document.getElementById('newsId').value;
-          const imageUrl = document.getElementById('newsImage').value;
+          const imageUrlRaw = document.getElementById('newsImage').value;
+          const imageUrl = imageUrlRaw ? normalizeImgbbUrl(imageUrlRaw) : '';
 
           if (imageUrl && !isHttpUrl(imageUrl)) {
             throw new Error('URL gambar tidak valid');
@@ -1575,8 +1630,10 @@
             allNews.unshift(newsData);
           }
           
+          // Simpan lokal dulu
           StorageManager.saveNews(allNews);
           
+          // Push ke GitHub
           await GitHubAPI.updateFile(allNews, `Update berita: ${title}`);
           
           showToast('✅ Berhasil dipublish!', 'success');
@@ -1666,35 +1723,42 @@
       
       updateContentCounter();
     }
-    
+
     function loadNewsList() {
-      const allNews = StorageManager.loadNews();
+      // Normalisasi URL gambar lama agar preview gak error
+      let allNews = StorageManager.loadNews().map(n => ({ ...n, image: normalizeImgbbUrl(n.image) }));
       const container = document.getElementById('newsList');
       
       if (allNews.length === 0) {
         container.innerHTML = '<p style="text-align:center;color:#999;padding:2rem;">Belum ada berita</p>';
         return;
       }
+
+      const placeholder = '<div class="news-thumbnail" style="display:flex;align-items:center;justify-content:center;font-size:2rem;background:#0A3D73;color:white;">📰</div>';
       
-      container.innerHTML = allNews.map(news => `
-        <div class="news-item">
-          ${isHttpUrl(news.image) ? 
-            `<img src="${news.image}" class="news-thumbnail" alt="" onerror="this.outerHTML='<div class=&quot;news-thumbnail&quot; style=&quot;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#0A3D73;color:white;&quot;>📰</div>'">` : 
-            '<div class="news-thumbnail" style="display:flex;align-items:center;justify-content:center;font-size:2rem;background:#0A3D73;color:white;">📰</div>'
-          }
-          <div class="news-content">
-            <h3>${news.title}</h3>
-            <p style="color:#666;margin-top:0.5rem;">${(news.content || '').substring(0, 100)}...</p>
-            <div class="news-meta">
-              📁 ${news.category} | 📅 ${new Date(news.date).toLocaleDateString('id-ID')}
+      container.innerHTML = allNews.map(news => {
+        const imgSrc = normalizeImgbbUrl(news.image || '');
+        const thumb = isHttpUrl(imgSrc)
+          ? `<img src="${imgSrc}" class="news-thumbnail" alt="" onerror="handleThumbError(this)">`
+          : placeholder;
+
+        return `
+          <div class="news-item">
+            ${thumb}
+            <div class="news-content">
+              <h3>${news.title}</h3>
+              <p style="color:#666;margin-top:0.5rem;">${(news.content || '').substring(0, 100)}...</p>
+              <div class="news-meta">
+                📁 ${news.category} | 📅 ${new Date(news.date).toLocaleDateString('id-ID')}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;">
+              <button class="btn btn-primary" onclick="editNews('${news.id}')">✏️</button>
+              <button class="btn btn-danger" onclick="deleteNews('${news.id}')">🗑️</button>
             </div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:0.5rem;">
-            <button class="btn btn-primary" onclick="editNews('${news.id}')">✏️</button>
-            <button class="btn btn-danger" onclick="deleteNews('${news.id}')">🗑️</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
     
     function editNews(id) {
@@ -1709,9 +1773,10 @@
       document.getElementById('newsDate').value = news.date;
       document.getElementById('newsContent').value = news.content;
       
-      if (isHttpUrl(news.image)) {
-        document.getElementById('newsImage').value = news.image;
-        document.getElementById('previewImg').src = news.image;
+      const normalized = normalizeImgbbUrl(news.image || '');
+      if (isHttpUrl(normalized)) {
+        document.getElementById('newsImage').value = normalized;
+        document.getElementById('previewImg').src = normalized;
         document.getElementById('imagePreview').style.display = 'block';
         document.getElementById('uploadText').style.display = 'none';
       } else {
@@ -1776,11 +1841,71 @@
     }
     
     function showSettings() {
+      // Tombol ini saat ini untuk reset semua
       if (confirm('Reset semua pengaturan?')) {
         StorageManager.clearAll();
         location.reload();
       }
     }
+
+    // Deteksi dan tawarkan migrasi URL ImgBB yang salah (untuk commit ke GitHub)
+    function scheduleUrlMigration() {
+      const news = StorageManager.loadNews();
+      const affected = news.filter(n => /ibb\.co\.com|i\.ibb\.co\.com/i.test(n.image || ''));
+      if (affected.length > 0) {
+        const ok = confirm(`Ditemukan ${affected.length} URL gambar yang perlu diperbaiki.\nPerbaiki dan commit ke GitHub sekarang?`);
+        if (ok) {
+          runUrlMigration();
+        } else {
+          // Minimal perbaiki di lokal agar preview jalan
+          const fixed = news.map(n => ({ ...n, image: normalizeImgbbUrl(n.image || '') }));
+          StorageManager.saveNews(fixed);
+          loadNewsList();
+        }
+      }
+    }
+
+    function runUrlMigration() {
+      publishCallback = async function(password) {
+        try {
+          const config = StorageManager.loadConfig(password);
+          if (!config) throw new Error('Gagal load config');
+
+          await GitHubAPI.initialize(config.token, config.username, config.repo, config.branch);
+
+          let allNews = StorageManager.loadNews();
+          let changed = 0;
+          allNews = allNews.map(n => {
+            const fixed = normalizeImgbbUrl(n.image || '');
+            if (fixed !== (n.image || '')) {
+              changed++;
+              return { ...n, image: fixed, updatedAt: new Date().toISOString() };
+            }
+            return n;
+          });
+
+          if (changed === 0) {
+            showToast('Tidak ada URL yang perlu diperbaiki', 'info');
+            return;
+          }
+
+          StorageManager.saveNews(allNews);
+          await GitHubAPI.updateFile(allNews, 'Normalize ImgBB URLs');
+
+          showToast(`✅ ${changed} URL diperbaiki & disinkron ke GitHub`, 'success');
+          loadNewsList();
+          updateStats();
+
+        } catch (e) {
+          showToast('Gagal: ' + e.message, 'error');
+        }
+      };
+
+      showPasswordModal();
+    }
+
+    // Ekspos manual via console jika perlu
+    window.runUrlMigration = runUrlMigration;
 
     window.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 SMPIT DTI Admin Panel v2.2');
@@ -1804,6 +1929,9 @@
         loadNewsList();
         updateStats();
         updateConnectionStatus(true);
+
+        // Cek URL yang perlu dimigrasi
+        scheduleUrlMigration();
         
         showToast('Selamat datang kembali!', 'info');
       } else {
