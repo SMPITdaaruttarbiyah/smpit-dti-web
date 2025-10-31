@@ -607,20 +607,18 @@
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <div class="card header">
       <h1>🔐 SMPIT DTI Admin Panel</h1>
-      <p style="color: #666; font-size: 1.1rem;">Sistem Manajemen Berita - ImgBB Integration</p>
+      <p style="color: #666; font-size: 1.1rem;">Sistem Manajemen Berita</p>
       <div class="status-badge" id="connectionStatus">
         <span id="statusIcon">⏳</span>
         <span id="statusText">Checking connection...</span>
       </div>
     </div>
 
-    <!-- Setup Wizard -->
     <div class="setup-wizard" id="setupWizard">
       <div class="card">
-        <h2 style="color: var(--primary); margin-bottom: 1.5rem;">🚀 Setup Awal (Hanya Sekali)</h2>
+        <h2 style="color: var(--primary); margin-bottom: 1.5rem;">🚀 Setup Awal</h2>
         
         <div class="wizard-steps">
           <div class="wizard-step active" id="step1">
@@ -646,12 +644,12 @@
             <h3>📝 Cara Buat GitHub Token:</h3>
             <ol>
               <li>Buka <a href="https://github.com/settings/tokens/new" target="_blank">link ini</a></li>
-              <li>Login ke GitHub (jika diminta)</li>
-              <li><strong>Note:</strong> Ketik <code>SMPIT DTI Admin</code></li>
-              <li><strong>Expiration:</strong> Pilih <code>No expiration</code></li>
+              <li>Login ke GitHub</li>
+              <li><strong>Note:</strong> <code>SMPIT DTI Admin</code></li>
+              <li><strong>Expiration:</strong> <code>No expiration</code></li>
               <li><strong>Select scopes:</strong> Centang <code>repo</code></li>
               <li>Klik <strong>"Generate token"</strong></li>
-              <li>Copy token (mulai dengan ghp_...)</li>
+              <li>Copy token (ghp_...)</li>
             </ol>
           </div>
 
@@ -661,52 +659,39 @@
               <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
               <button class="toggle-password" type="button" onclick="togglePasswordVisibility('githubToken')">👁️</button>
             </div>
-            <span class="input-hint">Token akan disimpan dengan enkripsi yang aman</span>
           </div>
 
           <button class="btn btn-primary" type="button" onclick="nextStep(2)">
-            Lanjut ke Step 2 →
+            Lanjut →
           </button>
         </div>
 
         <div class="wizard-content" id="stepContent2" style="display:none;">
-          <div class="alert alert-info">
-            <span>ℹ️</span>
-            <span>Masukkan informasi repository GitHub Anda</span>
-          </div>
-
           <div class="form-group">
-            <label>Username GitHub Anda *</label>
-            <input type="text" id="githubUsername" placeholder="Contoh: smpitdaaruttarbiyah" value="smpitdaaruttarbiyah">
-            <span class="input-hint">Username GitHub Anda (bukan email)</span>
+            <label>Username GitHub *</label>
+            <input type="text" id="githubUsername" placeholder="smpitdaaruttarbiyah" value="smpitdaaruttarbiyah">
           </div>
 
           <div class="form-group">
             <label>Nama Repository *</label>
-            <input type="text" id="repoName" placeholder="Contoh: smpit-dti-web" value="smpit-dti-web">
-            <span class="input-hint">Nama repository tempat website berada</span>
+            <input type="text" id="repoName" placeholder="smpit-dti-web" value="smpit-dti-web">
           </div>
 
           <div class="form-group">
             <label>Branch</label>
             <input type="text" id="repoBranch" value="main">
-            <span class="input-hint">Biasanya: main atau master</span>
           </div>
 
           <div style="display: flex; gap: 1rem;">
-            <button class="btn btn-secondary" type="button" onclick="prevStep(1)">
-              ← Kembali
-            </button>
-            <button class="btn btn-primary" type="button" onclick="nextStep(3)">
-              Lanjut ke Step 3 →
-            </button>
+            <button class="btn btn-secondary" type="button" onclick="prevStep(1)">← Kembali</button>
+            <button class="btn btn-primary" type="button" onclick="nextStep(3)">Lanjut →</button>
           </div>
         </div>
 
         <div class="wizard-content" id="stepContent3" style="display:none;">
           <div class="alert alert-warning">
             <span>🔐</span>
-            <span><strong>Penting:</strong> Password ini untuk mengenkripsi token GitHub Anda. Jangan lupa!</span>
+            <span><strong>Penting:</strong> Jangan lupa password ini!</span>
           </div>
 
           <div class="form-group">
@@ -715,7 +700,6 @@
               <input type="password" id="masterPassword" placeholder="Minimal 8 karakter">
               <button class="toggle-password" type="button" onclick="togglePasswordVisibility('masterPassword')">👁️</button>
             </div>
-            <span class="input-hint">Password ini untuk melindungi token GitHub Anda</span>
           </div>
 
           <div class="form-group">
@@ -727,36 +711,22 @@
           </div>
 
           <div style="display: flex; gap: 1rem;">
-            <button class="btn btn-secondary" type="button" onclick="prevStep(2)">
-              ← Kembali
-            </button>
-            <button class="btn btn-success" type="button" onclick="completeSetup()">
-              🚀 Selesaikan Setup
-            </button>
+            <button class="btn btn-secondary" type="button" onclick="prevStep(2)">← Kembali</button>
+            <button class="btn btn-success" type="button" onclick="completeSetup()">🚀 Selesai</button>
           </div>
         </div>
 
         <div class="wizard-content" id="stepContent4" style="display:none;">
-          <div class="alert alert-success">
-            <span>✅</span>
-            <span><strong>Setup Berhasil!</strong> Sistem siap digunakan.</span>
-          </div>
-
           <div style="text-align: center; padding: 2rem;">
             <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-            <h3 style="color: var(--success); margin-bottom: 1rem;">Selamat!</h3>
-            <p style="color: #666; margin-bottom: 2rem;">
-              Anda sekarang bisa mengelola berita dengan mudah.
-            </p>
-            <button class="btn btn-success btn-large" type="button" onclick="startUsingPanel()">
-              ✨ Mulai Kelola Berita
-            </button>
+            <h3 style="color: var(--success); margin-bottom: 1rem;">Setup Berhasil!</h3>
+            <p style="color: #666; margin-bottom: 2rem;">Sistem siap digunakan</p>
+            <button class="btn btn-success btn-large" type="button" onclick="startUsingPanel()">✨ Mulai</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Panel -->
     <div id="mainPanel" style="display:none;">
       <div class="stats">
         <div class="stat-card">
@@ -772,7 +742,7 @@
         <div class="stat-card">
           <div class="stat-icon">🚀</div>
           <div class="stat-value" id="totalPublished">0</div>
-          <div class="stat-label">Terpublish</div>
+          <div class="stat-label">Published</div>
         </div>
       </div>
 
@@ -785,7 +755,7 @@
           
           <div class="form-group">
             <label>Judul Berita *</label>
-            <input type="text" id="newsTitle" required maxlength="200" placeholder="Contoh: Kegiatan Peringatan Hari Santri Nasional 2025">
+            <input type="text" id="newsTitle" required maxlength="200" placeholder="Masukkan judul berita">
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -807,7 +777,7 @@
 
           <div class="form-group">
             <label>Konten Berita *</label>
-            <textarea id="newsContent" required maxlength="5000" placeholder="Tulis isi berita di sini..."></textarea>
+            <textarea id="newsContent" required maxlength="5000" placeholder="Tulis isi berita..."></textarea>
             <span class="input-hint" id="contentCounter">0 / 5000 karakter</span>
           </div>
 
@@ -818,12 +788,12 @@
               <div id="uploadText">
                 <div style="font-size: 3rem;">📷</div>
                 <div style="font-weight: 600; margin-top: 0.5rem;">Klik untuk upload gambar</div>
-                <div style="color: #999; font-size: 0.85rem; margin-top: 0.25rem;">Max 5MB, JPG/PNG/GIF</div>
+                <div style="color: #999; font-size: 0.85rem; margin-top: 0.25rem;">Max 5MB</div>
               </div>
               <div class="upload-progress" id="uploadProgress">
                 <div class="spinner-large"></div>
                 <div style="text-align: center; font-weight: 600; color: var(--primary);">
-                  Uploading ke ImgBB...
+                  Uploading...
                 </div>
               </div>
             </div>
@@ -835,7 +805,7 @@
 
           <div style="display: flex; gap: 1rem; margin-top: 2rem;">
             <button type="button" class="btn btn-success btn-large" id="publishBtn" onclick="publishNews()">
-              🚀 Publish ke Website
+              🚀 Publish
             </button>
             <button type="button" class="btn btn-secondary" onclick="resetForm()">
               🔄 Reset
@@ -845,16 +815,9 @@
       </div>
 
       <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
           <h2 style="color: var(--primary); margin: 0;">📋 Daftar Berita</h2>
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-info" type="button" onclick="debugNewsData()">
-              🐛 Debug
-            </button>
-            <button class="btn btn-secondary" type="button" onclick="showSettings()">
-              ⚙️ Pengaturan
-            </button>
-          </div>
+          <button class="btn btn-secondary" type="button" onclick="showSettings()">⚙️</button>
         </div>
         
         <div id="newsList"></div>
@@ -862,35 +825,28 @@
     </div>
   </div>
 
-  <!-- Password Modal -->
   <div class="modal" id="passwordModal" onclick="closeModalOnBackdrop(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h2>🔐 Masukkan Password</h2>
-        <p style="color: #666; margin-top: 0.5rem;">Untuk keamanan, masukkan password master Anda</p>
       </div>
       
       <div class="form-group">
         <label>Password Master</label>
         <div class="password-input-group">
-          <input type="password" id="modalPassword" placeholder="Password master Anda">
+          <input type="password" id="modalPassword" placeholder="Password">
           <button class="toggle-password" type="button" onclick="togglePasswordVisibility('modalPassword')">👁️</button>
         </div>
-        <div class="password-error" id="passwordError">❌ Password salah! Silakan coba lagi.</div>
+        <div class="password-error" id="passwordError">❌ Password salah!</div>
       </div>
 
       <div style="display: flex; gap: 1rem;">
-        <button class="btn btn-success" type="button" id="confirmPasswordBtn" onclick="confirmPassword()">
-          ✅ Konfirmasi
-        </button>
-        <button class="btn btn-secondary" type="button" onclick="closePasswordModal()">
-          ❌ Batal
-        </button>
+        <button class="btn btn-success" type="button" id="confirmPasswordBtn" onclick="confirmPassword()">✅ OK</button>
+        <button class="btn btn-secondary" type="button" onclick="closePasswordModal()">❌ Batal</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast">
     <span id="toastIcon"></span>
     <span id="toastMessage"></span>
@@ -952,7 +908,6 @@
           
           return decrypted;
         } catch (error) {
-          console.error('Decrypt error:', error);
           return null;
         }
       },
@@ -987,8 +942,6 @@
 
     async function uploadToImgBB(file) {
       try {
-        console.log('📤 Uploading to ImgBB...');
-        
         const base64 = await fileToBase64(file);
         const base64Data = base64.split(',')[1];
         
@@ -1001,33 +954,23 @@
           body: formData
         });
         
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.status}`);
-        }
+        if (!response.ok) throw new Error('Upload failed');
         
         const data = await response.json();
         
         if (data.success && data.data && data.data.url) {
-          const imageUrl = data.data.url;
-          
-          // VALIDASI URL - PENTING!
-          if (!imageUrl.startsWith('https://i.ibb.co/')) {
-            throw new Error('Invalid ImgBB URL format');
+          if (!data.data.url.startsWith('https://i.ibb.co/')) {
+            throw new Error('Invalid URL');
           }
           
-          console.log('✅ Upload success:', imageUrl);
-          
           return {
-            url: imageUrl,
-            displayUrl: data.data.display_url || imageUrl,
-            deleteUrl: data.data.delete_url
+            url: data.data.url,
+            displayUrl: data.data.display_url || data.data.url
           };
         } else {
-          throw new Error(data.error?.message || 'Upload failed');
+          throw new Error('Upload failed');
         }
-        
       } catch (error) {
-        console.error('❌ ImgBB error:', error);
         throw error;
       }
     }
@@ -1070,7 +1013,6 @@
           
           return response.ok;
         } catch (error) {
-          console.error('Connection test failed:', error);
           return false;
         }
       },
@@ -1097,10 +1039,9 @@
           } else if (response.status === 404) {
             return null;
           } else {
-            throw new Error(`Failed to get file: ${response.status}`);
+            throw new Error('Failed to get file');
           }
         } catch (error) {
-          console.error('Get file error:', error);
           throw error;
         }
       },
@@ -1145,12 +1086,11 @@
           
           if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || 'Failed to update file');
+            throw new Error(error.message || 'Failed to update');
           }
           
           return await response.json();
         } catch (error) {
-          console.error('Update file error:', error);
           throw error;
         }
       }
@@ -1236,12 +1176,12 @@
       if (!file) return;
       
       if (!file.type.startsWith('image/')) {
-        showToast('❌ File harus berupa gambar!', 'error');
+        showToast('❌ File harus gambar!', 'error');
         return;
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        showToast('❌ Ukuran maksimal 5MB!', 'error');
+        showToast('❌ Max 5MB!', 'error');
         return;
       }
       
@@ -1255,27 +1195,22 @@
       
       try {
         const compressedFile = await compressImage(file);
-        
-        showToast('📤 Uploading ke ImgBB...', 'info');
+        showToast('📤 Uploading...', 'info');
         
         const result = await uploadToImgBB(compressedFile);
         
-        // VALIDASI URL SEBELUM MENYIMPAN
         if (!result.url || !result.url.startsWith('https://i.ibb.co/')) {
-          throw new Error('Invalid ImgBB URL');
+          throw new Error('Invalid URL');
         }
-        
-        console.log('✅ Valid URL:', result.url);
         
         document.getElementById('newsImage').value = result.url;
         document.getElementById('previewImg').src = result.url;
         document.getElementById('imagePreview').style.display = 'block';
         
-        showToast('✅ Gambar berhasil di-upload!', 'success');
+        showToast('✅ Upload berhasil!', 'success');
         
       } catch (error) {
-        console.error('Upload error:', error);
-        showToast('❌ Gagal upload: ' + error.message, 'error');
+        showToast('❌ Upload gagal: ' + error.message, 'error');
         event.target.value = '';
         uploadText.style.display = 'block';
       } finally {
@@ -1332,11 +1267,11 @@
             );
           };
           
-          img.onerror = () => reject(new Error('Failed to load image'));
+          img.onerror = () => reject(new Error('Failed'));
           img.src = e.target.result;
         };
         
-        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.onerror = () => reject(new Error('Failed'));
         reader.readAsDataURL(file);
       });
     }
@@ -1390,11 +1325,11 @@
       if (connected) {
         status.className = 'status-badge connected';
         icon.textContent = '✅';
-        text.textContent = 'Terhubung ke GitHub';
+        text.textContent = 'Connected';
       } else {
         status.className = 'status-badge disconnected';
         icon.textContent = '⚠️';
-        text.textContent = 'Belum Terhubung';
+        text.textContent = 'Disconnected';
       }
     }
     
@@ -1413,22 +1348,6 @@
       const counter = document.getElementById('contentCounter');
       counter.textContent = `${content.length} / 5000 karakter`;
     }
-    
-    function debugNewsData() {
-      const news = StorageManager.loadNews();
-      console.log('=== DEBUG NEWS DATA ===');
-      console.log('Total:', news.length);
-      
-      news.forEach((item, index) => {
-        console.log(`\nNews ${index + 1}:`);
-        console.log('Title:', item.title);
-        console.log('Date:', item.date);
-        console.log('Image:', item.image || 'NO IMAGE');
-        console.log('Image valid:', item.image && item.image.startsWith('https://i.ibb.co/'));
-      });
-      
-      showToast('✅ Check console untuk detail', 'info');
-    }
 
     function nextStep(stepNum) {
       if (stepNum === 2) {
@@ -1444,7 +1363,7 @@
         const repo = document.getElementById('repoName').value.trim();
         
         if (!username || !repo) {
-          showToast('Username dan repository harus diisi!', 'error');
+          showToast('Username dan repo harus diisi!', 'error');
           return;
         }
       }
@@ -1470,7 +1389,7 @@
       const confirm = document.getElementById('confirmPassword').value;
       
       if (password.length < 8) {
-        showToast('Password minimal 8 karakter!', 'error');
+        showToast('Password min 8 karakter!', 'error');
         return;
       }
       
@@ -1481,7 +1400,7 @@
       
       const btn = event.target;
       btn.disabled = true;
-      btn.innerHTML = '<span class="loading"></span> Menyimpan...';
+      btn.innerHTML = '<span class="loading"></span> Saving...';
       
       try {
         const config = {
@@ -1499,18 +1418,18 @@
         );
         
         if (!connected) {
-          throw new Error('Gagal terhubung ke GitHub!');
+          throw new Error('Gagal connect ke GitHub!');
         }
         
         StorageManager.saveConfig(config, password);
         
         nextStep(4);
-        showToast('Setup berhasil! 🎉', 'success');
+        showToast('Setup berhasil!', 'success');
         
       } catch (error) {
         showToast('Error: ' + error.message, 'error');
         btn.disabled = false;
-        btn.innerHTML = '🚀 Selesaikan Setup';
+        btn.innerHTML = '🚀 Selesai';
       }
     }
     
@@ -1522,7 +1441,7 @@
       updateStats();
       updateConnectionStatus(true);
       
-      showToast('Selamat datang! 📝', 'info');
+      showToast('Selamat datang!', 'info');
     }
 
     let publishCallback = null;
@@ -1550,7 +1469,7 @@
           const config = StorageManager.loadConfig(password);
           
           if (!config) {
-            throw new Error('Gagal memuat konfigurasi');
+            throw new Error('Gagal load config');
           }
           
           await GitHubAPI.initialize(
@@ -1563,9 +1482,8 @@
           const newsId = document.getElementById('newsId').value;
           const imageUrl = document.getElementById('newsImage').value;
           
-          // VALIDASI IMAGE URL
           if (imageUrl && !imageUrl.startsWith('https://i.ibb.co/')) {
-            throw new Error('Invalid image URL. Please re-upload image.');
+            throw new Error('Invalid image URL');
           }
           
           const newsData = {
@@ -1595,18 +1513,17 @@
           
           await GitHubAPI.updateFile(allNews, `Update berita: ${title}`);
           
-          showToast('✅ Berita berhasil dipublish!', 'success');
+          showToast('✅ Berhasil dipublish!', 'success');
           
           resetForm();
           loadNewsList();
           updateStats();
           
         } catch (error) {
-          console.error('Publish error:', error);
-          showToast('Gagal publish: ' + error.message, 'error');
+          showToast('Gagal: ' + error.message, 'error');
         } finally {
           publishBtn.disabled = false;
-          publishBtn.innerHTML = '🚀 Publish ke Website';
+          publishBtn.innerHTML = '🚀 Publish';
         }
       };
       
@@ -1643,7 +1560,7 @@
       }
       
       confirmBtn.disabled = true;
-      confirmBtn.innerHTML = '<span class="loading"></span> Verifying...';
+      confirmBtn.innerHTML = '<span class="loading"></span>';
       
       setTimeout(() => {
         const isValid = StorageManager.verifyPassword(password);
@@ -1652,7 +1569,7 @@
           errorEl.classList.add('show');
           showToast('Password salah!', 'error');
           confirmBtn.disabled = false;
-          confirmBtn.innerHTML = '✅ Konfirmasi';
+          confirmBtn.innerHTML = '✅ OK';
           return;
         }
         
@@ -1667,7 +1584,7 @@
         closePasswordModal();
         
         confirmBtn.disabled = false;
-        confirmBtn.innerHTML = '✅ Konfirmasi';
+        confirmBtn.innerHTML = '✅ OK';
       }, 500);
     }
     
@@ -1704,7 +1621,6 @@
             <p style="color:#666;margin-top:0.5rem;">${news.content.substring(0, 100)}...</p>
             <div class="news-meta">
               📁 ${news.category} | 📅 ${new Date(news.date).toLocaleDateString('id-ID')}
-              ${news.published ? ' | ✅ Published' : ''}
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:0.5rem;">
@@ -1740,26 +1656,68 @@
     }
     
     function deleteNews(id) {
-      if (!confirm('Yakin ingin menghapus berita ini?')) return;
+      if (!confirm('⚠️ Hapus berita ini?\n\nBerita akan dihapus permanen dari website!')) return;
       
-      let allNews = StorageManager.loadNews();
-      allNews = allNews.filter(n => n.id !== id);
-      StorageManager.saveNews(allNews);
+      const allNews = StorageManager.loadNews();
+      const newsToDelete = allNews.find(n => n.id === id);
       
-      loadNewsList();
-      updateStats();
-      showToast('Berita berhasil dihapus', 'success');
+      if (!newsToDelete) {
+        showToast('❌ Berita tidak ditemukan', 'error');
+        return;
+      }
+      
+      if (!confirm(`Hapus:\n"${newsToDelete.title}"\n\nYakin?`)) return;
+      
+      window.deleteNewsId = id;
+      
+      publishCallback = async function(password) {
+        showToast('🗑️ Menghapus...', 'info');
+        
+        try {
+          const config = StorageManager.loadConfig(password);
+          
+          if (!config) {
+            throw new Error('Gagal load config');
+          }
+          
+          await GitHubAPI.initialize(
+            config.token,
+            config.username,
+            config.repo,
+            config.branch
+          );
+          
+          let allNews = StorageManager.loadNews();
+          const deleted = allNews.find(n => n.id === window.deleteNewsId);
+          allNews = allNews.filter(n => n.id !== window.deleteNewsId);
+          StorageManager.saveNews(allNews);
+          
+          await GitHubAPI.updateFile(allNews, `🗑️ Hapus berita: ${deleted.title}`);
+          
+          showToast('✅ Berhasil dihapus!', 'success');
+          
+          loadNewsList();
+          updateStats();
+          
+          delete window.deleteNewsId;
+          
+        } catch (error) {
+          showToast('Gagal: ' + error.message, 'error');
+        }
+      };
+      
+      showPasswordModal();
     }
     
     function showSettings() {
-      if (confirm('Reset semua pengaturan? (Anda harus setup ulang)')) {
+      if (confirm('Reset semua pengaturan?')) {
         StorageManager.clearAll();
         location.reload();
       }
     }
 
     window.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 SMPIT DTI Admin Panel v2.1 - ImgBB Fixed');
+      console.log('🚀 SMPIT DTI Admin Panel v2.1');
       
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('newsDate').value = today;
@@ -1781,7 +1739,7 @@
         updateStats();
         updateConnectionStatus(true);
         
-        showToast('Selamat datang kembali! 👋', 'info');
+        showToast('Welcome back!', 'info');
       } else {
         document.getElementById('setupWizard').classList.add('active');
         updateConnectionStatus(false);
