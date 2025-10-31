@@ -1,7 +1,10 @@
-// News Loader v2.5 – same-origin fallback, multi-proxy image, eager load
+// News Loader v2.6 – normalize ImgBB URLs, smart proxy, GitHub-friendly
 (function () {
   'use strict';
 
+  // =========================
+  // Config & Cache
+  // =========================
   function detectGitHubConfig() {
     const url = window.location.href;
     if (url.includes('.github.io')) {
@@ -30,8 +33,8 @@
     branch: 'main',
     newsPath: 'data/news.json',
     maxNews: 6,
-    cacheTime: 2 * 60 * 1000,
-    version: '2.5',
+    cacheTime: 2 * 60 * 1000, // 2 menit
+    version: '2.6',
     basePath: detectBasePath()
   };
 
@@ -81,6 +84,9 @@
     }
   };
 
+  // =========================
+  // Helpers
+  // =========================
   function isHttpUrl(u) {
     if (!u || typeof u !== 'string') return false;
     try { const x = new URL(u); return x.protocol === 'http:' || x.protocol === 'https:'; } catch { return false; }
@@ -88,8 +94,26 @@
   function getHost(u) {
     try { return new URL(u).host.toLowerCase(); } catch { return ''; }
   }
+  function normalizeImgbbUrl(u) {
+    if (!u || typeof u !== 'string') return u;
+    return u
+      .replace(/i\.ibb\.co\.com/gi, 'i.ibb.co')
+      .replace(/ibb\.co\.com/gi, 'ibb.co');
+  }
+  function looksLikeDirectImage(u) {
+    try {
+      const p = new URL(u).pathname.toLowerCase();
+      return /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(p);
+    } catch { return false; }
+  }
+  function shouldStartWithProxy(u) {
+    const h = getHost(u);
+    return h === 'i.ibb.co' || h === 'ibb.co'; // CDN/Viewer sering diblok
+  }
 
-  // Proxies
+  // =========================
+  // Image proxy fallbacks
+  // =========================
   function getProxyUrl(url) {
     try {
       const u = new URL(url);
@@ -107,8 +131,8 @@
   function getProxyUrl3(url) {
     try {
       const u = new URL(url);
-      const path = u.host + u.pathname; // abaikan query untuk statically
-      return 'https://cdn.statically.io/img/' + path.replace(/^https?:\/\//, '');
+      const path = u.host + u.pathname; // statically abaikan query
+      return 'https://cdn.statically.io/img/' + path;
     } catch { return url; }
   }
 
@@ -160,28 +184,34 @@
     return s.length <= max ? s : s.substring(0, max).trim() + '...';
   }
 
+  // =========================
+  // Fetchers (GitHub-friendly)
+  // =========================
   async function fetchJson(url) {
-    const res = await fetch(url, { cache: 'no-store' }); // tanpa header tambahan
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     return res.json();
   }
 
   async function fetchSameOrigin() {
-    // Catatan: di GitHub Pages, folder "data" tidak di-serve (Jekyll data), jadi 404 itu normal.
+    // Di GitHub Pages, folder "data" bisa 404 (Jekyll) → normal, akan fallback
     const url = new URL(`${CONFIG.basePath}/${CONFIG.newsPath}?t=${Date.now()}`, location.origin).href;
     console.log('📡 Trying (same-origin):', url);
     return fetchJson(url);
   }
+
   async function fetchRaw() {
     const url = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.newsPath}?t=${Date.now()}`;
     console.log('📡 Trying (raw.githubusercontent):', url);
     return fetchJson(url);
   }
+
   async function fetchJsDelivr() {
     const url = `https://cdn.jsdelivr.net/gh/${CONFIG.owner}/${CONFIG.repo}@${CONFIG.branch}/${CONFIG.newsPath}?nocache=${Date.now()}`;
     console.log('📡 Trying (jsDelivr):', url);
     return fetchJson(url);
   }
+
   async function fetchGitHubAPI() {
     const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.newsPath}?ref=${CONFIG.branch}`;
     console.log('📡 Trying (GitHub API):', url);
@@ -201,6 +231,15 @@
     return { news: [], totalNews: 0 };
   }
 
+  function fixImageUrl(u) {
+    if (!u) return '';
+    const url = normalizeImgbbUrl(String(u).trim());
+    const host = getHost(url);
+    // Viewer page (ibb.co/<id>) bukan direct image → kosongkan
+    if (host === 'ibb.co' && !looksLikeDirectImage(url)) return '';
+    return url;
+  }
+
   async function fetchNews() {
     const tries = [fetchSameOrigin, fetchRaw, fetchJsDelivr, fetchGitHubAPI];
     let lastErr;
@@ -209,7 +248,9 @@
         const json = await fn();
         const data = normalizeData(json);
         data.news = data.news.map(n => {
-          if (n && n.image && !isHttpUrl(n.image) && !String(n.image).startsWith('data:')) n.image = '';
+          if (!n) return n;
+          const fixed = fixImageUrl(n.image);
+          n.image = fixed && isHttpUrl(fixed) ? fixed : '';
           return n;
         });
         cache.set(data);
@@ -224,17 +265,19 @@
     throw lastErr || new Error('All attempts failed');
   }
 
+  // =========================
+  // Render list & modal
+  // =========================
   function createNewsCard(n) {
     const catColors = { Pengumuman: 'badge-primary', Kegiatan: 'badge-success', Prestasi: 'badge-warning', Umum: 'badge-info' };
     const badgeClass = catColors[n.category] || 'badge-secondary';
+
     const title = escapeHtml(n.title);
     const date = formatDate(n.date || n.createdAt);
     const excerpt = escapeHtml(truncateText(n.content));
-    const imgUrl = n.image && isHttpUrl(n.image) ? n.image : '';
 
-    // Jika host i.ibb.co/ibb.co, langsung mulai dari proxy1 (bypass blokir)
-    const host = getHost(imgUrl);
-    const startWithProxy = host === 'i.ibb.co' || host === 'ibb.co';
+    const imgUrl = fixImageUrl(n.image && isHttpUrl(n.image) ? n.image : '');
+    const startWithProxy = imgUrl ? shouldStartWithProxy(imgUrl) : false;
     const initialSrc = startWithProxy ? getProxyUrl(imgUrl) : imgUrl;
     const initialStep = startWithProxy ? '1' : '0';
 
@@ -293,7 +336,6 @@
     }
 
     container.innerHTML = valid.map(createNewsCard).join('');
-
     if (typeof AOS !== 'undefined' && AOS.refresh) AOS.refresh();
   }
 
@@ -342,11 +384,12 @@
     document.getElementById('newsModalContent').textContent = n.content;
 
     const img = document.getElementById('newsModalImage');
-    if (n.image && isHttpUrl(n.image)) {
-      const host = getHost(n.image);
-      const startWithProxy = host === 'i.ibb.co' || host === 'ibb.co';
+    const src = fixImageUrl(n.image && isHttpUrl(n.image) ? n.image : '');
+
+    if (src) {
+      const startWithProxy = shouldStartWithProxy(src);
       img.style.display = 'block';
-      img.setAttribute('data-original', n.image);
+      img.setAttribute('data-original', src);
       img.setAttribute('data-step', startWithProxy ? '1' : '0');
       img.onerror = function () {
         window.newsImgError(img);
@@ -355,7 +398,7 @@
           img.style.display = 'none';
         }
       };
-      img.src = startWithProxy ? getProxyUrl(n.image) : n.image;
+      img.src = startWithProxy ? getProxyUrl(src) : src;
     } else {
       img.style.display = 'none';
     }
@@ -373,6 +416,9 @@
     }
   };
 
+  // =========================
+  // Init & Auto-refresh
+  // =========================
   async function init() {
     console.log('🚀 Init news loader v' + CONFIG.version);
     try {
@@ -409,6 +455,7 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
+  // Ekspos untuk debug
   window.newsLoader = {
     CONFIG, cache,
     reload: async function () { cache.clear(); const d = await fetchNews(); renderNews(d); return d; },
