@@ -1278,3 +1278,129 @@ body {
     font-weight: 500;
     letter-spacing: 2px;
 }
+
+
+/* ================================
+Visi & Mis
+================================ */
+.vision-mission {
+background: #F3EEE7;
+padding: 100px 0;
+position: relative;
+overflow: hidden;
+}
+.vision-mission::before,
+.vision-mission::after {
+content: "";
+position: absolute;
+left: 0;
+right: 0;
+height: 80px;
+pointer-events: none;
+}
+
+.vision-mission::before {
+top: 0;
+background: linear-gradient(to bottom, rgba(0,0,0,0.06), rgba(0,0,0,0));
+}
+
+.vision-mission::after {
+bottom: 0;
+background: linear-gradient(to top, rgba(0,0,0,0.06), rgba(0,0,0,0));
+}
+
+.vision-grid {
+display: grid;
+grid-template-columns: 1.15fr 1fr;
+gap: clamp(24px, 4vw, 64px);
+align-items: start;
+}
+
+.vision-quote {
+position: relative;
+color: #121212;
+max-width: 720px;
+}
+
+.vision-quote::before {
+content: "“";
+display: block;
+color: var(--biru-daarut);
+font-family: "Playfair Display", Georgia, serif;
+font-weight: 800;
+font-size: clamp(72px, 10vw, 140px);
+line-height: 0.8;
+margin-bottom: 12px;
+opacity: 0.95;
+}
+
+.vision-quote p {
+font-family: "Playfair Display", Georgia, serif;
+font-weight: 800;
+font-size: clamp(28px, 4.2vw, 56px);
+line-height: 1.1;
+letter-spacing: -0.5px;
+margin: 0;
+}
+
+.mission-title {
+font-family: "Playfair Display", Georgia, serif;
+color: var(--biru-daarut);
+font-weight: 800;
+font-size: clamp(24px, 3vw, 40px);
+margin-bottom: 24px;
+}
+
+.mission-list {
+list-style: none;
+margin: 0;
+padding: 0;
+display: grid;
+gap: 18px;
+}
+
+.mission-item {
+display: grid;
+grid-template-columns: 34px 1fr;
+align-items: start;
+gap: 14px;
+color: var(--text-primary);
+font-size: clamp(16px, 1.6vw, 18px);
+}
+
+.mission-icon {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 28px;
+height: 28px;
+background: var(--hijau-pertumbuhan);
+border-radius: 6px;
+box-shadow: 0 2px 8px rgba(30,158,68,.25);
+}
+
+.mission-icon svg {
+display: block;
+}
+
+.mission-item:hover .mission-icon {
+transform: translateY(-1px);
+box-shadow: 0 6px 16px rgba(30,158,68,.28);
+transition: transform .2s ease, box-shadow .2s ease;
+}
+
+/* Responsif */
+@media (max-width: 992px) {
+.vision-mission { padding: 80px 0; }
+}
+
+@media (max-width: 768px) {
+.vision-grid { grid-template-columns: 1fr; }
+.vision-right { margin-top: 8px; }
+}
+
+@media (max-width: 480px) {
+.vision-mission { padding: 64px 0; }
+.mission-item { grid-template-columns: 30px 1fr; }
+.mission-icon { width: 26px; height: 26px; }
+}
