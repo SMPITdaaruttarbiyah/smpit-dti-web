@@ -1,7 +1,19 @@
 {
   "version": "2.0.0",
-  "lastUpdated": "2025-10-31T10:14:28.253Z",
+  "lastUpdated": "2025-10-31T10:15:04.015Z",
   "website": "SMPIT DAARUT TARBIYAH INDONESIA",
-  "totalNews": 0,
-  "news": []
+  "totalNews": 1,
+  "news": [
+    {
+      "id": "1761905702511",
+      "title": "axas",
+      "category": "Pengumuman",
+      "date": "2025-10-31",
+      "content": "xas",
+      "image": "https://i.ibb.co/7HLnkYk/0c1e0230481b.jpg",
+      "published": true,
+      "createdAt": "2025-10-31T10:15:02.511Z",
+      "updatedAt": "2025-10-31T10:15:02.511Z"
+    }
+  ]
 }
