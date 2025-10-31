@@ -8,11 +8,7 @@
 
 ## 📱 Admin Panel
 
-**URL**: https://smpitdaaruttarbiyah.github.io/smpit-dti-web/admin.html
-
-**Login**: 
-- Username: `admin`
-- Password: `smpitdti2024`
+**URL**: https://smpitdaaruttarbiyah.github.io/smpit-dti-web/admin
 
 ## ✨ Features
 
