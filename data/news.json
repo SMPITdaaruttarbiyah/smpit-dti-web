@@ -1,19 +1,7 @@
 {
   "version": "2.0.0",
-  "lastUpdated": "2025-10-31T08:09:41.221Z",
+  "lastUpdated": "2025-10-31T08:20:12.981Z",
   "website": "SMPIT DAARUT TARBIYAH INDONESIA",
-  "totalNews": 1,
-  "news": [
-    {
-      "id": "1761898180820",
-      "title": "aA",
-      "category": "Pengumuman",
-      "date": "2025-10-31",
-      "content": "aAsasa",
-      "image": "https://i.ibb.co/1frg8CNc/d21266a5697b.jpg",
-      "published": true,
-      "createdAt": "2025-10-31T08:09:40.820Z",
-      "updatedAt": "2025-10-31T08:09:40.820Z"
-    }
-  ]
+  "totalNews": 0,
+  "news": []
 }
