@@ -1,0 +1,234 @@
+name: Auto Update Index HTML
+
+on:
+  push:
+    paths:
+      - 'data/news.json'
+  workflow_dispatch:
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Generate updated index.html
+      run: |
+        node -e "
+        const fs = require('fs');
+        
+        // Read news data
+        const newsData = JSON.parse(fs.readFileSync('data/news.json', 'utf8'));
+        const news = newsData.news || [];
+        
+        // Generate news HTML
+        const newsHTML = news.map(item => \`
+                <div class="news-card bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="h-48 bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center">
+                        <i class="fas fa-newspaper text-white text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <i class="fas fa-calendar mr-2"></i>
+                            \${new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </div>
+                        <span class="inline-block bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full mb-3">
+                            \${item.category}
+                        </span>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">\${item.title}</h3>
+                        <p class="text-gray-600 mb-4">\${item.content}</p>
+                        \${item.tags ? \`
+                            <div class="flex flex-wrap gap-2">
+                                \${item.tags.split(',').map(tag => \`
+                                    <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
+                                        \${tag.trim()}
+                                    </span>
+                                \`).join('')}
+                            </div>
+                        \` : ''}
+                    </div>
+                </div>
+        \`).join('');
+        
+        // Generate complete index.html
+        const indexHTML = \`<!DOCTYPE html>
+        <html lang="id">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>SMPIT DAARUT TARBIYAH INDONESIA</title>
+            <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+            <style>
+                .hero-gradient { background: linear-gradient(135deg, #0f766e 0%, #059669 100%); }
+                .news-card { transition: all 0.3s ease; }
+                .news-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+            </style>
+        </head>
+        <body class="bg-gray-50">
+            <!-- Header -->
+            <header class="bg-white shadow-md sticky top-0 z-50">
+                <nav class="container mx-auto px-4 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-graduation-cap text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold text-emerald-800">SMPIT DAARUT TARBIYAH INDONESIA</h1>
+                                <p class="text-sm text-gray-600">Bekasi Timur</p>
+                            </div>
+                        </div>
+                        <div class="hidden md:flex space-x-6">
+                            <a href="#home" class="nav-link text-emerald-700 hover:text-emerald-900 font-medium">Beranda</a>
+                            <a href="#news" class="nav-link text-emerald-700 hover:text-emerald-900 font-medium">Berita</a>
+                            <a href="#about" class="nav-link text-emerald-700 hover:text-emerald-900 font-medium">Tentang</a>
+                            <a href="#contact" class="nav-link text-emerald-700 hover:text-emerald-900 font-medium">Kontak</a>
+                        </div>
+                    </div>
+                </nav>
+            </header>
+
+            <!-- Hero Section -->
+            <section id="home" class="hero-gradient text-white py-20">
+                <div class="container mx-auto px-4 text-center">
+                    <div class="w-32 h-32 bg-white rounded-full mx-auto mb-8 flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-emerald-600 text-5xl"></i>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">SMPIT DAARUT TARBIYAH INDONESIA</h2>
+                    <p class="text-xl mb-8 max-w-3xl mx-auto">
+                        Membangun peradaban Islam Rahmatan Lil' Aalamiin melalui pendidikan terpadu yang berkualitas
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="#news" class="bg-white text-emerald-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                            <i class="fas fa-newspaper mr-2"></i>Lihat Berita
+                        </a>
+                        <a href="#contact" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition">
+                            <i class="fas fa-map-marker-alt mr-2"></i>Lokasi
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- News Section -->
+            <section id="news" class="py-16 bg-gray-50">
+                <div class="container mx-auto px-4">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-emerald-800 mb-4">Berita Terkini</h2>
+                        <p class="text-gray-600 max-w-2xl mx-auto">
+                            Informasi terbaru tentang kegiatan dan prestasi sekolah
+                        </p>
+                        <div class="mt-4">
+                            <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm">
+                                <i class="fas fa-sync-alt mr-1"></i>Update: \${new Date().toLocaleString('id-ID')}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        \${newsHTML || \`
+                            <div class="text-center col-span-full py-12">
+                                <i class="fas fa-newspaper text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-600">Belum ada berita tersedia</p>
+                            </div>
+                        \`}
+                    </div>
+
+                    <div class="mt-12 bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-center">
+                        <div class="flex items-center justify-center gap-2 text-emerald-700 mb-2">
+                            <i class="fas fa-chart-bar text-2xl"></i>
+                            <span class="font-semibold text-lg">Statistik Berita</span>
+                        </div>
+                        <p class="text-gray-600">
+                            Total \${news.length} berita tersedia
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="bg-emerald-800 text-white py-12">
+                <div class="container mx-auto px-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">SMPIT DAARUT TARBIYAH INDONESIA</h3>
+                            <p class="text-emerald-200">
+                                Membangun peradaban Islam Rahmatan Lil' Aalamiin
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold mb-4">Kontak</h4>
+                            <p class="text-emerald-200">
+                                <i class="fas fa-map-marker-alt mr-2"></i>Jl. Lapangan Bekasi Tengah No. 3<br>
+                                <i class="fas fa-phone mr-2"></i>+62 21-xxxx-xxxx<br>
+                                <i class="fas fa-envelope mr-2"></i>info@smpitdti.sch.id
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold mb-4">Sosial Media</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="text-emerald-200 hover:text-white">
+                                    <i class="fab fa-facebook text-2xl"></i>
+                                </a>
+                                <a href="#" class="text-emerald-200 hover:text-white">
+                                    <i class="fab fa-instagram text-2xl"></i>
+                                </a>
+                                <a href="#" class="text-emerald-200 hover:text-white">
+                                    <i class="fab fa-youtube text-2xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t border-emerald-700 mt-8 pt-8 text-center">
+                        <p class="text-emerald-200">
+                            &copy; 2025 SMPIT DAARUT TARBIYAH INDONESIA. All rights reserved.
+                        </p>
+                        <p class="text-emerald-200 text-sm mt-2">
+                            <i class="fas fa-robot mr-1"></i>Auto-generated from news.json
+                        </p>
+                    </div>
+                </div>
+            </footer>
+
+            <script>
+                // Smooth scrolling
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                });
+            </script>
+        </body>
+        </html>\`;
+        
+        // Write updated index.html
+        fs.writeFileSync('index.html', indexHTML);
+        console.log('✅ index.html updated with latest news');
+        "
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add index.html
+        git diff --staged --quiet || git commit -m "🤖 Auto-update index.html with latest news
+        
+        📰 Updated automatically from news.json
+        🔄 Generated on: $(date)
+        📊 News count: $(node -e "console.log(JSON.parse(require('fs').readFileSync('data/news.json', 'utf8')).news.length)")
+        
+        🚀 This commit was triggered by news.json update"
+        git push
