@@ -267,7 +267,7 @@
 }
 
 .quote-text {
-  font-size: 1.25rem;
+  font-size: 1.7rem;
   line-height: 1.8;
   color: var(--text-primary);
   font-style: italic;
@@ -280,7 +280,7 @@
 .quote-author {
   color: var(--biru-daarut);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.3rem;
   text-align: right;
   margin: 0;
 }
