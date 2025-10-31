@@ -178,7 +178,8 @@
     }
     
     .form-group input:focus,
-    .form-group textarea:focus {
+    .form-group textarea:focus,
+    .form-group select:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(10, 61, 115, 0.1);
@@ -405,6 +406,8 @@
     .image-preview img {
       width: 100%;
       height: auto;
+      max-height: 400px;
+      object-fit: contain;
     }
     
     .remove-image {
@@ -554,6 +557,12 @@
       
       .stats {
         grid-template-columns: 1fr;
+      }
+      
+      .toast {
+        right: 1rem;
+        left: 1rem;
+        top: 1rem;
       }
     }
   </style>
@@ -747,7 +756,7 @@
           
           <div class="form-group">
             <label>Judul Berita *</label>
-            <input type="text" id="newsTitle" required>
+            <input type="text" id="newsTitle" required maxlength="200">
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -769,7 +778,8 @@
 
           <div class="form-group">
             <label>Konten Berita *</label>
-            <textarea id="newsContent" required></textarea>
+            <textarea id="newsContent" required maxlength="5000"></textarea>
+            <span class="input-hint" id="contentCounter">0 / 5000 karakter</span>
           </div>
 
           <div class="form-group">
@@ -779,6 +789,7 @@
               <div id="uploadText">
                 <div style="font-size: 3rem;">📷</div>
                 <div style="font-weight: 600; margin-top: 0.5rem;">Klik untuk upload gambar</div>
+                <div style="color: #999; font-size: 0.85rem; margin-top: 0.25rem;">Max 2MB, JPG/PNG</div>
               </div>
             </div>
             <div id="imagePreview" class="image-preview" style="display:none;">
@@ -957,6 +968,12 @@
           filePath: 'data/news.json'
         };
         
+        console.log('🔧 GitHub API initialized:', {
+          owner: username,
+          repo: repo,
+          branch: branch
+        });
+        
         return await this.testConnection();
       },
       
@@ -972,9 +989,15 @@
             }
           );
           
-          return response.ok;
+          if (response.ok) {
+            console.log('✅ GitHub connection successful');
+            return true;
+          } else {
+            console.error('❌ GitHub connection failed:', response.status);
+            return false;
+          }
         } catch (error) {
-          console.error('Connection test failed:', error);
+          console.error('❌ Connection test error:', error);
           return false;
         }
       },
@@ -982,7 +1005,7 @@
       async getFile() {
         try {
           const response = await fetch(
-            `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}`,
+            `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}?ref=${this.config.branch}`,
             {
               headers: {
                 'Authorization': `Bearer ${this.config.token}`,
@@ -999,22 +1022,21 @@
               sha: data.sha
             };
           } else if (response.status === 404) {
+            console.log('ℹ️ File not found, will create new');
             return null;
           } else {
-            throw new Error('Failed to get file');
+            throw new Error(`Failed to get file: ${response.status}`);
           }
         } catch (error) {
-          console.error('Get file error:', error);
+          console.error('❌ Get file error:', error);
           throw error;
         }
       },
       
       async updateFile(newsData, message = 'Update berita') {
         try {
-          console.log('🔄 Starting GitHub file update...');
-          console.log('📁 Repository:', `${this.config.owner}/${this.config.repo}`);
-          console.log('📄 File path:', this.config.filePath);
-          console.log('📰 News count:', newsData.length);
+          console.log('🔄 Starting GitHub update...');
+          console.log('📊 News count:', newsData.length);
           
           const currentFile = await this.getFile();
           
@@ -1026,11 +1048,10 @@
             news: newsData,
             metadata: {
               updatedAt: new Date().toISOString(),
-              updatedBy: 'Admin Panel'
+              updatedBy: 'Admin Panel v2.0'
             }
           };
           
-          console.log('📦 Preparing data for GitHub...');
           const jsonString = JSON.stringify(dataToSave, null, 2);
           const content = Base64.encode(jsonString);
           
@@ -1042,12 +1063,12 @@
           
           if (currentFile && currentFile.sha) {
             body.sha = currentFile.sha;
-            console.log('🔄 Updating existing file (SHA:', currentFile.sha.substring(0, 7) + '...)');
+            console.log('🔄 Updating existing file');
           } else {
             console.log('➕ Creating new file');
           }
           
-          console.log('🚀 Sending request to GitHub API...');
+          console.log('🚀 Uploading to GitHub...');
           const response = await fetch(
             `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}`,
             {
@@ -1061,8 +1082,6 @@
             }
           );
           
-          console.log('📡 GitHub API response status:', response.status);
-          
           if (!response.ok) {
             const error = await response.json();
             console.error('❌ GitHub API error:', error);
@@ -1070,8 +1089,8 @@
           }
           
           const result = await response.json();
-          console.log('✅ GitHub update successful!');
-          console.log('🔗 Commit URL:', result.commit.html_url);
+          console.log('✅ Upload successful!');
+          console.log('🔗 Commit:', result.commit.sha.substring(0, 7));
           
           return result;
         } catch (error) {
@@ -1089,59 +1108,61 @@
       KEYS: {
         CONFIG: 'smpit_config_v2',
         NEWS: 'smpit_news_v2',
-        PASSWORD_HASH: 'smpit_pwd_hash'
+        PASSWORD_HASH: 'smpit_pwd_hash',
+        PUBLIC_CONFIG: 'github_config'
       },
       
       saveConfig(config, password) {
-        const encrypted = CryptoManager.encrypt(JSON.stringify(config), password);
-        localStorage.setItem(this.KEYS.CONFIG, encrypted);
-        
-        const hash = CryptoManager.hash(password);
-        localStorage.setItem(this.KEYS.PASSWORD_HASH, hash);
-        
-        console.log('✅ Config saved successfully');
+        try {
+          const encrypted = CryptoManager.encrypt(JSON.stringify(config), password);
+          localStorage.setItem(this.KEYS.CONFIG, encrypted);
+          
+          const hash = CryptoManager.hash(password);
+          localStorage.setItem(this.KEYS.PASSWORD_HASH, hash);
+          
+          // Save public config for news loader
+          const publicConfig = {
+            owner: config.username,
+            repo: config.repo
+          };
+          localStorage.setItem(this.KEYS.PUBLIC_CONFIG, JSON.stringify(publicConfig));
+          
+          console.log('✅ Config saved successfully');
+        } catch (error) {
+          console.error('❌ Save config error:', error);
+          throw error;
+        }
       },
       
       loadConfig(password) {
         try {
-          console.log('🔍 Loading config with password...');
           const encrypted = localStorage.getItem(this.KEYS.CONFIG);
           if (!encrypted) {
-            console.log('❌ No config found in localStorage');
+            console.log('❌ No config found');
             return null;
           }
           
-          console.log('🔓 Decrypting config...');
           const decrypted = CryptoManager.decrypt(encrypted, password);
           if (!decrypted) {
-            console.log('❌ Decryption failed - wrong password');
+            console.log('❌ Decryption failed');
             return null;
           }
           
           const config = JSON.parse(decrypted);
-          console.log('✅ Config loaded successfully:', { 
-            hasToken: !!config.token, 
-            username: config.username, 
-            repo: config.repo 
-          });
+          console.log('✅ Config loaded');
           return config;
         } catch (error) {
-          console.error('❌ Config load error:', error);
+          console.error('❌ Load config error:', error);
           return null;
         }
       },
       
       verifyPassword(password) {
         const savedHash = localStorage.getItem(this.KEYS.PASSWORD_HASH);
-        if (!savedHash) {
-          console.log('❌ No password hash found');
-          return false;
-        }
+        if (!savedHash) return false;
         
         const hash = CryptoManager.hash(password);
-        const isValid = hash === savedHash;
-        console.log('🔐 Password verification:', isValid ? 'VALID' : 'INVALID');
-        return isValid;
+        return hash === savedHash;
       },
       
       hasConfig() {
@@ -1164,13 +1185,16 @@
           const decrypted = CryptoManager.decrypt(encrypted, 'local-storage-key');
           return JSON.parse(decrypted);
         } catch (error) {
-          console.error('News load error:', error);
+          console.error('❌ Load news error:', error);
           return [];
         }
       },
       
       clearAll() {
-        localStorage.clear();
+        Object.values(this.KEYS).forEach(key => {
+          localStorage.removeItem(key);
+        });
+        console.log('🗑️ All data cleared');
       }
     };
 
@@ -1236,6 +1260,12 @@
       document.getElementById('totalNews').textContent = news.length;
       document.getElementById('totalCategories').textContent = categories.length;
       document.getElementById('totalPublished').textContent = published;
+    }
+    
+    function updateContentCounter() {
+      const content = document.getElementById('newsContent').value;
+      const counter = document.getElementById('contentCounter');
+      counter.textContent = `${content.length} / 5000 karakter`;
     }
 
     // ==========================================
@@ -1303,6 +1333,7 @@
           branch: document.getElementById('repoBranch').value.trim() || 'main'
         };
         
+        console.log('🔧 Testing GitHub connection...');
         const connected = await GitHubAPI.initialize(
           config.token,
           config.username,
@@ -1320,6 +1351,7 @@
         showToast('Setup berhasil! 🎉', 'success');
         
       } catch (error) {
+        console.error('Setup error:', error);
         showToast('Error: ' + error.message, 'error');
         btn.disabled = false;
         btn.innerHTML = '🚀 Selesaikan Setup';
@@ -1344,15 +1376,6 @@
     let publishCallback = null;
     
     function publishNews() {
-      console.log('📝 Publish button clicked');
-      
-      // Check if config exists
-      if (!StorageManager.hasConfig()) {
-        console.error('❌ No config found! Need to setup first.');
-        showToast('❌ Anda belum melakukan setup! Silakan refresh halaman dan lakukan setup terlebih dahulu.', 'error');
-        return;
-      }
-      
       const title = document.getElementById('newsTitle').value.trim();
       const content = document.getElementById('newsContent').value.trim();
       
@@ -1361,42 +1384,29 @@
         return;
       }
       
-      console.log('✅ Form validation passed');
-      console.log('✅ Config exists, proceeding with publish...');
+      if (!StorageManager.hasConfig()) {
+        showToast('Setup belum dilakukan! Silakan refresh dan setup terlebih dahulu.', 'error');
+        return;
+      }
       
       publishCallback = async function(password) {
-        console.log('🔐 Executing publish callback with password:', password ? '***' : 'null');
-        console.log('🔐 publishCallback exists:', typeof publishCallback === 'function');
-        
         const publishBtn = document.getElementById('publishBtn');
         publishBtn.disabled = true;
         publishBtn.innerHTML = '<span class="loading"></span> Publishing...';
         
         try {
-          console.log('🔄 Loading config...');
           const config = StorageManager.loadConfig(password);
           
           if (!config) {
-            console.error('❌ No config found!');
-            throw new Error('Gagal memuat konfigurasi. Password mungkin salah atau Anda belum melakukan setup.');
+            throw new Error('Gagal memuat konfigurasi. Password mungkin salah.');
           }
           
-          console.log('✅ Config loaded:', { 
-            owner: config.username, 
-            repo: config.repo,
-            hasToken: !!config.token,
-            tokenPrefix: config.token ? config.token.substring(0, 10) + '...' : 'none'
-          });
-          
-          console.log('🔄 Initializing GitHub API...');
           await GitHubAPI.initialize(
             config.token,
             config.username,
             config.repo,
             config.branch
           );
-          
-          console.log('✅ GitHub API initialized');
           
           const newsId = document.getElementById('newsId').value;
           const newsData = {
@@ -1411,28 +1421,20 @@
             updatedAt: new Date().toISOString()
           };
           
-          console.log('📦 News data prepared:', newsData.title);
-          
           let allNews = StorageManager.loadNews();
           
           if (newsId) {
             const index = allNews.findIndex(n => n.id === newsId);
             if (index !== -1) {
               allNews[index] = newsData;
-              console.log('📝 Updated existing news');
             }
           } else {
             allNews.unshift(newsData);
-            console.log('➕ Added new news');
           }
           
           StorageManager.saveNews(allNews);
-          console.log('💾 Saved to localStorage');
           
-          console.log('🚀 Uploading to GitHub...');
           await GitHubAPI.updateFile(allNews, `Update berita: ${title}`);
-          
-          console.log('✅ Upload successful!');
           
           showToast('✅ Berita berhasil dipublish ke website!', 'success');
           
@@ -1441,7 +1443,7 @@
           updateStats();
           
         } catch (error) {
-          console.error('❌ Publish error:', error);
+          console.error('Publish error:', error);
           showToast('Gagal publish: ' + error.message, 'error');
         } finally {
           publishBtn.disabled = false;
@@ -1453,7 +1455,6 @@
     }
     
     function showPasswordModal() {
-      console.log('🔓 Opening password modal');
       document.getElementById('passwordModal').classList.add('active');
       document.getElementById('modalPassword').value = '';
       document.getElementById('passwordError').classList.remove('show');
@@ -1461,22 +1462,18 @@
     }
     
     function closePasswordModal() {
-      console.log('🔒 Closing password modal');
       document.getElementById('passwordModal').classList.remove('active');
       document.getElementById('passwordError').classList.remove('show');
-      // Don't reset publishCallback here - let it be reset after execution
+      publishCallback = null;
     }
     
     function closeModalOnBackdrop(event) {
       if (event.target.id === 'passwordModal') {
         closePasswordModal();
-        publishCallback = null; // Reset when cancelled
       }
     }
     
     function confirmPassword() {
-      console.log('🔐 Confirming password...');
-      
       const password = document.getElementById('modalPassword').value;
       const errorEl = document.getElementById('passwordError');
       const confirmBtn = document.getElementById('confirmPasswordBtn');
@@ -1486,8 +1483,6 @@
         return;
       }
       
-      console.log('🔍 Verifying password...');
-      
       confirmBtn.disabled = true;
       confirmBtn.innerHTML = '<span class="loading"></span> Verifying...';
       
@@ -1495,7 +1490,6 @@
         const isValid = StorageManager.verifyPassword(password);
         
         if (!isValid) {
-          console.log('❌ Password invalid');
           errorEl.classList.add('show');
           showToast('Password salah!', 'error');
           confirmBtn.disabled = false;
@@ -1503,17 +1497,12 @@
           return;
         }
         
-        console.log('✅ Password valid');
         errorEl.classList.remove('show');
         
-        // Execute callback FIRST, then close modal
         if (publishCallback) {
-          console.log('🚀 Executing publish callback');
           const callback = publishCallback;
-          publishCallback = null; // Reset immediately
+          publishCallback = null;
           callback(password);
-        } else {
-          console.log('⚠️ No publish callback found');
         }
         
         closePasswordModal();
@@ -1529,7 +1518,12 @@
       document.getElementById('newsImage').value = '';
       document.getElementById('imagePreview').style.display = 'none';
       document.getElementById('uploadText').style.display = 'block';
-      document.getElementById('newsDate').valueAsDate = new Date();
+      
+      // Set today's date
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('newsDate').value = today;
+      
+      updateContentCounter();
     }
     
     function handleImageUpload(event) {
@@ -1648,6 +1642,8 @@
         document.getElementById('uploadText').style.display = 'none';
       }
       
+      updateContentCounter();
+      
       window.scrollTo({ top: 0, behavior: 'smooth' });
       showToast('Mode edit aktif', 'info');
     }
@@ -1676,9 +1672,24 @@
     // ==========================================
     
     window.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 SMPIT DTI Admin Panel - Loading...');
+      console.log('🚀 SMPIT DTI Admin Panel v2.0 - Loading...');
       
-      document.getElementById('newsDate').valueAsDate = new Date();
+      // Set today as default and max date
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById('newsDate');
+      dateInput.value = today;
+      dateInput.max = today;
+      
+      // Add content counter
+      document.getElementById('newsContent').addEventListener('input', updateContentCounter);
+      
+      // Enter key for password modal
+      document.getElementById('modalPassword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          confirmPassword();
+        }
+      });
       
       if (StorageManager.hasConfig()) {
         console.log('✅ Config found, showing main panel');
@@ -1695,14 +1706,6 @@
         document.getElementById('setupWizard').classList.add('active');
         updateConnectionStatus(false);
       }
-      
-      // Enter key for password modal
-      document.getElementById('modalPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          confirmPassword();
-        }
-      });
       
       console.log('✅ Admin Panel ready!');
     });
