@@ -1,14 +1,12 @@
-// News Loader for SMPIT DTI Website - Auto Configuration
+// News Loader for SMPIT DTI Website
 (function() {
     'use strict';
     
-    // Auto-detect configuration from current URL
+    // Auto-detect configuration
     function detectGitHubConfig() {
         const url = window.location.href;
         
-        // Check if running on GitHub Pages
         if (url.includes('.github.io')) {
-            // Format: https://username.github.io/repo-name/
             const matches = url.match(/https:\/\/([^.]+)\.github\.io\/([^\/]+)/);
             if (matches) {
                 return {
@@ -18,27 +16,22 @@
             }
         }
         
-        // Check if running locally with path
-        if (url.includes('/smpit-dti-web/')) {
-            // Try to get from localStorage (set by admin panel)
-            const savedConfig = localStorage.getItem('github_config');
-            if (savedConfig) {
-                try {
-                    return JSON.parse(savedConfig);
-                } catch (e) {
-                    console.error('Failed to parse saved config');
-                }
+        const savedConfig = localStorage.getItem('github_config');
+        if (savedConfig) {
+            try {
+                return JSON.parse(savedConfig);
+            } catch (e) {
+                console.error('Failed to parse saved config');
             }
         }
         
-        // Default fallback - YOU NEED TO CHANGE THIS
+        // GANTI INI dengan username GitHub Anda yang sebenarnya
         return {
-            owner: 'SMPITdaaruttarbiyah',
+            owner: 'YOUR_GITHUB_USERNAME', // ← GANTI INI!
             repo: 'smpit-dti-web'
         };
     }
     
-    // Configuration
     const autoConfig = detectGitHubConfig();
     const CONFIG = {
         owner: autoConfig.owner,
@@ -46,8 +39,7 @@
         branch: 'main',
         newsPath: 'data/news.json',
         maxNews: 6,
-        cacheTime: 5 * 60 * 1000,
-        fallbackNewsUrl: '/smpit-dti-web/data/news.json' // Fallback for local
+        cacheTime: 5 * 60 * 1000
     };
     
     console.log('📋 News Loader Config:', CONFIG);
@@ -65,7 +57,6 @@
         set(data) {
             this.data = data;
             this.timestamp = Date.now();
-            // Also save to sessionStorage as backup
             try {
                 sessionStorage.setItem('news_cache', JSON.stringify({
                     data: data,
@@ -81,7 +72,6 @@
                 return this.data;
             }
             
-            // Try sessionStorage
             try {
                 const stored = sessionStorage.getItem('news_cache');
                 if (stored) {
@@ -103,7 +93,6 @@
     // Fetch news from multiple sources
     async function fetchNews() {
         try {
-            // Check cache first
             const cached = cache.get();
             if (cached) {
                 console.log('📦 Using cached news data');
@@ -112,21 +101,11 @@
             
             console.log('🔄 Fetching news...');
             
-            // Try multiple URLs in order
             const urls = [
-                // 1. Try raw GitHub content (for GitHub Pages)
                 `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.newsPath}`,
-                
-                // 2. Try GitHub API (with CORS proxy if needed)
                 `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.newsPath}?ref=${CONFIG.branch}`,
-                
-                // 3. Try local fallback
-                CONFIG.fallbackNewsUrl,
-                
-                // 4. Try relative path
+                `/smpit-dti-web/data/news.json`,
                 `/data/news.json`,
-                
-                // 5. Try with base path
                 `./data/news.json`
             ];
             
@@ -145,21 +124,18 @@
                     
                     if (response.ok) {
                         let data;
-                        
-                        // Check if it's GitHub API response
                         const contentType = response.headers.get('content-type');
+                        
                         if (contentType && contentType.includes('application/json')) {
                             const jsonData = await response.json();
                             
-                            // GitHub API returns base64 encoded content
                             if (jsonData.content && jsonData.encoding === 'base64') {
                                 const decoded = atob(jsonData.content.replace(/\s/g, ''));
                                 data = JSON.parse(decoded);
                             } else if (jsonData.news) {
-                                // Direct JSON response
                                 data = jsonData;
                             } else {
-                                continue; // Try next URL
+                                continue;
                             }
                         } else {
                             data = await response.json();
@@ -167,13 +143,17 @@
                         
                         if (data && data.news) {
                             cache.set(data);
-                            console.log(`✅ Successfully loaded ${data.news.length} news items from ${url}`);
+                            console.log(`✅ Loaded ${data.news.length} news from ${url}`);
+                            
+                            // Save as fallback
+                            localStorage.setItem('news_fallback', JSON.stringify(data));
+                            
                             return data;
                         }
                     }
                 } catch (error) {
                     lastError = error;
-                    console.warn(`Failed to fetch from ${url}:`, error.message);
+                    console.warn(`Failed from ${url}:`, error.message);
                 }
             }
             
@@ -182,7 +162,6 @@
         } catch (error) {
             console.error('❌ Error fetching news:', error);
             
-            // Try localStorage fallback
             const fallback = localStorage.getItem('news_fallback');
             if (fallback) {
                 console.log('📱 Using localStorage fallback');
@@ -193,15 +172,11 @@
                 }
             }
             
-            // Return empty structure
-            return {
-                news: [],
-                totalNews: 0
-            };
+            return { news: [], totalNews: 0 };
         }
     }
     
-    // Format date to Indonesian format
+    // Format date
     function formatDate(dateString) {
         const options = { 
             year: 'numeric', 
@@ -212,14 +187,13 @@
         try {
             const date = new Date(dateString);
             
-            // Validate date
             if (isNaN(date.getTime())) {
                 return new Date().toLocaleDateString('id-ID', options);
             }
             
-            // Fix future dates
             const today = new Date();
             if (date > today) {
+                console.warn('⚠️ Future date detected, using today');
                 return today.toLocaleDateString('id-ID', options);
             }
             
@@ -232,18 +206,13 @@
     // Truncate text
     function truncateText(text, maxLength = 150) {
         if (!text) return '';
+        text = text.trim();
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength).trim() + '...';
     }
     
-    // Create news card HTML
+    // Create news card
     function createNewsCard(news) {
-        const imageHTML = news.image 
-            ? `<img src="${news.image}" alt="${news.title}" class="news-image" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200/0A3D73/FFFFFF?text=SMPIT+DTI'">`
-            : `<div class="news-placeholder-image">
-                 <span>📰</span>
-               </div>`;
-        
         const categoryColors = {
             'Pengumuman': 'badge-primary',
             'Kegiatan': 'badge-success', 
@@ -253,19 +222,32 @@
         
         const badgeClass = categoryColors[news.category] || 'badge-secondary';
         
+        // Handle image - check if it exists and is valid
+        let imageHTML;
+        if (news.image && news.image.trim() !== '') {
+            // Check if it's a base64 image or URL
+            const imageSrc = news.image.startsWith('data:') || news.image.startsWith('http') 
+                ? news.image 
+                : news.image;
+                
+            imageHTML = `<img src="${imageSrc}" alt="${escapeHtml(news.title)}" class="news-image" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'news-placeholder-image\\'><span>📰</span></div>';">`;
+        } else {
+            imageHTML = `<div class="news-placeholder-image"><span>📰</span></div>`;
+        }
+        
         return `
             <div class="news-card" data-aos="fade-up">
                 <div class="news-card-image">
                     ${imageHTML}
-                    <span class="news-category ${badgeClass}">${news.category || 'Umum'}</span>
+                    <span class="news-category ${badgeClass}">${escapeHtml(news.category || 'Umum')}</span>
                 </div>
                 <div class="news-card-content">
                     <div class="news-date">
                         <i>📅</i> ${formatDate(news.date)}
                     </div>
-                    <h3 class="news-title">${news.title}</h3>
-                    <p class="news-excerpt">${truncateText(news.content)}</p>
-                    <a href="#" class="news-read-more" onclick="viewNewsDetail('${news.id}'); return false;">
+                    <h3 class="news-title">${escapeHtml(news.title)}</h3>
+                    <p class="news-excerpt">${escapeHtml(truncateText(news.content))}</p>
+                    <a href="#" class="news-read-more" onclick="window.viewNewsDetail('${news.id}'); return false;">
                         Baca Selengkapnya →
                     </a>
                 </div>
@@ -273,7 +255,14 @@
         `;
     }
     
-    // Render news to the page
+    // Escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Render news
     function renderNews(data) {
         const container = document.querySelector('#news .news-grid');
         
@@ -285,54 +274,39 @@
         if (!data || !data.news || data.news.length === 0) {
             container.innerHTML = `
                 <div class="no-news">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📰</div>
+                    <div>📰</div>
                     <p>Belum ada berita tersedia.</p>
-                    <p style="font-size: 0.9rem; color: #999; margin-top: 0.5rem;">
-                        Berita akan segera ditampilkan setelah dipublikasi.
-                    </p>
+                    <p>Berita akan segera ditampilkan setelah dipublikasi.</p>
                 </div>
             `;
             return;
         }
         
-        // Filter and sort news
         const today = new Date();
-        today.setHours(23, 59, 59, 999); // End of today
+        today.setHours(23, 59, 59, 999);
         
         const validNews = data.news
             .filter(news => {
                 if (!news.title || !news.content) return false;
-                
                 const newsDate = new Date(news.date);
-                // Allow today's news and past news
                 return newsDate <= today;
             })
-            .sort((a, b) => {
-                // Sort by date, newest first
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateB - dateA;
-            })
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(0, CONFIG.maxNews);
         
         if (validNews.length === 0) {
             container.innerHTML = `
                 <div class="no-news">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                    <div>📭</div>
                     <p>Tidak ada berita untuk ditampilkan.</p>
                 </div>
             `;
             return;
         }
         
-        // Create news cards
         const newsHTML = validNews.map(news => createNewsCard(news)).join('');
         container.innerHTML = newsHTML;
         
-        // Save successful data as fallback
-        localStorage.setItem('news_fallback', JSON.stringify(data));
-        
-        // Re-initialize AOS if available
         if (typeof AOS !== 'undefined') {
             AOS.refresh();
         }
@@ -340,18 +314,94 @@
         console.log(`📰 Rendered ${validNews.length} news items`);
     }
     
-    // View news detail (placeholder function)
-    window.viewNewsDetail = function(newsId) {
-        console.log('View news detail:', newsId);
+    // Create modal if not exists
+    function createModal() {
+        if (document.getElementById('newsModal')) return;
         
-        // Get news data
-        const cached = cache.get();
-        if (cached && cached.news) {
-            const news = cached.news.find(n => n.id === newsId);
-            if (news) {
-                // You can implement a modal or redirect here
-                alert(`📰 ${news.title}\n\n${news.content}\n\n📅 ${formatDate(news.date)}`);
+        const modal = document.createElement('div');
+        modal.id = 'newsModal';
+        modal.className = 'news-modal';
+        modal.innerHTML = `
+            <div class="news-modal-content">
+                <div class="news-modal-header">
+                    <img id="newsModalImage" class="news-modal-image" src="" alt="" style="display:none;">
+                    <button class="news-modal-close" onclick="window.closeNewsDetail()">×</button>
+                </div>
+                <div class="news-modal-body">
+                    <span id="newsModalCategory" class="news-modal-category"></span>
+                    <h2 id="newsModalTitle" class="news-modal-title"></h2>
+                    <div id="newsModalDate" class="news-modal-date"></div>
+                    <div id="newsModalContent" class="news-modal-content-text"></div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close on backdrop click
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                window.closeNewsDetail();
             }
+        });
+        
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                window.closeNewsDetail();
+            }
+        });
+    }
+    
+    // View news detail
+    window.viewNewsDetail = function(newsId) {
+        const cached = cache.get();
+        if (!cached || !cached.news) return;
+        
+        const news = cached.news.find(n => n.id === newsId);
+        if (!news) return;
+        
+        createModal();
+        
+        const modal = document.getElementById('newsModal');
+        const categoryColors = {
+            'Pengumuman': 'badge-primary',
+            'Kegiatan': 'badge-success', 
+            'Prestasi': 'badge-warning',
+            'Umum': 'badge-info'
+        };
+        
+        const badgeClass = categoryColors[news.category] || 'badge-secondary';
+        
+        // Set content
+        document.getElementById('newsModalTitle').textContent = news.title;
+        document.getElementById('newsModalCategory').textContent = news.category || 'Umum';
+        document.getElementById('newsModalCategory').className = `news-modal-category ${badgeClass}`;
+        document.getElementById('newsModalDate').innerHTML = `📅 ${formatDate(news.date)}`;
+        document.getElementById('newsModalContent').textContent = news.content;
+        
+        // Handle image
+        const modalImage = document.getElementById('newsModalImage');
+        if (news.image && news.image.trim() !== '') {
+            modalImage.src = news.image;
+            modalImage.style.display = 'block';
+            modalImage.onerror = function() {
+                this.style.display = 'none';
+            };
+        } else {
+            modalImage.style.display = 'none';
+        }
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+    
+    // Close news detail
+    window.closeNewsDetail = function() {
+        const modal = document.getElementById('newsModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
         }
     };
     
@@ -363,34 +413,27 @@
             const newsData = await fetchNews();
             renderNews(newsData);
         } catch (error) {
-            console.error('❌ Failed to initialize news:', error);
+            console.error('❌ Failed to initialize:', error);
             
             const container = document.querySelector('#news .news-grid');
             if (container) {
                 container.innerHTML = `
                     <div class="no-news">
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                        <div>⚠️</div>
                         <p>Gagal memuat berita.</p>
-                        <p style="font-size: 0.9rem; color: #999; margin-top: 0.5rem;">
-                            Silakan refresh halaman atau coba lagi nanti.
-                        </p>
-                        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 1rem;">
-                            🔄 Refresh
-                        </button>
+                        <p>Silakan refresh halaman atau coba lagi nanti.</p>
                     </div>
                 `;
             }
         }
     }
     
-    // Auto-refresh news periodically
+    // Auto-refresh
     setInterval(async () => {
         console.log('🔄 Auto-refreshing news...');
         try {
-            // Clear cache to force fresh fetch
             cache.data = null;
             cache.timestamp = null;
-            
             const newsData = await fetchNews();
             if (newsData && newsData.news) {
                 renderNews(newsData);
@@ -400,7 +443,7 @@
         }
     }, CONFIG.cacheTime);
     
-    // Start when DOM is ready
+    // Start
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
