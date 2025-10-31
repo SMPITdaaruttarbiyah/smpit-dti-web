@@ -732,26 +732,39 @@ body {
 }
 
 @media (max-width: 480px) {
-    /* Hanya tampilkan logo bulat, sembunyikan teks */
-    .logo-wrapper {
-        padding: 6px;
-        gap: 0;
-        border-radius: 50%;
-    }
-    
-    .logo-text {
-        display: none;
-    }
-    
-    .logo-img {
-        height: 45px;
-        width: 45px;
-    }
-    
-    .logo-ring {
-        width: 55px;
-        height: 55px;
-    }
+.logo-wrapper {
+padding: 6px 12px; /* beri ruang untuk teks /
+gap: 8px;
+border-radius: 999px; / pill, bukan bulat penuh /
+}
+.logo-text {
+display: flex; / tampilkan kembali */
+flex-direction: column;
+line-height: 1.1;
+}
+.logo-title {
+font-size: 14px;
+font-weight: 700;
+}
+.logo-subtitle {
+font-size: 9px;
+opacity: 0.95;
+}
+.logo-img {
+height: 40px;
+width: 40px;
+padding: 5px;
+}
+.logo-ring {
+width: 48px;
+height: 48px;
+}
+}
+
+Opsional layar sangat kecil:
+@media (max-width: 360px) {
+.logo-subtitle { display: none; }
+.logo-title { font-size: 16px; }
 }
 
 /* Accessibility: Fokus untuk keyboard navigation */
