@@ -1,0 +1,27 @@
+[
+{
+"id": "library1",
+"title": "Perpustakaan Digital",
+"desc": "Pusat literasi dengan koleksi fisik dan digital, nyaman untuk belajar mandiri dan kolaboratif.",
+"category": "akademik",
+"image": "/smpit-dti-web/assets/images/facilities/library1-1200.jpg",
+"thumb": "/smpit-dti-web/assets/images/facilities/library1-320.jpg"
+},
+{
+"id": "mosque1",
+"title": "Masjid Sekolah",
+"desc": "Ruang ibadah representatif untuk membangun karakter spiritual siswa.",
+"category": "ibadah",
+"image": "/smpit-dti-web/assets/images/facilities/mosque1-1200.jpg",
+"thumb": "/smpit-dti-web/assets/images/facilities/mosque1-320.jpg"
+},
+{
+"id": "lab1",
+"title": "Laboratorium IPA",
+"desc": "Fasilitas praktikum modern untuk eksplorasi sains secara langsung.",
+"category": "akademik",
+"image": "/smpit-dti-web/assets/images/facilities/lab1-1200.jpg",
+"thumb": "/smpit-dti-web/assets/images/facilities/lab1-320.jpg"
+}
+/* Tambah item sebanyak yang dibutuhkan, format sama */
+]
