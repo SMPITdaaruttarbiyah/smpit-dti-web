@@ -1,23 +1,19 @@
 {
   "version": "2.0.0",
-  "lastUpdated": "2025-10-31T07:18:36.094Z",
+  "lastUpdated": "2025-10-31T07:55:47.711Z",
   "website": "SMPIT DAARUT TARBIYAH INDONESIA",
   "totalNews": 1,
   "news": [
     {
-      "id": "1761895115173",
-      "title": "sasa",
+      "id": "1761897346153",
+      "title": "eqreq",
       "category": "Pengumuman",
-      "date": "2025-10-30",
-      "content": "sasa",
-      "image": "https://i.ibb.co/S4FdLbGL/35093c3b5d79.jpg",
+      "date": "2025-10-31",
+      "content": "thdt",
+      "image": "https://i.ibb.co/rG76xPqL/bb72e4f3a1b4.jpg",
       "published": true,
-      "createdAt": "2025-10-31T07:18:35.173Z",
-      "updatedAt": "2025-10-31T07:18:35.173Z"
+      "createdAt": "2025-10-31T07:55:46.153Z",
+      "updatedAt": "2025-10-31T07:55:46.153Z"
     }
-  ],
-  "metadata": {
-    "updatedAt": "2025-10-31T07:18:36.094Z",
-    "updatedBy": "Admin Panel v2.0"
-  }
+  ]
 }
