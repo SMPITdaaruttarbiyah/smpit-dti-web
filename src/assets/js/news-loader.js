@@ -1,4 +1,4 @@
-// News Loader for SMPIT DTI Website - ImgBB Fixed Version
+// News Loader - Auto Cache Clear Version
 (function() {
     'use strict';
     
@@ -19,9 +19,7 @@
         if (savedConfig) {
             try {
                 return JSON.parse(savedConfig);
-            } catch (e) {
-                console.error('Failed to parse saved config');
-            }
+            } catch (e) {}
         }
         
         return {
@@ -37,16 +35,24 @@
         branch: 'main',
         newsPath: 'data/news.json',
         maxNews: 6,
-        cacheTime: 5 * 60 * 1000
+        cacheTime: 2 * 60 * 1000,
+        version: '2.1'
     };
     
-    console.log('📋 News Loader Config:', CONFIG);
+    console.log('📋 News Loader v' + CONFIG.version, CONFIG);
     
     const cache = {
         data: null,
         timestamp: null,
         
         isValid() {
+            const storedVersion = sessionStorage.getItem('news_version');
+            if (storedVersion !== CONFIG.version) {
+                console.log('🔄 Version changed, clearing cache');
+                this.clear();
+                return false;
+            }
+            
             return this.data && this.timestamp && 
                    (Date.now() - this.timestamp < CONFIG.cacheTime);
         },
@@ -59,9 +65,8 @@
                     data: data,
                     timestamp: this.timestamp
                 }));
-            } catch (e) {
-                console.warn('Failed to save to sessionStorage');
-            }
+                sessionStorage.setItem('news_version', CONFIG.version);
+            } catch (e) {}
         },
         
         get() {
@@ -79,9 +84,7 @@
                         return this.data;
                     }
                 }
-            } catch (e) {
-                console.warn('Failed to load from sessionStorage');
-            }
+            } catch (e) {}
             
             return null;
         },
@@ -90,6 +93,9 @@
             this.data = null;
             this.timestamp = null;
             sessionStorage.removeItem('news_cache');
+            sessionStorage.removeItem('news_version');
+            localStorage.removeItem('news_fallback');
+            console.log('🗑️ Cache cleared');
         }
     };
     
@@ -97,30 +103,27 @@
         try {
             const cached = cache.get();
             if (cached) {
-                console.log('📦 Using cached news data');
+                console.log('📦 Using cache');
                 return cached;
             }
             
-            console.log('🔄 Fetching news from GitHub...');
+            console.log('🔄 Fetching from GitHub...');
             
             const timestamp = Date.now();
             const urls = [
                 `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.newsPath}?t=${timestamp}`,
-                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.newsPath}?ref=${CONFIG.branch}`,
-                `/smpit-dti-web/data/news.json?t=${timestamp}`,
-                `/data/news.json?t=${timestamp}`
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.newsPath}?ref=${CONFIG.branch}`
             ];
-            
-            let lastError = null;
             
             for (const url of urls) {
                 try {
-                    console.log(`📡 Trying: ${url}`);
+                    console.log(`📡 Trying: ${url.substring(0, 60)}...`);
                     
                     const response = await fetch(url, {
-                        cache: 'no-cache',
+                        cache: 'no-store',
                         headers: {
-                            'Accept': 'application/json'
+                            'Accept': 'application/json',
+                            'Cache-Control': 'no-cache'
                         }
                     });
                     
@@ -143,30 +146,21 @@
                             data = await response.json();
                         }
                         
-                        if (data && data.news) {
-                            // VALIDASI & FIX IMAGE URLs
+                        if (data && Array.isArray(data.news)) {
                             data.news = data.news.map(news => {
                                 if (news.image) {
-                                    // Hanya terima URL yang valid
                                     if (!news.image.startsWith('http://') && 
                                         !news.image.startsWith('https://') && 
                                         !news.image.startsWith('data:')) {
-                                        console.warn('⚠️ Invalid image URL:', news.title, '-', news.image);
-                                        news.image = ''; // Clear invalid URL
+                                        console.warn('⚠️ Invalid image:', news.title);
+                                        news.image = '';
                                     }
                                 }
                                 return news;
                             });
                             
                             cache.set(data);
-                            console.log(`✅ Loaded ${data.news.length} news from ${url}`);
-                            
-                            // Debug images
-                            data.news.forEach((news, i) => {
-                                if (news.image) {
-                                    console.log(`📷 News ${i+1} image:`, news.image.substring(0, 60) + '...');
-                                }
-                            });
+                            console.log(`✅ Loaded ${data.news.length} news`);
                             
                             localStorage.setItem('news_fallback', JSON.stringify(data));
                             
@@ -174,24 +168,21 @@
                         }
                     }
                 } catch (error) {
-                    lastError = error;
-                    console.warn(`Failed from ${url}:`, error.message);
+                    console.warn('Failed:', error.message);
                 }
             }
             
-            throw lastError || new Error('All fetch attempts failed');
+            throw new Error('All attempts failed');
             
         } catch (error) {
-            console.error('❌ Error fetching news:', error);
+            console.error('❌ Error:', error);
             
             const fallback = localStorage.getItem('news_fallback');
             if (fallback) {
-                console.log('📱 Using localStorage fallback');
+                console.log('📱 Using fallback');
                 try {
                     return JSON.parse(fallback);
-                } catch (e) {
-                    console.error('Failed to parse fallback');
-                }
+                } catch (e) {}
             }
             
             return { news: [], totalNews: 0 };
@@ -207,11 +198,9 @@
         
         try {
             const date = new Date(dateString);
-            
             if (isNaN(date.getTime())) {
                 return new Date().toLocaleDateString('id-ID', options);
             }
-            
             return date.toLocaleDateString('id-ID', options);
         } catch (error) {
             return new Date().toLocaleDateString('id-ID', options);
@@ -227,13 +216,7 @@
     
     function isValidImageUrl(url) {
         if (!url || typeof url !== 'string') return false;
-        
-        // Must start with http/https or data:
-        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
-            return true;
-        }
-        
-        return false;
+        return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:');
     }
     
     function createNewsCard(news) {
@@ -246,23 +229,18 @@
         
         const badgeClass = categoryColors[news.category] || 'badge-secondary';
         
-        // Handle image with strict validation
         let imageHTML;
         
         if (news.image && isValidImageUrl(news.image)) {
-            console.log('✅ Valid image URL:', news.title, '-', news.image.substring(0, 50));
-            
             imageHTML = `
                 <img 
                     src="${news.image}" 
                     alt="${escapeHtml(news.title)}" 
                     class="news-image" 
                     loading="lazy" 
-                    onerror="console.error('❌ Image failed:', this.src); this.onerror=null; this.parentElement.innerHTML='<div class=\\'news-placeholder-image\\'><span>📰</span></div>';"
-                    onload="console.log('✅ Image loaded:', this.alt)">
+                    onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'news-placeholder-image\\'><span>📰</span></div>';">
             `;
         } else {
-            console.log('❌ No valid image for:', news.title);
             imageHTML = `<div class="news-placeholder-image"><span>📰</span></div>`;
         }
         
@@ -296,7 +274,7 @@
         const container = document.querySelector('#news .news-grid');
         
         if (!container) {
-            console.error('❌ News container not found');
+            console.error('❌ Container not found');
             return;
         }
         
@@ -305,17 +283,13 @@
                 <div class="no-news">
                     <div>📰</div>
                     <p>Belum ada berita tersedia.</p>
-                    <p>Berita akan segera ditampilkan setelah dipublikasi.</p>
                 </div>
             `;
             return;
         }
         
         const validNews = data.news
-            .filter(news => {
-                if (!news.title || !news.content) return false;
-                return true;
-            })
+            .filter(news => news.title && news.content)
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(0, CONFIG.maxNews);
         
@@ -323,13 +297,13 @@
             container.innerHTML = `
                 <div class="no-news">
                     <div>📭</div>
-                    <p>Tidak ada berita untuk ditampilkan.</p>
+                    <p>Tidak ada berita.</p>
                 </div>
             `;
             return;
         }
         
-        console.log('📰 Rendering news cards...');
+        console.log('📰 Rendering', validNews.length, 'news');
         const newsHTML = validNews.map(news => createNewsCard(news)).join('');
         container.innerHTML = newsHTML;
         
@@ -337,7 +311,7 @@
             AOS.refresh();
         }
         
-        console.log(`✅ Rendered ${validNews.length} news items`);
+        console.log('✅ Rendered');
     }
     
     function createModal() {
@@ -406,7 +380,6 @@
             modalImage.src = news.image;
             modalImage.style.display = 'block';
             modalImage.onerror = function() {
-                console.error('Modal image failed:', this.src);
                 this.style.display = 'none';
             };
         } else {
@@ -426,13 +399,13 @@
     };
     
     async function init() {
-        console.log('🚀 Initializing news loader...');
+        console.log('🚀 Init news loader v' + CONFIG.version);
         
         try {
             const newsData = await fetchNews();
             renderNews(newsData);
         } catch (error) {
-            console.error('❌ Failed to initialize:', error);
+            console.error('❌ Init failed:', error);
             
             const container = document.querySelector('#news .news-grid');
             if (container) {
@@ -440,7 +413,6 @@
                     <div class="no-news">
                         <div>⚠️</div>
                         <p>Gagal memuat berita.</p>
-                        <p>Silakan refresh halaman atau coba lagi nanti.</p>
                     </div>
                 `;
             }
@@ -448,7 +420,7 @@
     }
     
     setInterval(async () => {
-        console.log('🔄 Auto-refreshing news...');
+        console.log('🔄 Auto-refresh');
         try {
             cache.clear();
             const newsData = await fetchNews();
@@ -456,7 +428,7 @@
                 renderNews(newsData);
             }
         } catch (error) {
-            console.warn('Auto-refresh failed:', error);
+            console.warn('Refresh failed:', error);
         }
     }, CONFIG.cacheTime);
     
@@ -469,30 +441,16 @@
     window.newsLoader = {
         CONFIG,
         cache,
-        fetchNews,
-        renderNews,
         reload: async function() {
             console.log('🔄 Manual reload');
             cache.clear();
-            localStorage.removeItem('news_fallback');
             const data = await fetchNews();
             renderNews(data);
             return data;
         },
-        debugImages: function() {
-            const data = cache.get();
-            if (!data || !data.news) {
-                console.log('No news data');
-                return;
-            }
-            
-            console.log('=== IMAGE DEBUG ===');
-            data.news.forEach((news, i) => {
-                console.log(`\nNews ${i+1}: ${news.title}`);
-                console.log('Has image:', !!news.image);
-                console.log('Image URL:', news.image || 'NONE');
-                console.log('Valid URL:', isValidImageUrl(news.image));
-            });
+        clearCache: function() {
+            cache.clear();
+            console.log('✅ Cache cleared');
         }
     };
 })();
